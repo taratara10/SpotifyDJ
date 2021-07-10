@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor( private val repository: Repository): ViewModel() {
+class UserViewModel @Inject constructor(  val repository: Repository): ViewModel() {
 
     fun getUser(accessToken: String):User? = runBlocking {
         val request = repository.getUser(accessToken)

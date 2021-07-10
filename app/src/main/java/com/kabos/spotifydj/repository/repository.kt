@@ -13,5 +13,4 @@ class Repository @Inject constructor( private val userService: UserService) {
         userService.getUser("Bearer $accessToken")
 
 
-
 }

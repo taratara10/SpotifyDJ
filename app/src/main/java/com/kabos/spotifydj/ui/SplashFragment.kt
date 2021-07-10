@@ -1,21 +1,14 @@
-package com.kabos.spotifydj
+package com.kabos.spotifydj.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
-import android.view.Window
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.kabos.spotifydj.viewModel.UserViewModel
+import androidx.fragment.app.Fragment
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
-@AndroidEntryPoint
-class SplashActivity: AppCompatActivity() {
+class SplashFragment: Fragment() {
 
     private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
     private val REDIRECT_URI = "com.kabos.spotifydj://callback"
@@ -26,14 +19,14 @@ class SplashActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
-        authorizationSpotify()
     }
+
+
     private fun authorizationSpotify() {
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(arrayOf(SCOPE))
             .build()
-        AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
+        AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -45,11 +38,11 @@ class SplashActivity: AppCompatActivity() {
 
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    getSharedPreferences("SPOTIFY", 0).edit()
+                    requireActivity().getSharedPreferences("SPOTIFY", 0).edit()
                         .putString("token", response.accessToken)
                         .apply()
                     Log.d("STARTING", "GOT AUTH TOKEN")
-                    startMainActivity()
+//                    startMainActivity()
                 }
 
                 AuthorizationResponse.Type.ERROR ->{
@@ -58,7 +51,7 @@ class SplashActivity: AppCompatActivity() {
 
                 // Most likely auth flow was cancelled
                 else -> {
-                   //TODO
+                    //TODO
                     Log.d("SPLASH", "Cannot login")
                 }
             }
@@ -66,8 +59,4 @@ class SplashActivity: AppCompatActivity() {
 
     }
 
-    private fun startMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-    }
 }
