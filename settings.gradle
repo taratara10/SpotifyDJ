@@ -1,0 +1,3 @@
+rootProject.name = "SpotifyDJ"
+include ':app'
+include ':app-remote-lib'
