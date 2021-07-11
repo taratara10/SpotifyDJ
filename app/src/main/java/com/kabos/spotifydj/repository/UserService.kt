@@ -7,6 +7,6 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 
 interface UserService {
-    @GET()
+    @GET("me")
     suspend fun getUser(@Header("Authorization") accessToken: String):Response<User>
 }

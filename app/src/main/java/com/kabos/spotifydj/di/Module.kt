@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Module
 object ApiModule {
 
-    val ENDPOINT = "https://api.spotify.com/v1/me"
+    val ENDPOINT = "https://api.spotify.com/v1/"
 
     @Singleton
     @Provides

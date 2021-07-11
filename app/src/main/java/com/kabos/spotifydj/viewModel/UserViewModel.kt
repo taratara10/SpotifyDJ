@@ -1,5 +1,6 @@
 package com.kabos.spotifydj.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.User
@@ -16,6 +17,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun getUser(accessToken: String):User? = runBlocking {
         val request = repository.getUser(accessToken)
         if (request.isSuccessful) {
+            Log.d("VIEWMODEL", "${request.body()}")
             return@runBlocking request.body()
         }else {
             return@runBlocking null

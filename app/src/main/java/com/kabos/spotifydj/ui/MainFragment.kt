@@ -32,7 +32,7 @@ class MainFragment: Fragment() {
 
         binding.apply {
             button2.setOnClickListener {
-                viewModel.getUser(accessToken)
+                textView3.text = viewModel.getUser(accessToken).toString()
             }
         }
     }
