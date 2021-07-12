@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,12 @@ class MainFragment: Fragment() {
 
         binding.apply {
             button2.setOnClickListener {
-                textView3.text = viewModel.getUser(accessToken).toString()
+//                textView3.text = viewModel.getUser(accessToken).toString()
+                viewModel.getPlaylist(accessToken)
+            }
+
+            playBtn.setOnClickListener {
+                    viewModel.getCurrentPlayback(accessToken)
             }
         }
     }
