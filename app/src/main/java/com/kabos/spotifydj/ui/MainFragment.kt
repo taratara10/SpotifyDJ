@@ -35,6 +35,7 @@ class MainFragment: Fragment() {
             button2.setOnClickListener {
 //                textView3.text = viewModel.getUser(accessToken).toString()
                 viewModel.getPlaylist(accessToken)
+                viewModel.playback(accessToken)
             }
 
             playBtn.setOnClickListener {

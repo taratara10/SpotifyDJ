@@ -1,15 +1,9 @@
 package com.kabos.spotifydj.repository
 
 import android.content.SharedPreferences
-import com.kabos.spotifydj.model.CurrentPlayback
-import com.kabos.spotifydj.model.Playlist
-import com.kabos.spotifydj.model.RecentlyPlaylist
-import com.kabos.spotifydj.model.User
+import com.kabos.spotifydj.model.*
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.PUT
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface UserService {
     @GET("me")
@@ -21,9 +15,13 @@ interface UserService {
     @GET("me/player/recently-played")
     suspend fun getRecentlyPlayed(@Header("Authorization")accessToken: String): Response<RecentlyPlaylist>
 
-    @GET("me/player")
-    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<CurrentPlayback>
+    @GET("me/player/devices")
+    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<Devices>
 
     @PUT("me/player/play")
-    suspend fun playback(@Header("Authorization")accessToken: String)
+    suspend fun playback(@Header("Authorization")accessToken: String,
+                         @Body body:Playback,
+                         @Query("device_id")id: String
+    )
+
 }

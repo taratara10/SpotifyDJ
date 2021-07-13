@@ -24,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
     private val REDIRECT_URI = "com.kabos.spotifydj://callback"
-    private val SCOPE = arrayOf("user-read-recently-played","playlist-read-private","playlist-read-collaborative","user-modify-playback-state")
+    private val SCOPE = arrayOf("user-read-recently-played","playlist-read-private","playlist-read-collaborative","user-modify-playback-state","user-read-playback-state")
     private val REQUEST_CODE: Int = 1337
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
