@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.databinding.FragmentMainBinding
+import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 
 class MainFragment: Fragment() {
@@ -57,14 +58,3 @@ class MainFragment: Fragment() {
 }
 
 
-
-class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
-    override fun getItemCount(): Int = 3
-
-    override fun createFragment(position: Int): Fragment =
-        when(position) {
-            0 -> SearchFragment()
-            1 -> RecommendFragment()
-            else -> PlaylistFragment()
-        }
-}
