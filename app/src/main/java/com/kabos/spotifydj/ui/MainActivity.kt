@@ -1,20 +1,10 @@
-package com.kabos.spotifydj
+package com.kabos.spotifydj.ui
 
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.kabos.spotifydj.databinding.ActivityMainBinding
-import com.kabos.spotifydj.model.User
-import com.kabos.spotifydj.repository.Repository
-import com.kabos.spotifydj.repository.UserService
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.R
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse

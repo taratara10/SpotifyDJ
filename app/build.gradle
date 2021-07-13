@@ -80,4 +80,7 @@ dependencies {
 
     //viewModel-ktx viewModelScopeを使うため
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
+
+    //viewPager2
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
 }
