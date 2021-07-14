@@ -24,4 +24,10 @@ interface UserService {
                          @Query("device_id")id: String
     )
 
+
+    @GET("search")
+    suspend fun searchTracks(@Header("Authorization")accessToken: String,
+                             @Query("q")keyword: String,
+                             @Query("type")type: String
+    ):Response<SearchResult>
 }

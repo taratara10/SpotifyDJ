@@ -15,6 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
+   private val accessToken = ""
+
     fun getUser(accessToken: String):User? = runBlocking {
         val request = repository.getUser(accessToken)
         if (request.isSuccessful) {
@@ -61,6 +63,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val request = repository.getCurrentPlayback(accessToken)
 
             Log.d("CURRENTPLAYBACK","${request.body()}")
+
+    }
+
+
+    fun searchTracks(accessToken: String, keyword: String) = runBlocking{
+        val request = repository.searchTracks(accessToken,keyword)
+
+//        if (request.isSuccessful){
+//            Log.d("SEARCH", "${request.body()}")
+//        }else {
+//            Log.d("SEARCH","search failed")
+//
+//        }
+        try {
+            Log.d("SEARCH", "${request.body()}")
+        }catch (e: Exception){
+            e.stackTrace
+            Log.d("PLAYBACK", "playback $e")
+        }
 
     }
 }

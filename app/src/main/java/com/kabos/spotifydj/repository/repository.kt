@@ -26,4 +26,8 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
         userService.getCurrentPlayback("Bearer $accessToken")
+
+
+    suspend fun searchTracks(accessToken: String, keyword: String) : Response<SearchResult> =
+         userService.searchTracks("Bearer $accessToken",keyword, "artist")
 }
