@@ -41,16 +41,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun getRecentlyPlayed(accessToken: String): String = runBlocking {
-        val request = repository.getRecentlyPlayed(accessToken)
-        if (request.isSuccessful){
-            val track = request.body()!!.items[0].track.name
-            Log.d("VIEWMODEL", "$track / ${request.body()}")
-            return@runBlocking track
-        }else {
-            return@runBlocking "No track"
-        }
-    }
+
 
     fun playback(accessToken: String) = runBlocking {
         try {
@@ -62,13 +53,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    fun getCurrentPlayback(accessToken: String) = runBlocking {
-        val request = repository.getCurrentPlayback(accessToken)
-
-            Log.d("CURRENTPLAYBACK","${request.body()}")
-
-    }
-
 
     fun searchTracks(accessToken: String, keyword: String) = runBlocking{
         val request = repository.searchTracks(accessToken,keyword)
@@ -76,8 +60,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (request.isSuccessful){
             //todo 渡すのはtracks.item
             Log.d("SEARCH", "${request.body()}")
-//            val trackList = request.body()!!.tracks.items
-//            searchTrackList.postValue(trackList)
+            val trackList = request.body()?.tracks?.items
+            searchTrackList.postValue(trackList)
         }else {
             Log.d("SEARCH","search failed")
 
