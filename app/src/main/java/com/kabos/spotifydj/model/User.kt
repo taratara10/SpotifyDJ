@@ -11,7 +11,7 @@ data class User(
 
 data class Playlist(
     val href: String,
-    val items: List<Item>,
+    val items: List<UserItem>,
     val limit: Int,
     val next: Any,
     val offset: Int,
@@ -19,7 +19,7 @@ data class Playlist(
     val total: Int
 )
 
-data class Item(
+data class UserItem(
     val collaborative: Boolean,
     val href: String,
     val id: String,

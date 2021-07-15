@@ -1,5 +1,7 @@
 package com.kabos.spotifydj.di
 
+import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.repository.UserService
 import dagger.Module

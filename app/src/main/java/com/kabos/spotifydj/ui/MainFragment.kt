@@ -7,20 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.databinding.FragmentMainBinding
+import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 
 class MainFragment: Fragment() {
 
     private lateinit var binding: FragmentMainBinding
-    private val viewModel: UserViewModel by activityViewModels()
-    private lateinit var accessToken: String
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -28,18 +25,36 @@ class MainFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-            .getString("token", "No token").toString()
+        //setup viewPager
+        val viewPager = binding.pager
+        viewPager.adapter = ViewPagerAdapter(this)
 
-        binding.apply {
-            button2.setOnClickListener {
-//                textView3.text = viewModel.getUser(accessToken).toString()
-                viewModel.getPlaylist(accessToken)
-            }
+        //setup TabLayout
+        val tabLayout = binding.tabLayout
+        TabLayoutMediator(tabLayout, viewPager) {tab, position ->
+            tab.text = "OBJECT $position"
+        }.attach()
 
-            playBtn.setOnClickListener {
-                    viewModel.getCurrentPlayback(accessToken)
-            }
-        }
+
+
+
+
+
+//        accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
+//            .getString("token", "No token").toString()
+
+//        binding.apply {
+//            button2.setOnClickListener {
+////                textView3.text = viewModel.getUser(accessToken).toString()
+//                viewModel.getPlaylist(accessToken)
+//                viewModel.playback(accessToken)
+//            }
+//
+//            playBtn.setOnClickListener {
+//                    viewModel.getCurrentPlayback(accessToken)
+//            }
+//        }
     }
 }
+
+

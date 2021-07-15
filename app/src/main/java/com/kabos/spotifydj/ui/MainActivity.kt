@@ -1,20 +1,10 @@
-package com.kabos.spotifydj
+package com.kabos.spotifydj.ui
 
 import android.content.Intent
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.kabos.spotifydj.databinding.ActivityMainBinding
-import com.kabos.spotifydj.model.User
-import com.kabos.spotifydj.repository.Repository
-import com.kabos.spotifydj.repository.UserService
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.R
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -24,7 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
     private val REDIRECT_URI = "com.kabos.spotifydj://callback"
-    private val SCOPE = arrayOf("user-read-recently-played","playlist-read-private","playlist-read-collaborative","user-modify-playback-state")
+    private val SCOPE = arrayOf("user-read-recently-played","playlist-read-private","playlist-read-collaborative","user-modify-playback-state","user-read-playback-state")
     private val REQUEST_CODE: Int = 1337
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
