@@ -31,7 +31,7 @@ class TrackViewHolder(private val binding: AdapterTrackBinding)
             tvTrackName.text = item.name
             tvArtistName.text = item.artists[0].name
             Glide.with(root.context)
-                .load(item.album.images[2].url)
+                .load(item.album.images[0].url)
                 .into(ivTrackImage)
 
         }

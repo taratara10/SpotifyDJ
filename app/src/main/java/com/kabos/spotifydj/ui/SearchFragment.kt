@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -32,8 +33,7 @@ class SearchFragment: Fragment() {
 
         binding.apply {
             val searchTrackKeyword = etSearchTracks.text.toString()
-            etSearchTracks.doOnTextChanged { text, start, before, count ->
-                Log.d("FRAGMENT", text.toString())
+            etSearchTracks.doAfterTextChanged { text ->
                 viewModel.searchTracks(accessToken, text.toString())
             }
 

@@ -76,8 +76,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (request.isSuccessful){
             //todo 渡すのはtracks.item
             Log.d("SEARCH", "${request.body()}")
-//            val trackList = request.body()!!.tracks.items
-//            searchTrackList.postValue(trackList)
+            val trackList = request.body()?.tracks?.items
+            searchTrackList.postValue(trackList)
         }else {
             Log.d("SEARCH","search failed")
 
