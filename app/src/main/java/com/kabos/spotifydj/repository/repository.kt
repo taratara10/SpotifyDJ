@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
+import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -28,6 +29,6 @@ class Repository @Inject constructor( private val userService: UserService) {
         userService.getCurrentPlayback("Bearer $accessToken")
 
 
-    suspend fun searchTracks(accessToken: String, keyword: String) : Response<SearchResult> =
-         userService.searchTracks("Bearer $accessToken",keyword, "artist")
+    suspend fun searchTracks(accessToken: String, keyword: String) : Response<SearchTracks> =
+         userService.searchTracks("Bearer $accessToken",keyword, "track")
 }

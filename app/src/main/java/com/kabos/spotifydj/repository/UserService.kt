@@ -2,6 +2,7 @@ package com.kabos.spotifydj.repository
 
 import android.content.SharedPreferences
 import com.kabos.spotifydj.model.*
+import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -29,5 +30,5 @@ interface UserService {
     suspend fun searchTracks(@Header("Authorization")accessToken: String,
                              @Query("q")keyword: String,
                              @Query("type")type: String
-    ):Response<SearchResult>
+    ):Response<SearchTracks>
 }

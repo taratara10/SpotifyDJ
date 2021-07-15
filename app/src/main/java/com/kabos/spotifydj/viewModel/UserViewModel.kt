@@ -1,10 +1,12 @@
 package com.kabos.spotifydj.viewModel
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.Playlist
 import com.kabos.spotifydj.model.User
+import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.coroutineScope
@@ -16,6 +18,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
    private val accessToken = ""
+    val searchTrackList: MutableLiveData<List<TrackItems>> = MutableLiveData()
 
     fun getUser(accessToken: String):User? = runBlocking {
         val request = repository.getUser(accessToken)
@@ -70,18 +73,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun searchTracks(accessToken: String, keyword: String) = runBlocking{
         val request = repository.searchTracks(accessToken,keyword)
 
-//        if (request.isSuccessful){
-//            Log.d("SEARCH", "${request.body()}")
-//        }else {
-//            Log.d("SEARCH","search failed")
-//
-//        }
-        try {
+        if (request.isSuccessful){
+            //todo 渡すのはtracks.item
             Log.d("SEARCH", "${request.body()}")
-        }catch (e: Exception){
-            e.stackTrace
-            Log.d("PLAYBACK", "playback $e")
+//            val trackList = request.body()!!.tracks.items
+//            searchTrackList.postValue(trackList)
+        }else {
+            Log.d("SEARCH","search failed")
+
         }
+
 
     }
 }
