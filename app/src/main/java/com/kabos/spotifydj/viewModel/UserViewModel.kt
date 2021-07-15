@@ -41,16 +41,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun getRecentlyPlayed(accessToken: String): String = runBlocking {
-        val request = repository.getRecentlyPlayed(accessToken)
-        if (request.isSuccessful){
-            val track = request.body()!!.items[0].track.name
-            Log.d("VIEWMODEL", "$track / ${request.body()}")
-            return@runBlocking track
-        }else {
-            return@runBlocking "No track"
-        }
-    }
+
 
     fun playback(accessToken: String) = runBlocking {
         try {
@@ -60,13 +51,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
            e.stackTrace
            Log.d("PLAYBACK", "playback failed")
         }
-    }
-
-    fun getCurrentPlayback(accessToken: String) = runBlocking {
-        val request = repository.getCurrentPlayback(accessToken)
-
-            Log.d("CURRENTPLAYBACK","${request.body()}")
-
     }
 
 

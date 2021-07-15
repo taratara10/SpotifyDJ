@@ -32,7 +32,6 @@ class SearchFragment: Fragment() {
 
 
         binding.apply {
-            val searchTrackKeyword = etSearchTracks.text.toString()
             etSearchTracks.doAfterTextChanged { text ->
                 viewModel.searchTracks(accessToken, text.toString())
             }
