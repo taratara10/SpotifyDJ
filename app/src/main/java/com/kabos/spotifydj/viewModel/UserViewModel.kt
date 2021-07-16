@@ -3,15 +3,14 @@ package com.kabos.spotifydj.viewModel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.Playlist
+import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.User
+import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,38 +34,42 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             val item = request.body()?.items?.get(0)
             Log.d("VIEWMODEL", "${request.body()}/$item")
 
-
         }
         return@runBlocking null
     }
-
-
-
-
-    fun playback(accessToken: String) = runBlocking {
-        try {
-            repository.playback(accessToken)
-            Log.d("PLAYBACK", "playback success!")
-        }catch (e: Exception){
-           e.stackTrace
-           Log.d("PLAYBACK", "playback failed")
-        }
-    }
-
 
     fun searchTracks(accessToken: String, keyword: String) = runBlocking{
         val request = repository.searchTracks(accessToken,keyword)
 
         if (request.isSuccessful){
-            //todo 渡すのはtracks.item
             Log.d("SEARCH", "${request.body()}")
             val trackList = request.body()?.tracks?.items
-            searchTrackList.postValue(trackList)
+
         }else {
             Log.d("SEARCH","search failed")
-
         }
+    }
 
+    suspend fun getAudioFeatures(accessToken: String, id: String) = withContext(Dispatchers.IO) {
+        async {
+            val request = repository.getAudioFeaturesById(accessToken, id)
+            if (request.isSuccessful) {
+                return@async request.body() as AudioFeature
+            }else{
+                Log.d("getAudioFeature","getAudioFeature failed")
+            }
+        }
+    }
+
+
+    fun mergeTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
+        return TrackInfo(
+            id = trackItems.id,
+            name = trackItems.name,
+            artist = trackItems.artists[0].name,
+            imageUrl = trackItems.album.images[0].url,
+            tempo = audioFeature.tempo
+        )
 
     }
 }

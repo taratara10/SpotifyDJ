@@ -2,6 +2,8 @@ package com.kabos.spotifydj.repository
 
 import android.content.SharedPreferences
 import com.kabos.spotifydj.model.*
+import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.feature.AudioFeatures
 import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.http.*
@@ -21,8 +23,8 @@ interface UserService {
 
     @PUT("me/player/play")
     suspend fun playback(@Header("Authorization")accessToken: String,
-                         @Body body:Playback,
-                         @Query("device_id")id: String
+                         @Query("device_id")id: String,
+                         @Body body:Playback
     )
 
 
@@ -31,4 +33,9 @@ interface UserService {
                              @Query("q")keyword: String,
                              @Query("type")type: String
     ):Response<SearchTracks>
+
+    @GET("audio-features/{id}")
+    suspend fun getAudioFeaturesById(@Header("Authorization")accessToken: String,
+                                     @Path("id")id: String
+    ): Response<AudioFeature>
 }

@@ -1,6 +1,8 @@
 package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
+import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.feature.AudioFeatures
 import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -21,9 +23,9 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun getRecentlyPlayed(accessToken: String): Response<RecentlyPlaylist> =
         userService.getRecentlyPlayed("Bearer $accessToken")
 
-    suspend fun playback(accessToken: String) {
-        userService.playback("Bearer $accessToken", body, id)
-    }
+//    suspend fun playback(accessToken: String) {
+//        userService.playback("Bearer $accessToken",id)
+//    }
 
     suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
         userService.getCurrentPlayback("Bearer $accessToken")
@@ -31,4 +33,7 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun searchTracks(accessToken: String, keyword: String) : Response<SearchTracks> =
          userService.searchTracks("Bearer $accessToken",keyword, "track")
+
+    suspend fun getAudioFeaturesById(accessToken: String, id: String) : Response<AudioFeature> =
+        userService.getAudioFeaturesById("Bearer $accessToken", id)
 }
