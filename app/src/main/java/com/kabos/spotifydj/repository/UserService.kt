@@ -38,4 +38,9 @@ interface UserService {
     suspend fun getAudioFeaturesById(@Header("Authorization")accessToken: String,
                                      @Path("id")id: String
     ): Response<AudioFeature>
+
+    @GET("recommendations")
+    suspend fun getRecommendations(@Header("Authorization")accessToken: String,
+                                   @Query("seed_tracks")seedTrackId: String
+    ):Response<RecommendTracks>
 }

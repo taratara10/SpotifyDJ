@@ -35,4 +35,7 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun getAudioFeaturesById(accessToken: String, id: String) : Response<AudioFeature> =
         userService.getAudioFeaturesById("Bearer $accessToken", id)
+
+    suspend fun getRecommendTracks(accessToken: String, seedTrackId: String): Response<RecommendTracks> =
+        userService.getRecommendations("Bearer $accessToken",seedTrackId)
 }

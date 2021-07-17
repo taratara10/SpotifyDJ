@@ -4,9 +4,8 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kabos.spotifydj.model.Playlist
+import com.kabos.spotifydj.model.Track
 import com.kabos.spotifydj.model.TrackInfo
-import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
@@ -18,42 +17,34 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
-    val searchTrackList: MutableLiveData<List<TrackInfo>> = MutableLiveData()
+    val searchTrackList = MutableLiveData<List<TrackInfo>>()
+    val upperTrackList = MutableLiveData<List<TrackInfo>>()
+    val downerTrackList = MutableLiveData<List<TrackInfo>>()
+    var currentTrack = MutableLiveData<TrackInfo>()
 
     fun initializeAccessToken(accessToken: String){
         mAccessToken = accessToken
     }
 
-    fun getUser(accessToken: String):User? = runBlocking {
-        val request = repository.getUser(accessToken)
-        if (request.isSuccessful) {
-            return@runBlocking request.body()
-        }else {
-            return@runBlocking null
-        }
+    /**
+     * Util
+     * */
+
+    fun updateCurrentTrack(track: TrackInfo){
+        currentTrack.postValue(track)
+        //todo navigate to recommend fragment
     }
 
-    fun getPlaylist(accessToken: String): Playlist? = runBlocking {
-        val request = repository.getPlaylist(accessToken)
-        if (request.isSuccessful){
-            val item = request.body()?.items?.get(0)
-            Log.d("VIEWMODEL", "${request.body()}/$item")
-
-        }
-        return@runBlocking null
-    }
+    /**
+     * SearchFragmentの処理
+     * */
 
     fun displaySearchedTracksResult(keyword: String) = viewModelScope.launch{
-        //LiveDataにpostする用の箱
-        val trackInfoList = mutableListOf<TrackInfo>()
 
         //tempoとかの情報がないので、audioFeatureとmergeしてTrackInfoにする
-        val trackItemsList:List<TrackItems> = getTracksByKeyword(keyword).await() as List<TrackItems>
-        trackItemsList.map {
-            val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
-            val mergedTrackInfo = mergeTrackInfo(it,audioFeature)
-            trackInfoList.add(mergedTrackInfo)
-        }
+        val trackItemsList = getTracksByKeyword(keyword).await() as List<TrackItems>
+        Log.d("gKeyword","finished keyword")
+        val trackInfoList = generateTrackInfoList(trackItemsList).await() as List<TrackInfo>
 
         searchTrackList.postValue(trackInfoList)
         Log.d("Coroutine","finished")
@@ -92,5 +83,50 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             tempo = audioFeature.tempo
         )
 
+    }
+
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
+        async {
+            val mergedTrackInfoList = mutableListOf<TrackInfo>()
+
+            trackItems.map {
+                val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
+                val mergedTrackInfo = mergeTrackInfo(it, audioFeature)
+                mergedTrackInfoList.add(mergedTrackInfo)
+            }
+            return@async mergedTrackInfoList
+        }
+    }
+    /**
+     * Recommendの処理
+     * */
+
+    fun updateRecommendTrack() = viewModelScope.launch{
+        if (currentTrack.value == null) return@launch
+
+        //LiveDataにpostする用の箱
+        val trackInfoList = mutableListOf<TrackInfo>()
+
+        //tempoとかの情報がないので、audioFeatureとmergeしてTrackInfoにする
+        val trackItemsList = getRecommendTracks(currentTrack.value!!.id).await() as List<TrackItems>
+        trackItemsList.map {
+            val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
+            val mergedTrackInfo = mergeTrackInfo(it,audioFeature)
+            trackInfoList.add(mergedTrackInfo)
+        }
+
+        searchTrackList.postValue(trackInfoList)
+    }
+
+    suspend fun getRecommendTracks(seedTrackId: String) = withContext(Dispatchers.IO){
+        async {
+            val request = repository.getRecommendTracks(mAccessToken, seedTrackId)
+            if (request.isSuccessful){
+                return@async request.body()?.tracks
+            }else{
+                Log.d("getRecommendTracks","getRecommendTracks failed")
+                return@async null
+            }
+        }
     }
 }
