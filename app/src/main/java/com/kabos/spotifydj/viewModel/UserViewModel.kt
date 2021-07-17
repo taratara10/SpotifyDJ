@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kabos.spotifydj.model.Track
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
@@ -17,7 +16,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
-    val searchTrackList = MutableLiveData<List<TrackInfo>>()
+    val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>>()
     val downerTrackList = MutableLiveData<List<TrackInfo>>()
     var currentTrack = MutableLiveData<TrackInfo>()
@@ -40,14 +39,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     fun displaySearchedTracksResult(keyword: String) = viewModelScope.launch{
-
-        //tempoとかの情報がないので、audioFeatureとmergeしてTrackInfoにする
-        val trackItemsList = getTracksByKeyword(keyword).await() as List<TrackItems>
-        Log.d("gKeyword","finished keyword")
-        val trackInfoList = generateTrackInfoList(trackItemsList).await() as List<TrackInfo>
-
+        //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
+        val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
-        Log.d("Coroutine","finished")
     }
 
     suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
@@ -74,15 +69,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    private fun mergeTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
-        return TrackInfo(
-            id = trackItems.id,
-            name = trackItems.name,
-            artist = trackItems.artists[0].name,
-            imageUrl = trackItems.album.images[0].url,
-            tempo = audioFeature.tempo
-        )
-
+    private fun mergeTrackInfo(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
+        return if (trackItems != null && audioFeature != null) {
+            TrackInfo(
+                id = trackItems.id,
+                name = trackItems.name,
+                artist = trackItems.artists[0].name,
+                imageUrl = trackItems.album.images[0].url,
+                tempo = audioFeature.tempo
+            )
+        } else null
     }
 
     private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
@@ -90,9 +86,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             val mergedTrackInfoList = mutableListOf<TrackInfo>()
 
             trackItems.map {
-                val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
+                val audioFeature = getAudioFeatures(it.id).await()
                 val mergedTrackInfo = mergeTrackInfo(it, audioFeature)
-                mergedTrackInfoList.add(mergedTrackInfo)
+                if (mergedTrackInfo != null) {
+                    mergedTrackInfoList.add(mergedTrackInfo)
+                }
             }
             return@async mergedTrackInfoList
         }
@@ -112,7 +110,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         trackItemsList.map {
             val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
             val mergedTrackInfo = mergeTrackInfo(it,audioFeature)
-            trackInfoList.add(mergedTrackInfo)
+            if (mergedTrackInfo != null) {
+                trackInfoList.add(mergedTrackInfo)
+            }
         }
 
         searchTrackList.postValue(trackInfoList)
