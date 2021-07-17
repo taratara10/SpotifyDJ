@@ -3,6 +3,7 @@ package com.kabos.spotifydj.viewModel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.Playlist
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.User
@@ -16,8 +17,12 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
-   private val accessToken = ""
-    val searchTrackList: MutableLiveData<List<TrackItems>> = MutableLiveData()
+    var mAccessToken = ""
+    val searchTrackList: MutableLiveData<List<TrackInfo>> = MutableLiveData()
+
+    fun initializeAccessToken(accessToken: String){
+        mAccessToken = accessToken
+    }
 
     fun getUser(accessToken: String):User? = runBlocking {
         val request = repository.getUser(accessToken)
@@ -38,31 +43,47 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         return@runBlocking null
     }
 
-    fun searchTracks(accessToken: String, keyword: String) = runBlocking{
-        val request = repository.searchTracks(accessToken,keyword)
+    fun displaySearchedTracksResult(keyword: String) = viewModelScope.launch{
+        //LiveDataにpostする用の箱
+        val trackInfoList = mutableListOf<TrackInfo>()
 
-        if (request.isSuccessful){
-            Log.d("SEARCH", "${request.body()}")
-            val trackList = request.body()?.tracks?.items
-
-        }else {
-            Log.d("SEARCH","search failed")
+        //tempoとかの情報がないので、audioFeatureとmergeしてTrackInfoにする
+        val trackItemsList:List<TrackItems> = getTracksByKeyword(keyword).await() as List<TrackItems>
+        trackItemsList.map {
+            val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
+            val mergedTrackInfo = mergeTrackInfo(it,audioFeature)
+            trackInfoList.add(mergedTrackInfo)
         }
+
+        searchTrackList.postValue(trackInfoList)
+        Log.d("Coroutine","finished")
     }
 
-    suspend fun getAudioFeatures(accessToken: String, id: String) = withContext(Dispatchers.IO) {
+    suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            val request = repository.getAudioFeaturesById(accessToken, id)
-            if (request.isSuccessful) {
-                return@async request.body() as AudioFeature
-            }else{
-                Log.d("getAudioFeature","getAudioFeature failed")
+            val request = repository.getTracksByKeyword(mAccessToken, keyword)
+            if (request.isSuccessful){
+                return@async request.body()?.tracks?.items as List<TrackItems>
+            }else {
+                Log.d("getTracksByKeyword","search failed")
+                return@async null
             }
         }
     }
 
+    suspend fun getAudioFeatures(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
+        async {
+            val request = repository.getAudioFeaturesById(mAccessToken, id)
+            if (request.isSuccessful) {
+                return@async request.body()
+            }else{
+                Log.d("getAudioFeature","getAudioFeature failed")
+                return@async null
+            }
+        }
+    }
 
-    fun mergeTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
+    private fun mergeTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
         return TrackInfo(
             id = trackItems.id,
             name = trackItems.name,

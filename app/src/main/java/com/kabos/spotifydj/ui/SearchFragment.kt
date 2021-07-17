@@ -29,11 +29,11 @@ class SearchFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
             .getString("token", "No token").toString()
-
+        viewModel.initializeAccessToken(accessToken)
 
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
-                viewModel.searchTracks(accessToken, text.toString())
+                viewModel.displaySearchedTracksResult(text.toString())
             }
 
             rvSearchTracksResult.apply {

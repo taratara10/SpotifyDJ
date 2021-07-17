@@ -29,7 +29,7 @@ interface UserService {
 
 
     @GET("search")
-    suspend fun searchTracks(@Header("Authorization")accessToken: String,
+    suspend fun getTracksByKeyword(@Header("Authorization")accessToken: String,
                              @Query("q")keyword: String,
                              @Query("type")type: String
     ):Response<SearchTracks>

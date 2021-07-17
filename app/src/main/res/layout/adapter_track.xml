@@ -32,7 +32,7 @@
         tools:text="Artist name" />
 
     <TextView
-        android:id="@+id/tv_bpm"
+        android:id="@+id/tv_tempo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

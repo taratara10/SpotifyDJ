@@ -11,7 +11,6 @@ import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
 
-    val body = Playback("spotify:album:5ht7ItJgpBH7W6vJ5BqpPr", Offset(5),0)
     val id = "88568a2c2385a4eb6d662a06a4b3c799ea973cc2"
 
     suspend fun getUser(accessToken: String): Response<User> =
@@ -31,8 +30,8 @@ class Repository @Inject constructor( private val userService: UserService) {
         userService.getCurrentPlayback("Bearer $accessToken")
 
 
-    suspend fun searchTracks(accessToken: String, keyword: String) : Response<SearchTracks> =
-         userService.searchTracks("Bearer $accessToken",keyword, "track")
+    suspend fun getTracksByKeyword(accessToken: String, keyword: String) : Response<SearchTracks> =
+         userService.getTracksByKeyword("Bearer $accessToken",keyword, "track")
 
     suspend fun getAudioFeaturesById(accessToken: String, id: String) : Response<AudioFeature> =
         userService.getAudioFeaturesById("Bearer $accessToken", id)
