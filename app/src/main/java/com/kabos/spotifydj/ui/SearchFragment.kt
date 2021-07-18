@@ -33,7 +33,7 @@ class SearchFragment: Fragment() {
 
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
-                viewModel.displaySearchedTracksResult(text.toString())
+                viewModel.updateSearchedTracksResult(text.toString())
             }
 
             rvSearchTracksResult.apply {

@@ -1,6 +1,5 @@
 package com.kabos.spotifydj.repository
 
-import android.content.SharedPreferences
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.feature.AudioFeatures
@@ -40,7 +39,14 @@ interface UserService {
     ): Response<AudioFeature>
 
     @GET("recommendations")
-    suspend fun getRecommendations(@Header("Authorization")accessToken: String,
-                                   @Query("seed_tracks")seedTrackId: String
+    suspend fun getRecommendations(
+        @Header("Authorization") accessToken: String,
+        @Query("seed_tracks")seedTrackId: String,
+        @Query("min_tempo") minTempo: Int,
+        @Query("max_tempo") maxTempo: Int,
+        @Query("min_danceability") minDancebility: Int,
+        @Query("max_danceability") maxDancebility: Int,
+        @Query("min_energy") minEnergy: Int,
+        @Query("max_energy") maxEnergy: Int,
     ):Response<RecommendTracks>
 }

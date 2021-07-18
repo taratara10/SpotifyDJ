@@ -17,8 +17,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     var mAccessToken = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
-    val upperTrackList = MutableLiveData<List<TrackInfo>>()
-    val downerTrackList = MutableLiveData<List<TrackInfo>>()
+    val upperTrackList = MutableLiveData<List<TrackInfo>?>()
+    val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     var currentTrack = MutableLiveData<TrackInfo>()
 
     fun initializeAccessToken(accessToken: String){
@@ -38,14 +38,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * SearchFragmentの処理
      * */
 
-    fun displaySearchedTracksResult(keyword: String) = viewModelScope.launch{
+    fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
         //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
     }
 
-    suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+    private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
             val request = repository.getTracksByKeyword(mAccessToken, keyword)
             if (request.isSuccessful){
@@ -57,7 +57,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    suspend fun getAudioFeatures(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
+    private suspend fun getAudioFeaturesById(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
         async {
             val request = repository.getAudioFeaturesById(mAccessToken, id)
             if (request.isSuccessful) {
@@ -69,7 +69,22 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    private fun mergeTrackInfo(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
+        async {
+            val mergedTrackInfoList = mutableListOf<TrackInfo>()
+
+            trackItems.map { trackItems ->
+                val audioFeature = getAudioFeaturesById(trackItems.id).await()
+                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
+                if (trackInfo != null) {
+                    mergedTrackInfoList.add(trackInfo)
+                }
+            }
+            return@async mergedTrackInfoList
+        }
+    }
+
+    private fun mergeTrackItemAndAudioFeature(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
         return if (trackItems != null && audioFeature != null) {
             TrackInfo(
                 id = trackItems.id,
@@ -80,42 +95,20 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             )
         } else null
     }
-
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
-        async {
-            val mergedTrackInfoList = mutableListOf<TrackInfo>()
-
-            trackItems.map {
-                val audioFeature = getAudioFeatures(it.id).await()
-                val mergedTrackInfo = mergeTrackInfo(it, audioFeature)
-                if (mergedTrackInfo != null) {
-                    mergedTrackInfoList.add(mergedTrackInfo)
-                }
-            }
-            return@async mergedTrackInfoList
-        }
-    }
     /**
      * Recommendの処理
      * */
 
     fun updateRecommendTrack() = viewModelScope.launch{
+        //todo 消す
+        currentTrack.postValue(searchTrackList.value?.get(0))
+        Log.d("Recommend","${currentTrack.value}")
         if (currentTrack.value == null) return@launch
 
-        //LiveDataにpostする用の箱
-        val trackInfoList = mutableListOf<TrackInfo>()
-
-        //tempoとかの情報がないので、audioFeatureとmergeしてTrackInfoにする
-        val trackItemsList = getRecommendTracks(currentTrack.value!!.id).await() as List<TrackItems>
-        trackItemsList.map {
-            val audioFeature = getAudioFeatures(it.id).await() as AudioFeature
-            val mergedTrackInfo = mergeTrackInfo(it,audioFeature)
-            if (mergedTrackInfo != null) {
-                trackInfoList.add(mergedTrackInfo)
-            }
-        }
-
-        searchTrackList.postValue(trackInfoList)
+        //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
+        val trackItemsList = getRecommendTracks(currentTrack.value!!.id).await() ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        upperTrackList.postValue(trackInfoList)
     }
 
     suspend fun getRecommendTracks(seedTrackId: String) = withContext(Dispatchers.IO){

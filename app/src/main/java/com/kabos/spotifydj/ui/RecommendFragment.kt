@@ -36,6 +36,10 @@ class RecommendFragment: Fragment() {
                layoutManager = LinearLayoutManager(activity)
                adapter = downerTrackAdapter
            }
+
+           button.setOnClickListener {
+               viewModel.updateRecommendTrack()
+           }
        }
 
         viewModel.upperTrackList.observe(viewLifecycleOwner,{upperTrack ->
