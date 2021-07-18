@@ -42,11 +42,11 @@ interface UserService {
     suspend fun getRecommendations(
         @Header("Authorization") accessToken: String,
         @Query("seed_tracks")seedTrackId: String,
-        @Query("min_tempo") minTempo: Int,
-        @Query("max_tempo") maxTempo: Int,
-        @Query("min_danceability") minDancebility: Int,
-        @Query("max_danceability") maxDancebility: Int,
-        @Query("min_energy") minEnergy: Int,
-        @Query("max_energy") maxEnergy: Int,
+        @Query("min_tempo") minTempo: Double,
+        @Query("max_tempo") maxTempo: Double,
+        @Query("min_danceability") minDancebility: Double,
+        @Query("max_danceability") maxDancebility: Double,
+        @Query("min_energy") minEnergy: Double,
+        @Query("max_energy") maxEnergy: Double,
     ):Response<RecommendTracks>
 }

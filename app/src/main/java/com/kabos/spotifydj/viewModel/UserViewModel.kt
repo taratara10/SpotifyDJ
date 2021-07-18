@@ -91,7 +91,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 name = trackItems.name,
                 artist = trackItems.artists[0].name,
                 imageUrl = trackItems.album.images[0].url,
-                tempo = audioFeature.tempo
+                tempo = audioFeature.tempo,
+                danceability = audioFeature.danceability,
+                energy = audioFeature.energy
             )
         } else null
     }
@@ -103,18 +105,28 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //todo 消す
         currentTrack.postValue(searchTrackList.value?.get(0))
         Log.d("Recommend","${currentTrack.value}")
-        if (currentTrack.value == null) return@launch
 
-        //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
-        val trackItemsList = getRecommendTracks(currentTrack.value!!.id).await() ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
-        upperTrackList.postValue(trackInfoList)
+
+        if (currentTrack.value == null) return@launch
+        //fetch upperTrack
+        launch {
+            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true).await() ?: return@launch
+            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            upperTrackList.postValue(trackInfoList)
+        }
+        //fetch downerTrack
+        launch {
+            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false).await() ?: return@launch
+            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            downerTrackList.postValue(trackInfoList)
+        }
     }
 
-    suspend fun getRecommendTracks(seedTrackId: String) = withContext(Dispatchers.IO){
+    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean) = withContext(Dispatchers.IO){
         async {
-            val request = repository.getRecommendTracks(mAccessToken, seedTrackId)
+            val request = repository.getRecommendTracks(mAccessToken, trackInfo, fetchUpperTrack)
             if (request.isSuccessful){
+                Log.d("getRecommendTracks","success! ${request.body()?.tracks}")
                 return@async request.body()?.tracks
             }else{
                 Log.d("getRecommendTracks","getRecommendTracks failed")

@@ -28,12 +28,12 @@ class Repository @Inject constructor( private val userService: UserService) {
 
 
     suspend fun getTracksByKeyword(accessToken: String, keyword: String) : Response<SearchTracks> =
-         userService.getTracksByKeyword("Bearer $accessToken",keyword, "track")
+         userService.getTracksByKeyword("Bearer $accessToken",keyword, "album,track,artist")
 
     suspend fun getAudioFeaturesById(accessToken: String, id: String) : Response<AudioFeature> =
         userService.getAudioFeaturesById("Bearer $accessToken", id)
 
-    suspend fun getRecommendTracks(accessToken: String, trackInfo: TrackInfo, isUpper: Boolean): Response<RecommendTracks> {
+    suspend fun getRecommendTracks(accessToken: String, trackInfo: TrackInfo, fetchUpperTrack: Boolean): Response<RecommendTracks> {
         val minTempoRate = 0.9
         val maxTempoRate = 1.1
         val minDanceabilityRate = 0.8
@@ -42,19 +42,18 @@ class Repository @Inject constructor( private val userService: UserService) {
         var maxEnergyRate = 1.0
 
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
-        if (isUpper) maxEnergyRate = 1.2
-        if (!isUpper) minEnergyRate = 0.8
+        if (fetchUpperTrack) maxEnergyRate = 1.2
+        if (!fetchUpperTrack) minEnergyRate = 0.8
         return userService.getRecommendations(accessToken = "Bearer $accessToken",
             seedTrackId = trackInfo.id,
-            minTempo = (trackInfo.tempo * minTempoRate).toInt(),
-            maxTempo = (trackInfo.tempo * maxTempoRate).toInt(),
-            minDancebility = (trackInfo.danceability * minDanceabilityRate).toInt(),
-            maxDancebility = (trackInfo.danceability * maxDanceabilityRate).toInt(),
-            minEnergy = (trackInfo.energy * minEnergyRate).toInt(),
-            maxEnergy = (trackInfo.energy * maxEnergyRate).toInt(),
+            minTempo = trackInfo.tempo * minTempoRate,
+            maxTempo = trackInfo.tempo * maxTempoRate,
+            minDancebility = trackInfo.danceability * minDanceabilityRate,
+            maxDancebility = trackInfo.danceability * maxDanceabilityRate,
+            minEnergy = trackInfo.energy * minEnergyRate,
+            maxEnergy = trackInfo.energy * maxEnergyRate,
         )
     }
-
 
 
 }
