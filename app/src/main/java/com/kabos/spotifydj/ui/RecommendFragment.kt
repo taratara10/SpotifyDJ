@@ -15,6 +15,7 @@ class RecommendFragment: Fragment() {
 
     private lateinit var binding: FragmentRecommendBinding
     private val viewModel: UserViewModel by activityViewModels()
+    private val currentTrackAdapter by lazy { TrackAdapter(viewModel.callback) }
     private val upperTrackAdapter by lazy { TrackAdapter(viewModel.callback) }
     private val downerTrackAdapter  by lazy { TrackAdapter(viewModel.callback) }
 
@@ -36,6 +37,10 @@ class RecommendFragment: Fragment() {
                layoutManager = LinearLayoutManager(activity)
                adapter = downerTrackAdapter
            }
+           rvCurrentTracks.apply{
+               layoutManager = LinearLayoutManager(activity)
+               adapter = currentTrackAdapter
+           }
 
            button.setOnClickListener {
                viewModel.updateRecommendTrack()
@@ -48,6 +53,11 @@ class RecommendFragment: Fragment() {
 
         viewModel.downerTrackList.observe(viewLifecycleOwner,{downerTrack ->
             downerTrackAdapter.submitList(downerTrack)
+        })
+
+        viewModel.currentTrack.observe(viewLifecycleOwner,{currentTrack ->
+            val list = listOf(currentTrack)
+            currentTrackAdapter.submitList(list)
         })
     }
 }
