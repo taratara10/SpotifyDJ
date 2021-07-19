@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
+import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 
@@ -18,7 +20,8 @@ class SearchFragment: Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
     private val viewModel: UserViewModel by activityViewModels()
-    private val trackAdapter = TrackAdapter {  }
+    private val trackAdapter by lazy { TrackAdapter(viewModel.callback) }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)

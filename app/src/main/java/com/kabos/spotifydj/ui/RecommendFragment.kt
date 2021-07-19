@@ -15,8 +15,8 @@ class RecommendFragment: Fragment() {
 
     private lateinit var binding: FragmentRecommendBinding
     private val viewModel: UserViewModel by activityViewModels()
-    private val upperTrackAdapter = TrackAdapter {  }
-    private val downerTrackAdapter = TrackAdapter {  }
+    private val upperTrackAdapter by lazy { TrackAdapter(viewModel.callback) }
+    private val downerTrackAdapter  by lazy { TrackAdapter(viewModel.callback) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentRecommendBinding.inflate(inflater, container, false)

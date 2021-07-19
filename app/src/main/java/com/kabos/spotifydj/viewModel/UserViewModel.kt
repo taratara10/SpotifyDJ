@@ -8,6 +8,7 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
+import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -21,9 +22,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     var currentTrack = MutableLiveData<TrackInfo>()
 
+
+    val callback = object: AdapterCallback {
+        override fun addTrack(trackInfo: TrackInfo) {
+            addTrackToPlaylist(trackInfo)
+        }
+
+        override fun playback(trackInfo: TrackInfo) {
+            playbackTrack(trackInfo)
+        }
+
+        override fun onClick(trackInfo: TrackInfo) {
+            updateCurrentTrack(trackInfo)
+        }
+    }
+
     fun initializeAccessToken(accessToken: String){
         mAccessToken = accessToken
     }
+
 
     /**
      * Util
@@ -32,6 +49,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun updateCurrentTrack(track: TrackInfo){
         currentTrack.postValue(track)
         //todo navigate to recommend fragment
+    }
+
+    fun addTrackToPlaylist(trackInfo: TrackInfo){
+
+    }
+
+    fun playbackTrack(trackInfo: TrackInfo){
+
     }
 
     /**
