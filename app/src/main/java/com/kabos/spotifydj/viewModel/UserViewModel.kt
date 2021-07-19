@@ -9,7 +9,6 @@ import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
-import com.kabos.spotifydj.ui.adapter.Callback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -23,6 +22,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+
+
 
 
     val callback = object: AdapterCallback {
@@ -51,7 +52,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun updateCurrentTrack(track: TrackInfo){
         currentTrack.postValue(track)
         updateRecommendTrack()
-        //todo navigate to recommend fragment
     }
 
     fun addTrackToPlaylist(track: TrackInfo){

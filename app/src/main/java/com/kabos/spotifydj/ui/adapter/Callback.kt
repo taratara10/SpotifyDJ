@@ -8,4 +8,3 @@ interface AdapterCallback {
     fun onClick(trackInfo: TrackInfo)
 }
 
-interface navigateCallback

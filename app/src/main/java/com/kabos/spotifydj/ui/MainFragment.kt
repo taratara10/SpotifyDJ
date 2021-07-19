@@ -16,6 +16,7 @@ import com.kabos.spotifydj.viewModel.UserViewModel
 class MainFragment: Fragment() {
 
     private lateinit var binding: FragmentMainBinding
+    private val viewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
@@ -35,25 +36,16 @@ class MainFragment: Fragment() {
             tab.text = "OBJECT $position"
         }.attach()
 
+        //currentTrackの変更を監視して、自動的にrecommendFragmentへ遷移
+        viewModel.currentTrack.observe(viewLifecycleOwner,{
+            viewPager.setCurrentItem(1,true)
+        })
 
+        //playlistを監視して、playlistFragmentへ遷移
+        viewModel.currentPlaylist.observe(viewLifecycleOwner,{
+            viewPager.setCurrentItem(2,true)
+        })
 
-
-
-
-//        accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-//            .getString("token", "No token").toString()
-
-//        binding.apply {
-//            button2.setOnClickListener {
-////                textView3.text = viewModel.getUser(accessToken).toString()
-//                viewModel.getPlaylist(accessToken)
-//                viewModel.playback(accessToken)
-//            }
-//
-//            playBtn.setOnClickListener {
-//                    viewModel.getCurrentPlayback(accessToken)
-//            }
-//        }
     }
 }
 

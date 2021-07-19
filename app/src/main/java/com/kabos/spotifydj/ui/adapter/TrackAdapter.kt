@@ -9,7 +9,7 @@ import com.kabos.spotifydj.databinding.AdapterTrackBinding.inflate
 import com.kabos.spotifydj.databinding.AdapterTrackBinding
 import com.kabos.spotifydj.model.TrackInfo
 
-class TrackAdapter(private val callback: Callback): androidx.recyclerview.widget.ListAdapter<TrackInfo, TrackViewHolder>(DiffCallback) {
+class TrackAdapter(private val callback: AdapterCallback): androidx.recyclerview.widget.ListAdapter<TrackInfo, TrackViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -24,7 +24,7 @@ class TrackAdapter(private val callback: Callback): androidx.recyclerview.widget
 
 class TrackViewHolder(private val binding: AdapterTrackBinding)
     : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: TrackInfo, callback: Callback){
+    fun bind(item: TrackInfo, callback: AdapterCallback){
         binding.apply {
             tvTrackName.text = item.name
             tvArtistName.text = item.artist

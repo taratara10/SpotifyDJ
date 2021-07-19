@@ -3,34 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation"
-    app:startDestination="@id/nav_search_fragment">
+    app:startDestination="@id/nav_main">
+
 
     <fragment
-        android:id="@+id/nav_search_fragment"
-        android:name="com.kabos.spotifydj.ui.SearchFragment"
-        android:label="search"
-        tools:layout="@layout/fragment_search">
-
-        <action
-            android:id="@+id/action_nav_search_fragment_to_nav_recommend_fragment"
-            app:destination="@id/nav_recommend_fragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/nav_recommend_fragment"
-        android:name="com.kabos.spotifydj.ui.RecommendFragment"
-        android:label="Recommend"
-        tools:layout="@layout/fragment_recommend">
+        android:id="@+id/nav_main"
+        android:name="com.kabos.spotifydj.ui.MainFragment"
+        android:label="pokedex"
+        tools:layout="@layout/fragment_main" >
 
     </fragment>
 
-    <fragment
-        android:id="@+id/nav_playlist_fragment"
-        android:name="com.kabos.spotifydj.ui.PlaylistFragment"
-        android:label="playlist"
-        tools:layout="@layout/fragment_playlist">
-
-        <action
-            android:id="@+id/action_nav_playlist_fragment_to_nav_recommend_fragment"
-            app:destination="@id/nav_recommend_fragment" />
-    </fragment>
 </navigation>
