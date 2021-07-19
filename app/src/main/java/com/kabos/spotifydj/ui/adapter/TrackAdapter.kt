@@ -5,12 +5,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.AdapterTrackBinding.inflate
 import com.kabos.spotifydj.databinding.AdapterTrackBinding
 import com.kabos.spotifydj.model.TrackInfo
 
-class TrackAdapter(private val callback: AdapterCallback): androidx.recyclerview.widget.ListAdapter<TrackInfo, TrackViewHolder>(DiffCallback) {
+class TrackAdapter(private val callback: Callback): androidx.recyclerview.widget.ListAdapter<TrackInfo, TrackViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -25,7 +24,7 @@ class TrackAdapter(private val callback: AdapterCallback): androidx.recyclerview
 
 class TrackViewHolder(private val binding: AdapterTrackBinding)
     : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: TrackInfo, callback: AdapterCallback){
+    fun bind(item: TrackInfo, callback: Callback){
         binding.apply {
             tvTrackName.text = item.name
             tvArtistName.text = item.artist

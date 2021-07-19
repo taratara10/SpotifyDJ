@@ -1,18 +1,14 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
-import com.kabos.spotifydj.model.TrackInfo
-import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 

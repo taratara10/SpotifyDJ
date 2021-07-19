@@ -55,5 +55,8 @@ class Repository @Inject constructor( private val userService: UserService) {
         )
     }
 
+    suspend fun createPlaylist(accessToken: String, userId: String, title: String) {
+        userService.createPlaylist("Bearer $accessToken",userId,title)
+    }
 
 }

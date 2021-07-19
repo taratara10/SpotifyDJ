@@ -7,3 +7,5 @@ interface AdapterCallback {
     fun playback(trackInfo: TrackInfo)
     fun onClick(trackInfo: TrackInfo)
 }
+
+interface navigateCallback

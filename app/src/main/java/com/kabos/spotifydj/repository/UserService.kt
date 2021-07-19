@@ -28,14 +28,16 @@ interface UserService {
 
 
     @GET("search")
-    suspend fun getTracksByKeyword(@Header("Authorization")accessToken: String,
-                             @Query("q")keyword: String,
-                             @Query("type")type: String
+    suspend fun getTracksByKeyword(
+        @Header("Authorization")accessToken: String,
+        @Query("q")keyword: String,
+        @Query("type")type: String
     ):Response<SearchTracks>
 
     @GET("audio-features/{id}")
-    suspend fun getAudioFeaturesById(@Header("Authorization")accessToken: String,
-                                     @Path("id")id: String
+    suspend fun getAudioFeaturesById(
+        @Header("Authorization")accessToken: String,
+        @Path("id")id: String
     ): Response<AudioFeature>
 
     @GET("recommendations")
@@ -49,4 +51,11 @@ interface UserService {
         @Query("min_energy") minEnergy: Double,
         @Query("max_energy") maxEnergy: Double,
     ):Response<RecommendTracks>
+
+    @POST("users/{user_id}/playlists")
+    suspend fun createPlaylist(
+        @Header("Authorization") accessToken: String,
+        @Path("user_id")userId: String,
+        @Query("name")title: String
+    )
 }

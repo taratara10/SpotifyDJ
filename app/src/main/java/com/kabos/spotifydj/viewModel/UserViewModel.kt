@@ -9,6 +9,7 @@ import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
+import com.kabos.spotifydj.ui.adapter.Callback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -20,7 +21,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    var currentTrack = MutableLiveData<TrackInfo>()
+    val currentTrack = MutableLiveData<TrackInfo>()
+    val currentPlaylist = MutableLiveData<List<TrackInfo>>()
 
 
     val callback = object: AdapterCallback {
@@ -48,11 +50,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun updateCurrentTrack(track: TrackInfo){
         currentTrack.postValue(track)
+        updateRecommendTrack()
         //todo navigate to recommend fragment
     }
 
-    fun addTrackToPlaylist(trackInfo: TrackInfo){
-
+    fun addTrackToPlaylist(track: TrackInfo){
+        updateCurrentTrack(track)
+        val playlist: MutableList<TrackInfo> = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        playlist.add(track)
+        currentPlaylist.postValue(playlist)
     }
 
     fun playbackTrack(trackInfo: TrackInfo){
@@ -127,11 +133,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     fun updateRecommendTrack() = viewModelScope.launch{
-        //todo 消す
-        currentTrack.postValue(searchTrackList.value?.get(0))
-        Log.d("Recommend","${currentTrack.value}")
-
-
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
