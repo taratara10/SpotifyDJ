@@ -2,14 +2,16 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
+import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.http.*
 
 interface UserService {
     @GET("me")
-    suspend fun getUser(@Header("Authorization") accessToken: String):Response<User>
+    suspend fun getUsersProfile(@Header("Authorization") accessToken: String):Response<User>
 
 
 //
@@ -20,9 +22,10 @@ interface UserService {
 //    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<Devices>
 
     @PUT("me/player/play")
-    suspend fun playback(@Header("Authorization")accessToken: String,
-                         @Query("device_id")id: String,
-                         @Body body:Playback
+    suspend fun playback(
+        @Header("Authorization")accessToken: String,
+        @Query("device_id")id: String,
+        @Body body:Playback
     )
 
 
@@ -68,8 +71,8 @@ interface UserService {
     suspend fun createPlaylist(
         @Header("Authorization") accessToken: String,
         @Path("user_id")userId: String,
-        @Query("name")title: String
-    )
+        @Body body: CreatePlaylistBody
+    ):Response<PlaylistItem>
 
     @POST("playlists/{playlist_id}/tracks")
     suspend fun addItemsToPlaylist(

@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,9 +34,12 @@ class PlaylistFragment: Fragment() {
                 adapter = trackAdapter
             }
 
+
             //todo 消す
             btnSavePlaylist.setOnClickListener {
-                viewModel.getUsersPlaylists()
+                //todo
+                val title = etPlaylistTitle.text.toString()
+                //viewModel.createPlaylist(title)
             }
 
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
@@ -45,4 +49,5 @@ class PlaylistFragment: Fragment() {
 
 
     }
+
 }

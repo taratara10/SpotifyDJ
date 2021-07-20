@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
@@ -17,15 +18,19 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
+    private val mUserId: String by lazy { initializeUserId() }
+    var currentPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+    val usersPlaylists = MutableLiveData<List<PlaylistItem>>()
 
 
 
 
+    //共通のcallbackを各FragmentのTrackAdapterに渡して
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             addTrackToPlaylist(trackInfo)
@@ -42,6 +47,17 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun initializeAccessToken(accessToken: String){
         mAccessToken = accessToken
+    }
+
+    private fun initializeUserId(): String = runBlocking {
+        val request = repository.getUsersProfile(mAccessToken)
+        if (request.isSuccessful){
+            Log.d("initializeUserId","${request.body()?.id}")
+            return@runBlocking request.body()?.id.toString()
+        }else{
+            Log.d("initializeUserId","failed")
+            return@runBlocking ""
+        }
     }
 
 
@@ -171,13 +187,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         Log.d("getUserPlaylist","${request.body()}")
         if (request.isSuccessful){
-            Log.d("getUserPlaylist","${request.body()}")
+            usersPlaylists.postValue(request.body()?.items)
         }else{
             Log.d("getUserPlaylist","getUserPlaylist failed")
         }
     }
 
-
+    fun createPlaylist(title: String) = viewModelScope.launch {
+        //todo userIdの初期化
+        if (mUserId == "") initializeUserId()
+        val request = repository.createPlaylist(mAccessToken,mUserId,title)
+        if (request.isSuccessful) {
+            currentPlaylistId = request.body()?.id.toString()
+            Log.d("createPlaylist","${request.body()?.id}")
+        }else{
+            Log.d("createPlaylist","failed")
+        }
+    }
 
 
 }
