@@ -33,6 +33,11 @@ class PlaylistFragment: Fragment() {
                 adapter = trackAdapter
             }
 
+            //todo 消す
+            btnSavePlaylist.setOnClickListener {
+                viewModel.getUsersPlaylists()
+            }
+
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
                 trackAdapter.submitList(playlist)
             })

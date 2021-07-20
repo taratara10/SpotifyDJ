@@ -2,7 +2,7 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.feature.AudioFeature
-import com.kabos.spotifydj.model.feature.AudioFeatures
+import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.http.*
@@ -11,14 +11,13 @@ interface UserService {
     @GET("me")
     suspend fun getUser(@Header("Authorization") accessToken: String):Response<User>
 
-    @GET("me/playlists")
-    suspend fun getCurrentPlaylist(@Header("Authorization")accessToken: String): Response<Playlist>
 
-    @GET("me/player/recently-played")
-    suspend fun getRecentlyPlayed(@Header("Authorization")accessToken: String): Response<RecentlyPlaylist>
-
-    @GET("me/player/devices")
-    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<Devices>
+//
+//    @GET("me/player/recently-played")
+//    suspend fun getRecentlyPlayed(@Header("Authorization")accessToken: String): Response<RecentlyPlaylist>
+//
+//    @GET("me/player/devices")
+//    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<Devices>
 
     @PUT("me/player/play")
     suspend fun playback(@Header("Authorization")accessToken: String,
@@ -52,10 +51,38 @@ interface UserService {
         @Query("max_energy") maxEnergy: Double,
     ):Response<RecommendTracks>
 
+    /**
+     *  playlist
+     * */
+
+    @GET("me/playlists")
+    suspend fun getUsersPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
+
+    @GET("playlists/{playlist_id}/tracks")
+    suspend fun getPlaylistItem(
+        @Header("Authorization") accessToken: String,
+        @Path("playlist_id")playlistId: String,
+    )
+
     @POST("users/{user_id}/playlists")
     suspend fun createPlaylist(
         @Header("Authorization") accessToken: String,
         @Path("user_id")userId: String,
         @Query("name")title: String
+    )
+
+    @POST("playlists/{playlist_id}/tracks")
+    suspend fun addItemsToPlaylist(
+        @Header("Authorization") accessToken: String,
+        @Header("Content-Type") contentType: String,
+        @Path("playlist_id")playlistId: String,
+    )
+
+    @DELETE("playlists/{playlist_id}/tracks")
+    suspend fun deleteItemsFromPlaylist(
+        @Header("Authorization") accessToken: String,
+        @Header("Content-Type") contentType: String,
+        @Path("playlist_id")playlistId: String,
+        @Path("tracks")tracks: Array<String>
     )
 }

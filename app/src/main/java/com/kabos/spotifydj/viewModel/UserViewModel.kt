@@ -82,6 +82,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             if (request.isSuccessful){
                 return@async request.body()?.tracks?.items as List<TrackItems>
             }else {
+                //todo check accessToken is enabled! and toast "need accestoken"
                 Log.d("getTracksByKeyword","search failed")
                 return@async null
             }
@@ -160,4 +161,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
         }
     }
+
+    /**
+     *  Playlist
+     * */
+
+    fun getUsersPlaylists() = viewModelScope.launch {
+        val request = repository.getUsersPlaylist(mAccessToken)
+
+        Log.d("getUserPlaylist","${request.body()}")
+        if (request.isSuccessful){
+            Log.d("getUserPlaylist","${request.body()}")
+        }else{
+            Log.d("getUserPlaylist","getUserPlaylist failed")
+        }
+    }
+
+
+
+
 }
