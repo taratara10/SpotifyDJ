@@ -2,6 +2,7 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -68,11 +69,12 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun getUsersPlaylist(accessToken: String): Response<Playlist> =
         userService.getUsersPlaylists(generateBearer(accessToken))
 
-    suspend fun addItemToPlaylist(accessToken: String,playlistId: String) {
+    suspend fun addItemToPlaylist(accessToken: String,playlistId: String, body: AddItemToPlaylistBody) {
         userService.addItemsToPlaylist(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
-            playlistId = playlistId
+            playlistId = playlistId,
+            body = body
         )
     }
 }

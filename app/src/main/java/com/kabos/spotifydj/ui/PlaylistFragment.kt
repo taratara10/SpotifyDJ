@@ -38,8 +38,12 @@ class PlaylistFragment: Fragment() {
             //todo 消す
             btnSavePlaylist.setOnClickListener {
                 //todo
-                val title = etPlaylistTitle.text.toString()
-                //viewModel.createPlaylist(title)
+//                val title = etPlaylistTitle.text.toString()
+                viewModel.createPlaylist("test")
+            }
+
+            btnAddPlaylist.setOnClickListener {
+                viewModel.postItemToPlaylist()
             }
 
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
@@ -33,7 +34,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     //共通のcallbackを各FragmentのTrackAdapterに渡して
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            addTrackToPlaylist(trackInfo)
+            addTrackToCurrentPlaylist(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -70,7 +71,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         updateRecommendTrack()
     }
 
-    fun addTrackToPlaylist(track: TrackInfo){
+    fun addTrackToCurrentPlaylist(track: TrackInfo){
         updateCurrentTrack(track)
         val playlist: MutableList<TrackInfo> = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
@@ -136,6 +137,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         return if (trackItems != null && audioFeature != null) {
             TrackInfo(
                 id = trackItems.id,
+                uri= trackItems.uri,
                 name = trackItems.name,
                 artist = trackItems.artists[0].name,
                 imageUrl = trackItems.album.images[0].url,
@@ -203,6 +205,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }else{
             Log.d("createPlaylist","failed")
         }
+    }
+
+    //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
+    fun postItemToPlaylist() = viewModelScope.launch {
+        if (currentPlaylist.value == null) return@launch
+        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.uri }!!)
+        repository.addItemToPlaylist(mAccessToken, currentPlaylistId,body)
+
+        //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
 
 

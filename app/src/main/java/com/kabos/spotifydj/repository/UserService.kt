@@ -2,6 +2,7 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -79,6 +80,7 @@ interface UserService {
         @Header("Authorization") accessToken: String,
         @Header("Content-Type") contentType: String,
         @Path("playlist_id")playlistId: String,
+        @Body body: AddItemToPlaylistBody
     )
 
     @DELETE("playlists/{playlist_id}/tracks")
