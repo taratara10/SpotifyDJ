@@ -26,3 +26,4 @@ data class Image(
 data class ExternalUrlsXX(
     val spotify: String
 )
+

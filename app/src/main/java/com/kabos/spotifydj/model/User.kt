@@ -8,25 +8,3 @@ data class User(
     val birthday: String
 )
 
-
-data class Playlist(
-    val href: String,
-    val items: List<UserItem>,
-    val limit: Int,
-    val next: Any,
-    val offset: Int,
-    val previous: Any,
-    val total: Int
-)
-
-data class UserItem(
-    val collaborative: Boolean,
-    val href: String,
-    val id: String,
-    val images: List<Any>,
-    val name: String,
-    val `public`: Boolean,
-    val snapshot_id: String,
-    val type: String,
-    val uri: String
-)

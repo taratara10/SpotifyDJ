@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.kabos.spotifydj.R
+import com.kabos.spotifydj.viewModel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -14,7 +15,13 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
     private val REDIRECT_URI = "com.kabos.spotifydj://callback"
-    private val SCOPE = arrayOf("user-read-recently-played","playlist-read-private","playlist-read-collaborative","user-modify-playback-state","user-read-playback-state")
+    private val SCOPE = arrayOf("user-read-recently-played",
+        "playlist-read-private",
+        "playlist-read-collaborative",
+        "user-modify-playback-state",
+        "user-read-playback-state",
+        "playlist-modify-public",
+        "playlist-modify-private")
     private val REQUEST_CODE: Int = 1337
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
