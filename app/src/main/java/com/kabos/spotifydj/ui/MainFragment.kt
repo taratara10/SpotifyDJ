@@ -20,6 +20,9 @@ class MainFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
+        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
+            .getString("token", "No token").toString()
+        viewModel.initializeAccessToken(accessToken)
         return binding.root
     }
 

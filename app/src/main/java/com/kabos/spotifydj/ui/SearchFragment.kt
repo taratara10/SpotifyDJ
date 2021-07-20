@@ -28,9 +28,6 @@ class SearchFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-            .getString("token", "No token").toString()
-        viewModel.initializeAccessToken(accessToken)
 
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
