@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -70,6 +71,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
     }
     override fun onSupportNavigateUp(): Boolean {
         //Fragmentのコールバックがあればそれを実行する
