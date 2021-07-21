@@ -11,6 +11,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
+import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -43,6 +44,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         override fun onClick(trackInfo: TrackInfo) {
             updateCurrentTrack(trackInfo)
+        }
+    }
+
+    val playlistCallback = object :PlaylistCallback {
+        override fun onClick(playlistItem: PlaylistItem) {
+            TODO("Not yet implemented")
         }
     }
 

@@ -12,6 +12,16 @@
         android:label="pokedex"
         tools:layout="@layout/fragment_main" >
 
+        <action
+            android:id="@+id/action_nav_main_to_nav_user_playlist"
+            app:destination="@id/nav_user_playlist" />
     </fragment>
+
+    <dialog
+        android:id="@+id/nav_user_playlist"
+        android:name="com.kabos.spotifydj.ui.DialogUsersPlaylists"
+        tools:layout="@layout/dialog_users_playlists">
+
+    </dialog>
 
 </navigation>

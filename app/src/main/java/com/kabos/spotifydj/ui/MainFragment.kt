@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.R
@@ -60,7 +61,8 @@ class MainFragment: Fragment() {
                 true
             }
             R.id.menu_fetch_playlist -> {
-
+                viewModel.getUsersPlaylistsList()
+                findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
                 true
             }
             else -> super.onOptionsItemSelected(item)
