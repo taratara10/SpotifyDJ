@@ -14,6 +14,30 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+    <TextView
+        android:id="@+id/tv_edit_text_is_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="アーティスト、曲名、キーワードで検索しよう"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_begin"
+        android:visibility="visible"
+        />
+
+    <TextView
+        android:id="@+id/tv_search_item_nothing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="該当結果なし"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_begin"
+        android:visibility="gone"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search_tracks_result"
         android:layout_width="0dp"
