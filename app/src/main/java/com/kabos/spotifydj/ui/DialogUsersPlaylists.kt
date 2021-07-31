@@ -3,11 +3,13 @@ package com.kabos.spotifydj.ui
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.DialogUsersPlaylistsBinding
+import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -35,9 +37,8 @@ class DialogUsersPlaylists: DialogFragment() {
                 adapter = playlistAdapter
             }
 
-            viewModel.usersPlaylistsList.observe(viewLifecycleOwner, {playlist ->
-                playlistAdapter.submitList(playlist)
-            })
+            playlistAdapter.submitList(viewModel.usersAllPlaylists)
+            Log.d("aaaaaaaaa","${viewModel.usersAllPlaylists}")
         }
     }
 

@@ -66,8 +66,8 @@ class Repository @Inject constructor( private val userService: UserService) {
             userId = userId,
             body = CreatePlaylistBody(name = title))
 
-    suspend fun getUsersPlaylist(accessToken: String): Response<Playlist> =
-        userService.getUsersPlaylists(generateBearer(accessToken))
+    suspend fun getUsersAllPlaylist(accessToken: String): Response<Playlist> =
+        userService.getUsersAllPlaylists(generateBearer(accessToken))
 
     suspend fun addItemToPlaylist(accessToken: String,playlistId: String, body: AddItemToPlaylistBody) {
         userService.addItemsToPlaylist(
