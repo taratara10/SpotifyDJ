@@ -26,6 +26,7 @@ class MainFragment: Fragment() {
         val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
             .getString("token", "No token").toString()
         viewModel.initializeAccessToken(accessToken)
+        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -57,7 +58,6 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-
                 true
             }
             R.id.menu_fetch_playlist -> {
