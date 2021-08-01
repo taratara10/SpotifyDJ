@@ -31,12 +31,14 @@ class PlaylistViewHolder(private val binding: AdapterUsersPlaylistBinding)
 
             //
             when(item.images.size){
-                0 -> {setImage(root.context,ivPlaylistImage1,item.images[0].url)}
                 1 -> {
+                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
+                }
+                2 -> {
                     setImage(root.context,ivPlaylistImage1,item.images[0].url)
                     setImage(root.context,ivPlaylistImage1,item.images[1].url)
                 }
-                2 -> {
+                3 -> {
                     setImage(root.context,ivPlaylistImage1,item.images[0].url)
                     setImage(root.context,ivPlaylistImage1,item.images[1].url)
                     setImage(root.context,ivPlaylistImage1,item.images[2].url)

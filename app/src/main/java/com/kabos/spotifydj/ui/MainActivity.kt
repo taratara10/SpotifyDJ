@@ -37,7 +37,8 @@ class MainActivity : AppCompatActivity() {
     private fun authorizationSpotify() {
         val accessToken = getSharedPreferences("SPOTIFY", 0)
             .getString("token", "No token").toString()
-        if (accessToken != "No Token") return
+        //todo 　refreshのタイミングがよくわからない　
+//        if (accessToken != "No Token") return
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(SCOPE)
             .build()
