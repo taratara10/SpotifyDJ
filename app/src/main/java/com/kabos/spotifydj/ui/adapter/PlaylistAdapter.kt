@@ -29,36 +29,14 @@ class PlaylistViewHolder(private val binding: AdapterUsersPlaylistBinding)
         binding.apply {
             tvPlaylistTitle.text = item.name
 
-            //
-            when(item.images.size){
-                1 -> {
-                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
-                }
-                2 -> {
-                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
-                }
-                3 -> {
-                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[2].url)
-                }
-                else -> {
-                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[2].url)
-                    setImage(root.context,ivPlaylistImage1,item.images[3].url)
-                }
-            }
+            Glide.with(root.context)
+                .load(item.images[0].url)
+                .into(ivPlaylistImage)
+
             adapterUserPlaylist.setOnClickListener {
                 callback.onClick(item)
             }
         }
-    }
-    private fun setImage(context:Context,imageView: ImageView, url:String){
-        Glide.with(context)
-            .load(url)
-            .into(imageView)
     }
 
 }
