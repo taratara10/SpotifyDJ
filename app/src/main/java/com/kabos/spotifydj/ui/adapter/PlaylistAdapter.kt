@@ -1,7 +1,9 @@
 package com.kabos.spotifydj.ui.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -26,14 +28,35 @@ class PlaylistViewHolder(private val binding: AdapterUsersPlaylistBinding)
     fun bind(item: PlaylistItem, callback: PlaylistCallback){
         binding.apply {
             tvPlaylistTitle.text = item.name
-//            Glide.with(root.context)
-//                .load(item.images)
-//                .into(ivPlaylistImage)
 
+            //
+            when(item.images.size){
+                0 -> {setImage(root.context,ivPlaylistImage1,item.images[0].url)}
+                1 -> {
+                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
+                }
+                2 -> {
+                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[2].url)
+                }
+                else -> {
+                    setImage(root.context,ivPlaylistImage1,item.images[0].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[1].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[2].url)
+                    setImage(root.context,ivPlaylistImage1,item.images[3].url)
+                }
+            }
             adapterUserPlaylist.setOnClickListener {
                 callback.onClick(item)
             }
         }
+    }
+    private fun setImage(context:Context,imageView: ImageView, url:String){
+        Glide.with(context)
+            .load(url)
+            .into(imageView)
     }
 
 }

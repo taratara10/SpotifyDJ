@@ -58,6 +58,8 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
+                Log.d("DEBUG","${requireActivity().getSharedPreferences("SPOTIFY", 0)
+                    .getString("token", "No token").toString()} and ${viewModel.mAccessToken}")
                 true
             }
             R.id.menu_fetch_playlist -> {
