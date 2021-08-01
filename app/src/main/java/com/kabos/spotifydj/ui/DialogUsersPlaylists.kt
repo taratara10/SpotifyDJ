@@ -36,10 +36,12 @@ class DialogUsersPlaylists: DialogFragment() {
                 layoutManager = LinearLayoutManager(activity)
                 adapter = playlistAdapter
             }
-
-            playlistAdapter.submitList(viewModel.usersAllPlaylists)
-            Log.d("aaaaaaaaa","${viewModel.usersAllPlaylists}")
         }
+
+        viewModel.usersAllPlaylists.observe(this,{ usersPlaylitst ->
+            playlistAdapter.submitList(usersPlaylitst)
+        })
+        Log.d("aaaaaaaaa","${viewModel.usersAllPlaylists}")
     }
 
 }

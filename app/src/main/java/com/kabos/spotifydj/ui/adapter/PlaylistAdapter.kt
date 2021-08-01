@@ -26,9 +26,9 @@ class PlaylistViewHolder(private val binding: AdapterUsersPlaylistBinding)
     fun bind(item: PlaylistItem, callback: PlaylistCallback){
         binding.apply {
             tvPlaylistTitle.text = item.name
-            Glide.with(root.context)
-                .load(item.images)
-                .into(ivPlaylistImage)
+//            Glide.with(root.context)
+//                .load(item.images)
+//                .into(ivPlaylistImage)
 
             adapterUserPlaylist.setOnClickListener {
                 callback.onClick(item)

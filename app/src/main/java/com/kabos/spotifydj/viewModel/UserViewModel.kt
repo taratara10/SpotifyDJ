@@ -27,7 +27,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
-    var usersAllPlaylists:List<PlaylistItem>? = listOf()
+    var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
 
 
 
@@ -191,12 +191,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      *  Playlist
      * */
 
-    fun getUsersPlaylistsList() = viewModelScope.launch {
+    fun getUsersAllPlaylists() = viewModelScope.launch {
         val request = repository.getUsersAllPlaylist(mAccessToken)
 
         Log.d("getUserPlaylist","${request.body()}")
         if (request.isSuccessful){
-            usersAllPlaylists = request.body()?.items
+            usersAllPlaylists.postValue(request.body()?.items)
         }else{
             Log.d("getUserPlaylist","getUserPlaylist failed")
         }
