@@ -63,7 +63,7 @@ interface UserService {
     suspend fun getUsersAllPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
 
     @GET("playlists/{playlist_id}/tracks")
-    suspend fun getPlaylistItem(
+    suspend fun getPlaylistItemById(
         @Header("Authorization") accessToken: String,
         @Path("playlist_id")playlistId: String,
     )

@@ -93,12 +93,21 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * SearchFragmentの処理
      * */
 
+    /**
+     * 1. getTracksByKeyword: 基本情報となるTrackItemをlistで取得
+     * 2.generateTrackInfo
+     *      2-1. getAudioFeatureById: TrackItemのidを元にtempoとかを取得
+     *      3-1. mergeTrackItemAndAudioFeatureで TrackInfoを生成
+     * 3.対応するLiveDataにpost
+     */
+
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
-        //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
+        //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
     }
+
 
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
@@ -125,21 +134,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
-        async {
-            val mergedTrackInfoList = mutableListOf<TrackInfo>()
-
-            trackItems.map { trackItems ->
-                val audioFeature = getAudioFeaturesById(trackItems.id).await()
-                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
-                if (trackInfo != null) {
-                    mergedTrackInfoList.add(trackInfo)
-                }
-            }
-            return@async mergedTrackInfoList
-        }
-    }
-
     private fun mergeTrackItemAndAudioFeature(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
         return if (trackItems != null && audioFeature != null) {
             TrackInfo(
@@ -153,6 +147,20 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 energy = audioFeature.energy
             )
         } else null
+    }
+
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
+        async {
+            //生成したTrackInfoを入れる仮の箱
+            val mergedTrackInfoList = mutableListOf<TrackInfo>()
+
+            trackItems.map { trackItems ->
+                val audioFeature = getAudioFeaturesById(trackItems.id).await()
+                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
+                if (trackInfo != null) mergedTrackInfoList.add(trackInfo)
+            }
+            return@async mergedTrackInfoList
+        }
     }
     /**
      * Recommendの処理
