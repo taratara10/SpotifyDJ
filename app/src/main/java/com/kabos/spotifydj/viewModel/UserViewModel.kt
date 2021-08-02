@@ -49,7 +49,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     val playlistCallback = object :PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
-            TODO("Not yet implemented")
+            updatePlaylistItemByDialog(playlistItem.id)
         }
     }
 
@@ -57,16 +57,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         mAccessToken = accessToken
     }
 
-    private fun initializeUserId(): String = runBlocking {
-        val request = repository.getUsersProfile(mAccessToken)
-        if (request.isSuccessful){
-            Log.d("initializeUserId","${request.body()?.id}")
-            return@runBlocking request.body()?.id.toString()
-        }else{
-            Log.d("initializeUserId","failed")
-            return@runBlocking ""
-        }
-    }
 
 
     /**
@@ -80,7 +70,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun addTrackToCurrentPlaylist(track: TrackInfo){
         updateCurrentTrack(track)
-        val playlist: MutableList<TrackInfo> = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         currentPlaylist.postValue(playlist)
     }
@@ -111,26 +101,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            val request = repository.getTracksByKeyword(mAccessToken, keyword)
-            if (request.isSuccessful){
-                return@async request.body()?.tracks?.items as List<TrackItems>
-            }else {
-                //todo check accessToken is enabled! and toast "need accestoken"
-                Log.d("getTracksByKeyword","search failed")
-                return@async null
-            }
+            return@async repository.getTracksByKeyword(mAccessToken,keyword)
         }
     }
 
     private suspend fun getAudioFeaturesById(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
         async {
-            val request = repository.getAudioFeaturesById(mAccessToken, id)
-            if (request.isSuccessful) {
-                return@async request.body()
-            }else{
-                Log.d("getAudioFeature","getAudioFeature failed")
-                return@async null
-            }
+            return@async repository.getAudioFeaturesById(mAccessToken,id)
         }
     }
 
@@ -182,16 +159,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean) = withContext(Dispatchers.IO){
+    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            val request = repository.getRecommendTracks(mAccessToken, trackInfo, fetchUpperTrack)
-            if (request.isSuccessful){
-                Log.d("getRecommendTracks","success! ${request.body()?.tracks}")
-                return@async request.body()?.tracks
-            }else{
-                Log.d("getRecommendTracks","getRecommendTracks failed")
-                return@async null
-            }
+            return@async repository.getRecommendTracks(mAccessToken,trackInfo,fetchUpperTrack)
         }
     }
 
@@ -210,16 +180,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
+    private fun initializeUserId(): String = runBlocking {
+        repository.getUsersProfile(mAccessToken)?.id.toString()
+    }
+
     fun createPlaylist(title: String) = viewModelScope.launch {
-        //todo userIdの初期化
         if (mUserId == "") initializeUserId()
-        val request = repository.createPlaylist(mAccessToken,mUserId,title)
-        if (request.isSuccessful) {
-            currentPlaylistId = request.body()?.id.toString()
-            Log.d("createPlaylist","${request.body()?.id}")
-        }else{
-            Log.d("createPlaylist","failed")
-        }
+        currentPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
@@ -231,5 +198,31 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
 
+    /**
+     * Dialog Playlist
+     * */
+
+
+    fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
+        //keywordに一致する検索結果がなければreturn
+//        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
+//        Log.d("DEBBBB","${playlistId}, ${trackItemsList[0]}")
+//        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+//        searchTrackList.postValue(trackInfoList)
+    }
+//
+//
+//    private suspend fun getPlaylistItemById(playlistId: String)
+//        : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+//        async {
+//            val request = repository.getPlaylistItemById(mAccessToken, playlistId)
+//            if (request.isSuccessful){
+//                return@async request.body()?.items?.get(0) as List<TrackItems>
+//            }else {
+//                Log.d("getPlaylistItemById","search failed")
+//                return@async null
+//            }
+//        }
+//    }
 
 }

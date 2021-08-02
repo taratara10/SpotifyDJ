@@ -12,7 +12,6 @@ data class PlaylistItem(
     val primary_color: Any,
     val `public`: Boolean,
     val snapshot_id: String,
-    val tracks: Tracks,
     val type: String,
     val uri: String
 )
