@@ -205,24 +205,17 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
-//        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
-//        Log.d("DEBBBB","${playlistId}, ${trackItemsList[0]}")
-//        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
-//        searchTrackList.postValue(trackInfoList)
+        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        searchTrackList.postValue(trackInfoList)
     }
-//
-//
-//    private suspend fun getPlaylistItemById(playlistId: String)
-//        : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
-//        async {
-//            val request = repository.getPlaylistItemById(mAccessToken, playlistId)
-//            if (request.isSuccessful){
-//                return@async request.body()?.items?.get(0) as List<TrackItems>
-//            }else {
-//                Log.d("getPlaylistItemById","search failed")
-//                return@async null
-//            }
-//        }
-//    }
+
+
+    private suspend fun getPlaylistItemById(playlistId: String)
+        : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+        async {
+            repository.getPlaylistItemById(mAccessToken,playlistId)
+        }
+    }
 
 }

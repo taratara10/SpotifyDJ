@@ -2,6 +2,7 @@ package com.kabos.spotifydj.repository
 
 import android.util.Log
 import com.kabos.spotifydj.model.*
+import com.kabos.spotifydj.model.PlaylistById.Item
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
@@ -109,17 +110,21 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun getUsersAllPlaylist(accessToken: String): Response<Playlist> =
         userService.getUsersAllPlaylists(generateBearer(accessToken))
-//
-//    suspend fun getPlaylistItemById(accessToken: String,playlistId: String):Response<PlaylistById> {
-//        val request = userService.getPlaylistItemById(
-//            accessToken = generateBearer(accessToken),
-//            playlistId = playlistId
-//        )
-//        if (request.isSuccessful){
-//            return
-//
-//        }
-//    }
+
+    suspend fun getPlaylistItemById(accessToken: String,playlistId: String):List<TrackItems>? {
+        val request = userService.getPlaylistItemById(
+            accessToken = generateBearer(accessToken),
+            playlistId = playlistId
+        )
+         if (request.isSuccessful){
+             //List<TrackItem>で扱いたいので、item.tackをmapで取り出す
+             val items:List<Item>? = request.body()?.items
+             return items?.map { it.track }
+        }else{
+             Log.d("getPlaylistItemById","search failed")
+             return null
+         }
+    }
 
 
     suspend fun addItemToPlaylist(accessToken: String,playlistId: String, body: AddItemToPlaylistBody) {
