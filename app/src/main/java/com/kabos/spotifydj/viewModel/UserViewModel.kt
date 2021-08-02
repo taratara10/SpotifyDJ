@@ -47,21 +47,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    val playlistCallback = object :PlaylistCallback {
-        override fun onClick(playlistItem: PlaylistItem) {
-            updatePlaylistItemByDialog(playlistItem.id)
-        }
-    }
-
-    fun initializeAccessToken(accessToken: String){
-        mAccessToken = accessToken
-    }
-
-
-
     /**
      * Util
      * */
+    fun initializeAccessToken(accessToken: String){
+        mAccessToken = accessToken
+    }
 
     fun updateCurrentTrack(track: TrackInfo){
         currentTrack.postValue(track)
