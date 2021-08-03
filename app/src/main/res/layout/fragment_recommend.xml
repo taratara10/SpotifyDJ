@@ -50,6 +50,16 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/tv_upper_tracks" />
+            <ProgressBar
+                android:id="@+id/pb_upper_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:indeterminateTint="@android:color/holo_green_light"
+                app:layout_constraintBottom_toBottomOf="@id/rv_upper_tracks_result"
+                app:layout_constraintEnd_toEndOf="@id/rv_upper_tracks_result"
+                app:layout_constraintStart_toStartOf="@id/rv_upper_tracks_result"
+                app:layout_constraintTop_toTopOf="@id/rv_upper_tracks_result" />
 
             <TextView
                 android:id="@+id/tv_downer_tracks"
@@ -68,6 +78,17 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/tv_downer_tracks" />
+
+            <ProgressBar
+                android:id="@+id/pb_downer_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:indeterminateTint="@android:color/holo_green_light"
+                app:layout_constraintBottom_toBottomOf="@id/rv_downer_tracks_result"
+                app:layout_constraintEnd_toEndOf="@id/rv_downer_tracks_result"
+                app:layout_constraintStart_toStartOf="@id/rv_downer_tracks_result"
+                app:layout_constraintTop_toTopOf="@id/rv_downer_tracks_result" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline_begin"

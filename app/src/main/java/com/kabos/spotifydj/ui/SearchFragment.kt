@@ -58,6 +58,11 @@ class SearchFragment: Fragment() {
             }
         })
 
+        viewModel.isLoadingSearchTrack.observe(viewLifecycleOwner,{isLoading ->
+            if (isLoading)binding.pbSearchProgress.visibility = View.VISIBLE
+                else binding.pbSearchProgress.visibility = View.GONE
+        })
+
 
 
     }

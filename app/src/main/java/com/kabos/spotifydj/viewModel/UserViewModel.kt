@@ -29,6 +29,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
     var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
 
+    val isLoadingSearchTrack = MutableLiveData(false)
+    val isLoadingUpperTrack = MutableLiveData(false)
+    val isLoadingDownerTrack = MutableLiveData(false)
+
 
 
 
@@ -83,9 +87,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      */
 
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
+        isLoadingSearchTrack.postValue(true)
         //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        isLoadingSearchTrack.postValue(false)
         searchTrackList.postValue(trackInfoList)
     }
 
@@ -138,14 +144,18 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
+            isLoadingUpperTrack.postValue(true)
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true).await() ?: return@launch
             val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            isLoadingUpperTrack.postValue(false)
             upperTrackList.postValue(trackInfoList)
         }
         //fetch downerTrack
         launch {
+            isLoadingDownerTrack.postValue(false)
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false).await() ?: return@launch
             val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            isLoadingDownerTrack.postValue(false)
             downerTrackList.postValue(trackInfoList)
         }
     }

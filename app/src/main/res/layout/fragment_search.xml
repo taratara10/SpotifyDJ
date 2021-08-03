@@ -47,6 +47,17 @@
         app:layout_constraintStart_toStartOf="@id/guideline_begin"
         android:visibility="gone"
         />
+
+    <ProgressBar
+        android:id="@+id/pb_search_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/holo_green_light"
+        app:layout_constraintBottom_toBottomOf="@id/rv_search_tracks_result"
+        app:layout_constraintEnd_toEndOf="@id/rv_search_tracks_result"
+        app:layout_constraintStart_toStartOf="@id/rv_search_tracks_result"
+        app:layout_constraintTop_toTopOf="@id/rv_search_tracks_result" />
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_begin"
         android:layout_width="wrap_content"

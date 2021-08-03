@@ -47,17 +47,31 @@ class RecommendFragment: Fragment() {
            }
        }
 
-        viewModel.upperTrackList.observe(viewLifecycleOwner,{upperTrack ->
-            upperTrackAdapter.submitList(upperTrack)
-        })
+        viewModel.apply {
+            upperTrackList.observe(viewLifecycleOwner,{upperTrack ->
+                upperTrackAdapter.submitList(upperTrack)
+            })
 
-        viewModel.downerTrackList.observe(viewLifecycleOwner,{downerTrack ->
-            downerTrackAdapter.submitList(downerTrack)
-        })
+            downerTrackList.observe(viewLifecycleOwner,{downerTrack ->
+                downerTrackAdapter.submitList(downerTrack)
+            })
 
-        viewModel.currentTrack.observe(viewLifecycleOwner,{currentTrack ->
-            val list = listOf(currentTrack)
-            currentTrackAdapter.submitList(list)
-        })
+            currentTrack.observe(viewLifecycleOwner,{currentTrack ->
+                //adapterがList<TrackInfo>で受け取るので、Listでラップする
+                val list = listOf(currentTrack)
+                currentTrackAdapter.submitList(list)
+            })
+
+            isLoadingUpperTrack.observe(viewLifecycleOwner,{isLoading ->
+                if (isLoading) binding.pbUpperProgress.visibility = View.VISIBLE
+                else binding.pbUpperProgress.visibility = View.GONE
+            })
+
+            isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
+                if (isLoading) binding.pbDownerProgress.visibility = View.VISIBLE
+                else binding.pbDownerProgress.visibility = View.GONE
+            })
+
+        }
     }
 }
