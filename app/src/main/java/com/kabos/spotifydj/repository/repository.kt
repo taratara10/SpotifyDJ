@@ -108,8 +108,15 @@ class Repository @Inject constructor( private val userService: UserService) {
     }
 
 
-    suspend fun getUsersAllPlaylist(accessToken: String): Response<Playlist> =
-        userService.getUsersAllPlaylists(generateBearer(accessToken))
+    suspend fun getUsersAllPlaylist(accessToken: String): List<PlaylistItem>? {
+        val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
+        return if (request.isSuccessful) request.body()?.items
+        else {
+            Log.d("getUserPlaylist","getUserPlaylist failed")
+            listOf()
+        }
+
+    }
 
     suspend fun getPlaylistItemById(accessToken: String,playlistId: String):List<TrackItems>? {
         val request = userService.getPlaylistItemById(

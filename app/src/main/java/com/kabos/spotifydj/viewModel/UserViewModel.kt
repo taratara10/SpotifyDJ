@@ -20,7 +20,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
-    private val mUserId: String by lazy { initializeUserId() }
+    private var mUserId = ""
     var currentPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
@@ -47,7 +47,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
 
         override fun onClick(trackInfo: TrackInfo) {
-            updateCurrentTrack(trackInfo)
+            updateCurrentTrackAndRecommend(trackInfo)
         }
     }
 
@@ -58,17 +58,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         mAccessToken = accessToken
     }
 
-    fun updateCurrentTrack(track: TrackInfo){
-        currentTrack.postValue(track)
-        updateRecommendTrack()
-    }
-
-    fun addTrackToCurrentPlaylist(track: TrackInfo){
-        updateCurrentTrack(track)
-        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
-        playlist.add(track)
-        currentPlaylist.postValue(playlist)
-    }
 
     fun playbackTrack(trackInfo: TrackInfo){
 
@@ -141,6 +130,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     fun updateRecommendTrack() = viewModelScope.launch{
+        Log.d("recommend","${currentTrack.value}")
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
@@ -169,20 +159,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      *  Playlist
      * */
-
-    fun getUsersAllPlaylists() = viewModelScope.launch {
-        val request = repository.getUsersAllPlaylist(mAccessToken)
-
-        Log.d("getUserPlaylist","${request.body()}")
-        if (request.isSuccessful){
-            usersAllPlaylists.postValue(request.body()?.items)
-        }else{
-            Log.d("getUserPlaylist","getUserPlaylist failed")
-        }
+    private fun updateCurrentTrackAndRecommend(track: TrackInfo){
+        currentTrack.postValue(track)
+        updateRecommendTrack()
     }
 
-    private fun initializeUserId(): String = runBlocking {
-        repository.getUsersProfile(mAccessToken)?.id.toString()
+    fun addTrackToCurrentPlaylist(track: TrackInfo){
+        updateCurrentTrackAndRecommend(track)
+        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        playlist.add(track)
+        currentPlaylist.postValue(playlist)
+    }
+
+
+    fun getUsersAllPlaylists() = viewModelScope.launch {
+        usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
+    }
+
+    private fun initializeUserId() = runBlocking {
+        mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
     }
 
     fun createPlaylist(title: String) = viewModelScope.launch {
