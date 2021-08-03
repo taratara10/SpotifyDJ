@@ -53,7 +53,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
 
         override fun onClick(trackInfo: TrackInfo) {
-            updateCurrentTrackAndRecommend(trackInfo)
+            updateCurrentTrack(trackInfo)
         }
     }
 
@@ -138,11 +138,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Recommendの処理
      * */
-    private fun updateCurrentTrackAndRecommend(track: TrackInfo){
-        runBlocking {
-            currentTrack.postValue(track)
-        }
-        updateRecommendTrack()
+
+    //postValue()の反映にラグがあるので、Fragment側で通知を受け取ったらupdateRecommend()をコールバック
+    fun updateCurrentTrack(track: TrackInfo){
+        currentTrack.postValue(track)
         isNavigateRecommendFragment.postValue(true)
     }
 
@@ -177,11 +176,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      *  Playlist
      * */
     fun addTrackToCurrentPlaylist(track: TrackInfo){
-        isNavigatePlaylistFragment.postValue(true)
         val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         currentPlaylist.postValue(playlist)
-        updateCurrentTrackAndRecommend(track)
+
+        isNavigatePlaylistFragment.postValue(true)
+        updateCurrentTrack(track)
     }
 
     fun getUsersAllPlaylists() = viewModelScope.launch {
