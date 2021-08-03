@@ -39,7 +39,7 @@ class PlaylistFragment: Fragment() {
             btnSavePlaylist.setOnClickListener {
                 //todo
 //                val title = etPlaylistTitle.text.toString()
-                viewModel.createPlaylist("test")
+//                viewModel.createPlaylist("test")
             }
 
             btnAddPlaylist.setOnClickListener {
@@ -48,6 +48,8 @@ class PlaylistFragment: Fragment() {
 
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
                 trackAdapter.submitList(playlist)
+                //これしないとrecyclerViewが更新されない
+                trackAdapter.notifyDataSetChanged()
             })
         }
 

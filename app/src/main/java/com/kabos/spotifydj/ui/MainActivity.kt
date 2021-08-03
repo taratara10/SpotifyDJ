@@ -4,6 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.viewModel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
@@ -33,6 +35,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun authorizationSpotify() {
+        val accessToken = getSharedPreferences("SPOTIFY", 0)
+            .getString("token", "No token").toString()
+        //todo 　refreshのタイミングがよくわからない　
+//        if (accessToken != "No Token") return
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(SCOPE)
             .build()
@@ -66,6 +72,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
     }
     override fun onSupportNavigateUp(): Boolean {
         //Fragmentのコールバックがあればそれを実行する

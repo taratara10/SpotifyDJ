@@ -29,19 +29,16 @@ class SearchFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-            .getString("token", "No token").toString()
-        viewModel.initializeAccessToken(accessToken)
 
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
                 viewModel.updateSearchedTracksResult(text.toString())
 
                 //empty viewを表示・非表示する処理
-                if (text.isNullOrEmpty()){
+                if (text.isNullOrEmpty()) {
                     tvEditTextIsEmpty.visibility = View.VISIBLE
                     rvSearchTracksResult.visibility = View.GONE
-                }else{
+                } else {
                     tvEditTextIsEmpty.visibility = View.GONE
                     rvSearchTracksResult.visibility = View.VISIBLE
                 }

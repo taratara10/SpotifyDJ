@@ -11,6 +11,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
+import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -26,7 +27,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
-    val usersPlaylists = MutableLiveData<List<PlaylistItem>>()
+    var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
 
 
 
@@ -46,25 +47,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    fun initializeAccessToken(accessToken: String){
-        mAccessToken = accessToken
-    }
-
-    private fun initializeUserId(): String = runBlocking {
-        val request = repository.getUsersProfile(mAccessToken)
-        if (request.isSuccessful){
-            Log.d("initializeUserId","${request.body()?.id}")
-            return@runBlocking request.body()?.id.toString()
-        }else{
-            Log.d("initializeUserId","failed")
-            return@runBlocking ""
-        }
-    }
-
-
     /**
      * Util
      * */
+    fun initializeAccessToken(accessToken: String){
+        mAccessToken = accessToken
+    }
 
     fun updateCurrentTrack(track: TrackInfo){
         currentTrack.postValue(track)
@@ -73,7 +61,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun addTrackToCurrentPlaylist(track: TrackInfo){
         updateCurrentTrack(track)
-        val playlist: MutableList<TrackInfo> = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         currentPlaylist.postValue(playlist)
     }
@@ -86,50 +74,31 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * SearchFragmentの処理
      * */
 
+    /**
+     * 1. getTracksByKeyword: 基本情報となるTrackItemをlistで取得
+     * 2.generateTrackInfo
+     *      2-1. getAudioFeatureById: TrackItemのidを元にtempoとかを取得
+     *      3-1. mergeTrackItemAndAudioFeatureで TrackInfoを生成
+     * 3.対応するLiveDataにpost
+     */
+
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
-        //TrackItemを取得して、idからfeature(tempoとか)を取得して結合→TrackInfo
+        //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
     }
 
+
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            val request = repository.getTracksByKeyword(mAccessToken, keyword)
-            if (request.isSuccessful){
-                return@async request.body()?.tracks?.items as List<TrackItems>
-            }else {
-                //todo check accessToken is enabled! and toast "need accestoken"
-                Log.d("getTracksByKeyword","search failed")
-                return@async null
-            }
+            return@async repository.getTracksByKeyword(mAccessToken,keyword)
         }
     }
 
     private suspend fun getAudioFeaturesById(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
         async {
-            val request = repository.getAudioFeaturesById(mAccessToken, id)
-            if (request.isSuccessful) {
-                return@async request.body()
-            }else{
-                Log.d("getAudioFeature","getAudioFeature failed")
-                return@async null
-            }
-        }
-    }
-
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
-        async {
-            val mergedTrackInfoList = mutableListOf<TrackInfo>()
-
-            trackItems.map { trackItems ->
-                val audioFeature = getAudioFeaturesById(trackItems.id).await()
-                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
-                if (trackInfo != null) {
-                    mergedTrackInfoList.add(trackInfo)
-                }
-            }
-            return@async mergedTrackInfoList
+            return@async repository.getAudioFeaturesById(mAccessToken,id)
         }
     }
 
@@ -146,6 +115,20 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 energy = audioFeature.energy
             )
         } else null
+    }
+
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
+        async {
+            //生成したTrackInfoを入れる仮の箱
+            val mergedTrackInfoList = mutableListOf<TrackInfo>()
+
+            trackItems.map { trackItems ->
+                val audioFeature = getAudioFeaturesById(trackItems.id).await()
+                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
+                if (trackInfo != null) mergedTrackInfoList.add(trackInfo)
+            }
+            return@async mergedTrackInfoList
+        }
     }
     /**
      * Recommendの処理
@@ -167,16 +150,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean) = withContext(Dispatchers.IO){
+    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            val request = repository.getRecommendTracks(mAccessToken, trackInfo, fetchUpperTrack)
-            if (request.isSuccessful){
-                Log.d("getRecommendTracks","success! ${request.body()?.tracks}")
-                return@async request.body()?.tracks
-            }else{
-                Log.d("getRecommendTracks","getRecommendTracks failed")
-                return@async null
-            }
+            return@async repository.getRecommendTracks(mAccessToken,trackInfo,fetchUpperTrack)
         }
     }
 
@@ -184,27 +160,24 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      *  Playlist
      * */
 
-    fun getUsersPlaylists() = viewModelScope.launch {
-        val request = repository.getUsersPlaylist(mAccessToken)
+    fun getUsersAllPlaylists() = viewModelScope.launch {
+        val request = repository.getUsersAllPlaylist(mAccessToken)
 
         Log.d("getUserPlaylist","${request.body()}")
         if (request.isSuccessful){
-            usersPlaylists.postValue(request.body()?.items)
+            usersAllPlaylists.postValue(request.body()?.items)
         }else{
             Log.d("getUserPlaylist","getUserPlaylist failed")
         }
     }
 
+    private fun initializeUserId(): String = runBlocking {
+        repository.getUsersProfile(mAccessToken)?.id.toString()
+    }
+
     fun createPlaylist(title: String) = viewModelScope.launch {
-        //todo userIdの初期化
         if (mUserId == "") initializeUserId()
-        val request = repository.createPlaylist(mAccessToken,mUserId,title)
-        if (request.isSuccessful) {
-            currentPlaylistId = request.body()?.id.toString()
-            Log.d("createPlaylist","${request.body()?.id}")
-        }else{
-            Log.d("createPlaylist","failed")
-        }
+        currentPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
@@ -216,5 +189,24 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
 
+    /**
+     * Dialog Playlist
+     * */
+
+
+    fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
+        //keywordに一致する検索結果がなければreturn
+        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        searchTrackList.postValue(trackInfoList)
+    }
+
+
+    private suspend fun getPlaylistItemById(playlistId: String)
+        : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+        async {
+            repository.getPlaylistItemById(mAccessToken,playlistId)
+        }
+    }
 
 }
