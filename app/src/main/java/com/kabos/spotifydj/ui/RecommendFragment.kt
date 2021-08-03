@@ -69,7 +69,7 @@ class RecommendFragment: Fragment() {
 
             isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
                 if (isLoading) binding.pbDownerProgress.visibility = View.VISIBLE
-                else binding.pbDownerProgress.visibility = View.GONE
+                else binding.pbUpperProgress.visibility = View.GONE
             })
 
         }

@@ -45,13 +45,19 @@ class MainFragment: Fragment() {
         }.attach()
 
         //currentTrackの変更を監視して、自動的にrecommendFragmentへ遷移
-        viewModel.currentTrack.observe(viewLifecycleOwner,{
-            viewPager.setCurrentItem(1,true)
+        viewModel.isNavigateRecommendFragment.observe(viewLifecycleOwner,{ isNavigate ->
+            if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
+                viewPager.setCurrentItem(1,true)
+                viewModel.isNavigateRecommendFragment.postValue(false)
+            }
         })
 
         //playlistを監視して、playlistFragmentへ遷移
-        viewModel.currentPlaylist.observe(viewLifecycleOwner,{
-            viewPager.setCurrentItem(2,true)
+        viewModel.isNavigatePlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
+            if (isNavigate) {
+                viewPager.setCurrentItem(2,true)
+                viewModel.isNavigatePlaylistFragment.postValue(false)
+            }
         })
 
     }
@@ -59,8 +65,8 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                Log.d("DEBUG","${requireActivity().getSharedPreferences("SPOTIFY", 0)
-                    .getString("token", "No token").toString()} and ${viewModel.mAccessToken}")
+                Log.d("currentTrackItem","${viewModel.currentTrack.value}")
+
                 true
             }
             R.id.menu_fetch_playlist -> {

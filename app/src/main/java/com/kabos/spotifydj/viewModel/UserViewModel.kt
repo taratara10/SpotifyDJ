@@ -25,13 +25,19 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    val currentTrack = MutableLiveData<TrackInfo>()
-    val currentPlaylist = MutableLiveData<List<TrackInfo>>()
     var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
+    val currentTrack = MutableLiveData<TrackInfo?>()
+    val currentPlaylist = MutableLiveData<List<TrackInfo>>()
 
+    //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
     val isLoadingUpperTrack = MutableLiveData(false)
     val isLoadingDownerTrack = MutableLiveData(false)
+
+    //Navigate Flag
+    val isNavigateRecommendFragment = MutableLiveData(false)
+    val isNavigatePlaylistFragment = MutableLiveData(false)
+
 
 
 
@@ -80,14 +86,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
-        isLoadingSearchTrack.postValue(false)
         searchTrackList.postValue(trackInfoList)
+        isLoadingSearchTrack.postValue(false)
     }
 
 
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
             return@async repository.getTracksByKeyword(mAccessToken,keyword)
+            //todo errorの時にLoadingProgress消す処理をコールバックで
         }
     }
 
@@ -125,12 +132,22 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             return@async mergedTrackInfoList
         }
     }
+
+
+
     /**
      * Recommendの処理
      * */
+    private fun updateCurrentTrackAndRecommend(track: TrackInfo){
+        runBlocking {
+            currentTrack.postValue(track)
+        }
+        updateRecommendTrack()
+        isNavigateRecommendFragment.postValue(true)
+    }
+
 
     fun updateRecommendTrack() = viewModelScope.launch{
-        Log.d("recommend","${currentTrack.value}")
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
@@ -159,18 +176,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      *  Playlist
      * */
-    private fun updateCurrentTrackAndRecommend(track: TrackInfo){
-        currentTrack.postValue(track)
-        updateRecommendTrack()
-    }
-
     fun addTrackToCurrentPlaylist(track: TrackInfo){
-        updateCurrentTrackAndRecommend(track)
+        isNavigatePlaylistFragment.postValue(true)
         val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         currentPlaylist.postValue(playlist)
+        updateCurrentTrackAndRecommend(track)
     }
-
 
     fun getUsersAllPlaylists() = viewModelScope.launch {
         usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
