@@ -7,8 +7,11 @@
         app:showAsAction="never"/>
     <item
         android:id="@+id/menu_fetch_playlist"
-        android:title="プレイリストを読み込む"
+        android:title="プレイリストから曲を見つける"
         app:showAsAction="never"/>
-
+    <item
+        android:id="@+id/menu_edit_playlist"
+        android:title="プレイリストを編集する"
+        app:showAsAction="never"/>
 
 </menu>

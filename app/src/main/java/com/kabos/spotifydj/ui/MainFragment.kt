@@ -40,6 +40,7 @@ class MainFragment: Fragment() {
         //setup TabLayout
         val tabLayout = binding.tabLayout
         TabLayoutMediator(tabLayout, viewPager) {tab, position ->
+            //todo titleを変える
             tab.text = "OBJECT $position"
         }.attach()
 
