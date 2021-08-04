@@ -60,7 +60,6 @@ class RecommendFragment: Fragment() {
                 //adapterがList<TrackInfo>で受け取るので、Listでラップする
                 val list = listOf(currentTrack)
                 currentTrackAdapter.submitList(list)
-                updateRecommendTrack()
             })
 
             isLoadingUpperTrack.observe(viewLifecycleOwner,{isLoading ->

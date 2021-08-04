@@ -139,14 +139,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * Recommendの処理
      * */
 
-    //postValue()の反映にラグがあるので、Fragment側で通知を受け取ったらupdateRecommend()をコールバック
+    //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
     fun updateCurrentTrack(track: TrackInfo){
-        currentTrack.postValue(track)
         isNavigateRecommendFragment.postValue(true)
+        currentTrack.value = track
+        updateRecommendTrack()
     }
 
 
-    fun updateRecommendTrack() = viewModelScope.launch{
+    private fun updateRecommendTrack() = viewModelScope.launch{
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
@@ -166,7 +167,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+    private suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
             return@async repository.getRecommendTracks(mAccessToken,trackInfo,fetchUpperTrack)
         }
