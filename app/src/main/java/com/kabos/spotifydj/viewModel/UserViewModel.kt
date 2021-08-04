@@ -105,7 +105,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     private suspend fun getAudioFeaturesById(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
         async {
-            return@async repository.getAudioFeaturesById(mAccessToken,id)
+            return@async repository.getAudioFeaturesById(
+                accessToken = mAccessToken,
+                id = id,
+                onFetchFailed = {
+                    isLoadingSearchTrack.postValue(false)
+                    isLoadingDownerTrack.postValue(false)
+                    isLoadingUpperTrack.postValue(false)
+                })
         }
     }
 
@@ -174,7 +181,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     private suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            return@async repository.getRecommendTracks(mAccessToken,trackInfo,fetchUpperTrack)
+            return@async repository.getRecommendTracks(
+                accessToken = mAccessToken,
+                trackInfo = trackInfo,
+                fetchUpperTrack = fetchUpperTrack,
+                onFetchFailed = {
+                    isLoadingSearchTrack.postValue(false)
+                    isLoadingUpperTrack.postValue(false)
+                    isLoadingDownerTrack.postValue(false)
+                }
+            )
         }
     }
 

@@ -49,6 +49,7 @@ class RecommendFragment: Fragment() {
         viewModel.apply {
             upperTrackList.observe(viewLifecycleOwner,{upperTrack ->
                 upperTrackAdapter.submitList(upperTrack)
+                //todo emptyなら動的にtextview作成したい
             })
 
             downerTrackList.observe(viewLifecycleOwner,{downerTrack ->
@@ -68,7 +69,7 @@ class RecommendFragment: Fragment() {
 
             isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
                 if (isLoading) binding.pbDownerProgress.visibility = View.VISIBLE
-                else binding.pbUpperProgress.visibility = View.GONE
+                else binding.pbDownerProgress.visibility = View.GONE
             })
 
         }
