@@ -43,7 +43,6 @@ class RecommendFragment: Fragment() {
            }
 
            button.setOnClickListener {
-               viewModel.updateRecommendTrack()
            }
        }
 

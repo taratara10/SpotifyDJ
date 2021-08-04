@@ -82,12 +82,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      */
 
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
-        isLoadingSearchTrack.postValue(true)
+        isLoadingSearchTrack.value = true
         //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
-        isLoadingSearchTrack.postValue(false)
+        isLoadingSearchTrack.value = false
     }
 
 
@@ -151,19 +151,19 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (currentTrack.value == null) return@launch
         //fetch upperTrack
         launch {
-            isLoadingUpperTrack.postValue(true)
+            isLoadingUpperTrack.value = true
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true).await() ?: return@launch
             val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
-            isLoadingUpperTrack.postValue(false)
             upperTrackList.postValue(trackInfoList)
+            isLoadingUpperTrack.value = false
         }
         //fetch downerTrack
         launch {
-            isLoadingDownerTrack.postValue(false)
+            isLoadingDownerTrack.value = true
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false).await() ?: return@launch
             val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
-            isLoadingDownerTrack.postValue(false)
             downerTrackList.postValue(trackInfoList)
+            isLoadingDownerTrack.value = false
         }
     }
 
@@ -214,9 +214,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
+        isLoadingSearchTrack.value = true
         val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
+        isLoadingSearchTrack.value = false
     }
 
 
