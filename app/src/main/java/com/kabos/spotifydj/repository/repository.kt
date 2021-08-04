@@ -3,16 +3,11 @@ package com.kabos.spotifydj.repository
 import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
-import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
-import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
-import com.kabos.spotifydj.model.track.SearchTracks
 import com.kabos.spotifydj.model.track.TrackItems
-import com.kabos.spotifydj.model.track.Tracks
-import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -35,23 +30,31 @@ class Repository @Inject constructor( private val userService: UserService) {
 //    suspend fun getRecentlyPlayed(accessToken: String): Response<RecentlyPlaylist> =
 //        userService.getRecentlyPlayed("Bearer $accessToken")
 //
-////    suspend fun playback(accessToken: String) {
-////        userService.playback("Bearer $accessToken",id)
-////    }
+//    suspend fun playback(accessToken: String) {
+//        userService.playback("Bearer $accessToken",id)
+//    }
 //
 //    suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
 //        userService.getCurrentPlayback("Bearer $accessToken")
 
 
-    suspend fun getTracksByKeyword(accessToken: String, keyword: String) : List<TrackItems>? {
+    suspend fun getTracksByKeyword(
+        accessToken: String,
+        keyword: String,
+        onFetchFailed: () -> Unit
+    ) : List<TrackItems>? {
+
         val request = userService.getTracksByKeyword(
-            accessToken= generateBearer(accessToken),
+            accessToken = generateBearer(accessToken),
             keyword = keyword,
             type = "album,track,artist"
         )
-        return if (request.isSuccessful) request.body()?.tracks?.items as List<TrackItems>
+        return if (request.isSuccessful){
+            request.body()?.tracks?.items as List<TrackItems>
+        }
         else {
-            Log.d("getTracksByKeyword","failed")
+            Log.d("getTracksByKeyword","${request.errorBody()?.string()}")
+            onFetchFailed()
             null
         }
     }

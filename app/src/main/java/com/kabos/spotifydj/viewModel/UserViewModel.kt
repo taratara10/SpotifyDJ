@@ -93,8 +93,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            return@async repository.getTracksByKeyword(mAccessToken,keyword)
-            //todo errorの時にLoadingProgress消す処理をコールバックで
+            return@async repository.getTracksByKeyword(
+                accessToken = mAccessToken,
+                keyword= keyword,
+                onFetchFailed= {
+                    isLoadingSearchTrack.postValue(false)
+                    //todo display onFetchFailed textView
+                })
         }
     }
 
