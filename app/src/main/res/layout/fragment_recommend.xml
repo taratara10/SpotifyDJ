@@ -8,8 +8,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="-16dp">
+        tools:layout_editor_absoluteX="-28dp"
+        tools:layout_editor_absoluteY="132dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -23,7 +23,16 @@
                 android:text="Current Tracks"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toTopOf="parent" />
-
+            <TextView
+                android:id="@+id/tv_current_tracks_nothing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="曲をタップして追加"
+                app:layout_constraintBottom_toBottomOf="@+id/rv_current_tracks"
+                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_begin"
+                app:layout_constraintTop_toTopOf="@+id/rv_current_tracks"
+                android:visibility="gone" />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_current_tracks"
                 android:layout_width="0dp"
@@ -50,12 +59,24 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/tv_upper_tracks" />
+
+            <TextView
+                android:id="@+id/tv_upper_tracks_nothing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="該当結果なし"
+                app:layout_constraintBottom_toBottomOf="@+id/rv_upper_tracks_result"
+                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_begin"
+                app:layout_constraintTop_toTopOf="@+id/rv_upper_tracks_result"
+                android:visibility="gone" />
+
             <ProgressBar
                 android:id="@+id/pb_upper_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:indeterminateTint="@android:color/holo_green_light"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/rv_upper_tracks_result"
                 app:layout_constraintEnd_toEndOf="@id/rv_upper_tracks_result"
                 app:layout_constraintStart_toStartOf="@id/rv_upper_tracks_result"
@@ -79,12 +100,22 @@
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/tv_downer_tracks" />
 
+            <TextView
+                android:id="@+id/tv_downer_tracks_nothing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="該当結果なし"
+                app:layout_constraintBottom_toBottomOf="@+id/rv_downer_tracks_result"
+                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_begin"
+                app:layout_constraintTop_toTopOf="@+id/rv_downer_tracks_result"
+                android:visibility="gone" />
             <ProgressBar
                 android:id="@+id/pb_downer_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:indeterminateTint="@android:color/holo_green_light"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/rv_downer_tracks_result"
                 app:layout_constraintEnd_toEndOf="@id/rv_downer_tracks_result"
                 app:layout_constraintStart_toStartOf="@id/rv_downer_tracks_result"

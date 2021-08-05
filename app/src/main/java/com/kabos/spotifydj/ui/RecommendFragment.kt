@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentRecommendBinding
+import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 
@@ -44,34 +47,43 @@ class RecommendFragment: Fragment() {
 
            button.setOnClickListener {
            }
-       }
 
-        viewModel.apply {
-            upperTrackList.observe(viewLifecycleOwner,{upperTrack ->
-                upperTrackAdapter.submitList(upperTrack)
-                //todo emptyなら動的にtextview作成したい
-            })
+           viewModel.apply {
+               upperTrackList.observe(viewLifecycleOwner,{upperTrackList ->
+                   upperTrackAdapter.submitList(upperTrackList)
+                   updateEmptyTextView(upperTrackList,tvUpperTracksNothing)
+               })
 
-            downerTrackList.observe(viewLifecycleOwner,{downerTrack ->
-                downerTrackAdapter.submitList(downerTrack)
-            })
+               downerTrackList.observe(viewLifecycleOwner,{downerTrackList ->
+                   downerTrackAdapter.submitList(downerTrackList)
+                   updateEmptyTextView(downerTrackList,tvUpperTracksNothing)
+               })
 
-            currentTrack.observe(viewLifecycleOwner,{currentTrack ->
-                //adapterがList<TrackInfo>で受け取るので、Listでラップする
-                val list = listOf(currentTrack)
-                currentTrackAdapter.submitList(list)
-            })
+               currentTrack.observe(viewLifecycleOwner,{currentTrack ->
+                   //adapterがList<TrackInfo>で受け取るので、Listでラップする
+                   val list = listOf(currentTrack)
+                   currentTrackAdapter.submitList(list)
+                   updateEmptyTextView(list, binding.tvCurrentTracksNothing)
+               })
 
-            isLoadingUpperTrack.observe(viewLifecycleOwner,{isLoading ->
-                if (isLoading) binding.pbUpperProgress.visibility = View.VISIBLE
-                else binding.pbUpperProgress.visibility = View.GONE
-            })
+               isLoadingUpperTrack.observe(viewLifecycleOwner,{isLoading ->
+                   updateProgressBar(isLoading,pbUpperProgress)
+               })
 
-            isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
-                if (isLoading) binding.pbDownerProgress.visibility = View.VISIBLE
-                else binding.pbDownerProgress.visibility = View.GONE
-            })
-
+               isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
+                   updateProgressBar(isLoading,pbDownerProgress)
+               })
+           }
         }
+    }
+
+    private fun updateEmptyTextView(item: List<TrackInfo?>?, textView: TextView){
+        if (item.isNullOrEmpty())textView.visibility = View.VISIBLE
+        else textView.visibility = View.GONE
+    }
+
+    private fun updateProgressBar(isLoading:Boolean, progressBar: ProgressBar){
+        if (isLoading)progressBar.visibility = View.VISIBLE
+        else progressBar.visibility = View.GONE
     }
 }
