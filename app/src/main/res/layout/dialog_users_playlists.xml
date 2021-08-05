@@ -8,6 +8,7 @@
         android:id="@+id/et_search_playlist"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:inputType="text"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
         app:layout_constraintTop_toTopOf="parent" />

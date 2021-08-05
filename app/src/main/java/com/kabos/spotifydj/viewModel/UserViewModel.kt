@@ -38,6 +38,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
 
+//    //TextView Flag
+//    val isDisplaySearchEmptyView = MutableLiveData(false)
+//    val isDisplayRecommendUpperEmptyView = MutableLiveData(false)
+//    val isDisplayRecommendDownerEmptyView = MutableLiveData(false)
+
+
 
 
 
@@ -68,6 +74,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun playbackTrack(trackInfo: TrackInfo){
 
     }
+
+
 
     /**
      * SearchFragmentの処理

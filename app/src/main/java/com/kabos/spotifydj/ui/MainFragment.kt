@@ -45,20 +45,22 @@ class MainFragment: Fragment() {
         }.attach()
 
         //currentTrackの変更を監視して、自動的にrecommendFragmentへ遷移
-        viewModel.isNavigateRecommendFragment.observe(viewLifecycleOwner,{ isNavigate ->
-            if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
-                viewPager.setCurrentItem(1,true)
-                viewModel.isNavigateRecommendFragment.postValue(false)
-            }
-        })
+        viewModel.apply {
+            isNavigateRecommendFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
+                    viewPager.setCurrentItem(1,true)
+                    viewModel.isNavigateRecommendFragment.postValue(false)
+                }
+            })
 
-        //playlistを監視して、playlistFragmentへ遷移
-        viewModel.isNavigatePlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
-            if (isNavigate) {
-                viewPager.setCurrentItem(2,true)
-                viewModel.isNavigatePlaylistFragment.postValue(false)
-            }
-        })
+            //playlistを監視して、playlistFragmentへ遷移
+            isNavigatePlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                if (isNavigate) {
+                    viewPager.setCurrentItem(2,true)
+                    viewModel.isNavigatePlaylistFragment.postValue(false)
+                }
+            })
+        }
 
     }
 

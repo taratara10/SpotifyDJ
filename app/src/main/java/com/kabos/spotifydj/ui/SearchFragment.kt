@@ -32,14 +32,11 @@ class SearchFragment: Fragment() {
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
                 viewModel.updateSearchedTracksResult(text.toString())
-
                 //empty viewを表示・非表示する処理
-                if (text.isNullOrEmpty()) {
+                if (text.isNullOrEmpty() && viewModel.searchTrackList.value.isNullOrEmpty()) {
                     tvEditTextIsEmpty.visibility = View.VISIBLE
-                    rvSearchTracksResult.visibility = View.GONE
                 } else {
                     tvEditTextIsEmpty.visibility = View.GONE
-                    rvSearchTracksResult.visibility = View.VISIBLE
                 }
             }
 
@@ -51,6 +48,7 @@ class SearchFragment: Fragment() {
 
         viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
             trackAdapter.submitList(searchResult)
+
             if (searchResult.isNullOrEmpty()){
                 binding.tvSearchItemNothing.visibility = View.VISIBLE
             }else{
