@@ -8,7 +8,6 @@ import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.SearchTracks
-import com.kabos.spotifydj.model.track.Tracks
 import retrofit2.Response
 import retrofit2.http.*
 

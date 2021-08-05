@@ -3,16 +3,11 @@ package com.kabos.spotifydj.repository
 import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
-import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
-import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
-import com.kabos.spotifydj.model.track.SearchTracks
 import com.kabos.spotifydj.model.track.TrackItems
-import com.kabos.spotifydj.model.track.Tracks
-import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -24,7 +19,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         val request = userService.getUsersProfile(generateBearer(accessToken))
         return if (request.isSuccessful) request.body()
         else{
-            Log.d("initializeUserId","failed")
+            Log.d("initializeUserId","${request.errorBody()?.string()}")
             null
         }
     }
@@ -35,38 +30,52 @@ class Repository @Inject constructor( private val userService: UserService) {
 //    suspend fun getRecentlyPlayed(accessToken: String): Response<RecentlyPlaylist> =
 //        userService.getRecentlyPlayed("Bearer $accessToken")
 //
-////    suspend fun playback(accessToken: String) {
-////        userService.playback("Bearer $accessToken",id)
-////    }
+//    suspend fun playback(accessToken: String) {
+//        userService.playback("Bearer $accessToken",id)
+//    }
 //
 //    suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
 //        userService.getCurrentPlayback("Bearer $accessToken")
 
 
-    suspend fun getTracksByKeyword(accessToken: String, keyword: String) : List<TrackItems>? {
+    suspend fun getTracksByKeyword(
+        accessToken: String,
+        keyword: String,
+        onFetchFailed: () -> Unit) : List<TrackItems>? {
         val request = userService.getTracksByKeyword(
-            accessToken= generateBearer(accessToken),
+            accessToken = generateBearer(accessToken),
             keyword = keyword,
             type = "album,track,artist"
         )
-        return if (request.isSuccessful) request.body()?.tracks?.items as List<TrackItems>
+
+        return if (request.isSuccessful){
+            request.body()?.tracks?.items as List<TrackItems>
+        }
         else {
-            Log.d("getTracksByKeyword","failed")
+            Log.d("getTracksByKeyword","${request.errorBody()?.string()}")
+            onFetchFailed()
             null
         }
     }
 
-    suspend fun getAudioFeaturesById(accessToken: String, id: String) : AudioFeature? {
+    suspend fun getAudioFeaturesById(
+        accessToken: String,
+        id: String,
+        onFetchFailed: () -> Unit) : AudioFeature? {
         val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
         return if (request.isSuccessful) request.body()
         else{
-            Log.d("getAudioFeature","getAudioFeature failed")
+            Log.d("getAudioFeature","${request.errorBody()?.string()}")
+            onFetchFailed()
             null
         }
     }
 
-    suspend fun getRecommendTracks(accessToken: String, trackInfo: TrackInfo, fetchUpperTrack: Boolean)
-        : List<TrackItems>? {
+    suspend fun getRecommendTracks(
+        accessToken: String,
+        trackInfo: TrackInfo,
+        fetchUpperTrack: Boolean,
+        onFetchFailed: () -> Unit) : List<TrackItems>? {
         val minTempoRate = 0.9
         val maxTempoRate = 1.1
         val minDanceabilityRate = 0.8
@@ -89,12 +98,16 @@ class Repository @Inject constructor( private val userService: UserService) {
 
         return if (request.isSuccessful) request.body()?.tracks
         else{
-            Log.d("getRecommendTracks","getRecommendTracks failed")
+            Log.d("getRecommendTracks","${request.errorBody()?.string()}")
+            onFetchFailed()
             return null
         }
     }
 
-    suspend fun createPlaylist(accessToken: String, userId: String, title: String): String {
+    suspend fun createPlaylist(
+        accessToken: String,
+        userId: String,
+        title: String): String {
        val request = userService.createPlaylist(
            accessToken = generateBearer(accessToken),
            userId = userId,
@@ -102,14 +115,21 @@ class Repository @Inject constructor( private val userService: UserService) {
        )
         return if(request.isSuccessful) request.body()?.id.toString()
         else {
-            Log.d("createPlaylist","failed")
+            Log.d("createPlaylist","${request.errorBody()?.string()}")
             ""
         }
     }
 
 
-    suspend fun getUsersAllPlaylist(accessToken: String): Response<Playlist> =
-        userService.getUsersAllPlaylists(generateBearer(accessToken))
+    suspend fun getUsersAllPlaylist(accessToken: String): List<PlaylistItem>? {
+        val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
+        return if (request.isSuccessful) request.body()?.items
+        else {
+            Log.d("getUserPlaylist","${request.errorBody()?.string()}")
+            listOf()
+        }
+
+    }
 
     suspend fun getPlaylistItemById(accessToken: String,playlistId: String):List<TrackItems>? {
         val request = userService.getPlaylistItemById(
@@ -121,7 +141,7 @@ class Repository @Inject constructor( private val userService: UserService) {
              val items:List<Item>? = request.body()?.items
              return items?.map { it.track }
         }else{
-             Log.d("getPlaylistItemById","search failed")
+             Log.d("getPlaylistItemById","${request.errorBody()?.string()}")
              return null
          }
     }
