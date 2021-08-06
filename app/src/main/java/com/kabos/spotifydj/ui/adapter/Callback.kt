@@ -9,7 +9,15 @@ interface AdapterCallback {
     fun onClick(trackInfo: TrackInfo)
 }
 
+//Dialog
 interface PlaylistCallback {
     fun onClick(playlistItem: PlaylistItem)
 }
 
+//Playlist Fragment
+interface DragTrackCallback {
+    fun onClick(trackInfo: TrackInfo)
+    fun playback(trackInfo: TrackInfo)
+    fun onSwiped(position: Int)
+    fun onDropped(initial:Int, final:Int, item: TrackInfo)
+}

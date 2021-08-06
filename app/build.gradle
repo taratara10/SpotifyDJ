@@ -86,4 +86,7 @@ dependencies {
 
     //viewPager2
     implementation "androidx.viewpager2:viewpager2:1.0.0"
+
+    //drag and drop recyclerView
+    implementation 'com.ernestoyaquello.dragdropswiperecyclerview:drag-drop-swipe-recyclerview:1.1.0'
 }

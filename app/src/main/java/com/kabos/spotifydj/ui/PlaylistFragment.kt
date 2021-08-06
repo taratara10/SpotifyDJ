@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
+import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 
@@ -18,7 +20,7 @@ class PlaylistFragment: Fragment() {
 
     private lateinit var binding: FragmentPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
-    private val trackAdapter by lazy { TrackAdapter(viewModel.callback) }
+    private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentPlaylistBinding.inflate(inflater, container, false)
@@ -31,7 +33,10 @@ class PlaylistFragment: Fragment() {
         binding.apply {
             rvPlaylist.apply {
                 layoutManager = LinearLayoutManager(activity)
-                adapter = trackAdapter
+                adapter = dragTackAdapter
+                dragListener = dragTackAdapter.onItemDragListener
+                swipeListener = dragTackAdapter.onItemSwipeListener
+                disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
 
@@ -47,9 +52,7 @@ class PlaylistFragment: Fragment() {
             }
 
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
-                trackAdapter.submitList(playlist)
-                //これしないとrecyclerViewが更新されない
-                trackAdapter.notifyDataSetChanged()
+                dragTackAdapter.submitList(playlist)
             })
         }
 

@@ -11,6 +11,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
+import com.kabos.spotifydj.ui.adapter.DragTrackCallback
 import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -61,6 +62,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         override fun onClick(trackInfo: TrackInfo) {
             updateCurrentTrack(trackInfo)
         }
+    }
+
+    val dragTrackCallback = object :DragTrackCallback{
+        override fun onClick(trackInfo: TrackInfo) {
+            TODO("Not yet implemented")
+        }
+
+        override fun playback(trackInfo: TrackInfo) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onSwiped(position: Int) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onDropped(initial: Int, final: Int, item: TrackInfo) {
+            TODO("Not yet implemented")
+        }
+
     }
 
     /**
