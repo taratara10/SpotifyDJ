@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
+import android.text.TextUtils.isEmpty
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
