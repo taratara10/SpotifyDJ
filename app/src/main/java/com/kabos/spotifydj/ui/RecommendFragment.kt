@@ -56,20 +56,20 @@ class RecommendFragment: Fragment() {
 
                downerTrackList.observe(viewLifecycleOwner,{downerTrackList ->
                    downerTrackAdapter.submitList(downerTrackList)
-                   updateEmptyTextView(downerTrackList,tvUpperTracksNothing)
+                   updateEmptyTextView(downerTrackList,tvDownerTracksNothing)
                })
 
                currentTrack.observe(viewLifecycleOwner,{currentTrack ->
                    //adapterがList<TrackInfo>で受け取るので、Listでラップする
                    val list = listOf(currentTrack)
                    currentTrackAdapter.submitList(list)
-                   updateEmptyTextView(list, binding.tvCurrentTracksNothing)
+                   updateEmptyTextView(list, binding.tvCurrentTracksEmpty)
+                   updateEmptyTextView(list,tvUpperTracksEmpty)
+                   updateEmptyTextView(list,tvDownerTracksEmpty)
                })
-
                isLoadingUpperTrack.observe(viewLifecycleOwner,{isLoading ->
                    updateProgressBar(isLoading,pbUpperProgress)
                })
-
                isLoadingDownerTrack.observe(viewLifecycleOwner,{isLoading ->
                    updateProgressBar(isLoading,pbDownerProgress)
                })

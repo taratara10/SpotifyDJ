@@ -15,6 +15,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+
+            <!--  Current Track  -->
             <TextView
                 android:id="@+id/tv_current_tracks"
                 android:layout_width="wrap_content"
@@ -24,7 +26,7 @@
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toTopOf="parent" />
             <TextView
-                android:id="@+id/tv_current_tracks_nothing"
+                android:id="@+id/tv_current_tracks_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="曲をタップして追加"
@@ -32,7 +34,7 @@
                 app:layout_constraintEnd_toEndOf="@+id/guideline_end"
                 app:layout_constraintStart_toStartOf="@id/guideline_begin"
                 app:layout_constraintTop_toTopOf="@+id/rv_current_tracks"
-                android:visibility="gone" />
+                android:visibility="visible" />
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_current_tracks"
                 android:layout_width="0dp"
@@ -42,6 +44,9 @@
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/tv_current_tracks" />
 
+
+
+        <!--    Upper Track        -->
             <TextView
                 android:id="@+id/tv_upper_tracks"
                 android:layout_width="wrap_content"
@@ -49,7 +54,6 @@
                 android:text="Upper Tracks"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@id/rv_current_tracks" />
-
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_upper_tracks_result"
@@ -71,6 +75,17 @@
                 app:layout_constraintTop_toTopOf="@+id/rv_upper_tracks_result"
                 android:visibility="gone" />
 
+            <TextView
+                android:id="@+id/tv_upper_tracks_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="関連する盛り上がる曲を探します"
+                app:layout_constraintBottom_toBottomOf="@+id/rv_upper_tracks_result"
+                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_begin"
+                app:layout_constraintTop_toTopOf="@+id/rv_upper_tracks_result"
+                android:visibility="visible" />
+
             <ProgressBar
                 android:id="@+id/pb_upper_progress"
                 android:layout_width="wrap_content"
@@ -82,6 +97,7 @@
                 app:layout_constraintStart_toStartOf="@id/rv_upper_tracks_result"
                 app:layout_constraintTop_toTopOf="@id/rv_upper_tracks_result" />
 
+        <!--    Downer        -->
             <TextView
                 android:id="@+id/tv_downer_tracks"
                 android:layout_width="wrap_content"
@@ -110,6 +126,17 @@
                 app:layout_constraintStart_toStartOf="@id/guideline_begin"
                 app:layout_constraintTop_toTopOf="@+id/rv_downer_tracks_result"
                 android:visibility="gone" />
+            <TextView
+                android:id="@+id/tv_downer_tracks_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="関連する落ち着いた曲を探します"
+                app:layout_constraintBottom_toBottomOf="@+id/rv_downer_tracks_result"
+                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_begin"
+                app:layout_constraintTop_toTopOf="@+id/rv_downer_tracks_result"
+                android:visibility="visible" />
+
             <ProgressBar
                 android:id="@+id/pb_downer_progress"
                 android:layout_width="wrap_content"
