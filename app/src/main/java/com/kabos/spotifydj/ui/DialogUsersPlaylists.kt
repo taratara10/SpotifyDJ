@@ -29,6 +29,7 @@ class DialogUsersPlaylists: DialogFragment() {
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
             viewModel.updatePlaylistItemByDialog(playlistItem.id)
+            viewModel.isNavigateSearchFragment.postValue(true)
             findNavController().popBackStack()
         }
     }

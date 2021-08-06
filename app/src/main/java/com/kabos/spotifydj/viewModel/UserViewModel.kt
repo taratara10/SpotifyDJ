@@ -36,6 +36,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isLoadingDownerTrack = MutableLiveData(false)
 
     //Navigate Flag
+    val isNavigateSearchFragment = MutableLiveData(false)
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
 
