@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
+    android:background="@color/blue_gray_50"
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
@@ -60,16 +61,16 @@
         android:layout_height="30dp"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_baseline_play_circle_outline_24"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_add_track"
-        app:layout_constraintEnd_toStartOf="@+id/iv_add_track"
-        app:layout_constraintTop_toTopOf="@+id/iv_add_track" />
+        app:layout_constraintBottom_toBottomOf="@+id/iv_drag_indicator"
+        app:layout_constraintEnd_toStartOf="@+id/iv_drag_indicator"
+        app:layout_constraintTop_toTopOf="@+id/iv_drag_indicator" />
 
     <ImageView
-        android:id="@+id/iv_add_track"
+        android:id="@+id/iv_drag_indicator"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_baseline_add_24"
+        android:src="@drawable/ic_baseline_drag_indicator_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

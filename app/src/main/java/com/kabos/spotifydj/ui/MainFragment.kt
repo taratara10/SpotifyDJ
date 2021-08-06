@@ -43,14 +43,24 @@ class MainFragment: Fragment() {
 
         //currentTrackの変更を監視して、自動的にrecommendFragmentへ遷移
         viewModel.apply {
+            isNavigateSearchFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                if (isNavigate){
+                    viewPager.setCurrentItem(0,true)
+                    viewModel.isNavigateSearchFragment.postValue(false)
+                }
+            })
+
             isNavigateRecommendFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                //viewModel#AddTrack() でisNavigatePlaylist(true)
+                //viewModel#updateCurrentTrack()でisNavigateRecommend(true)
+                //viewModel#AddTrack()の内部でupdateCurrentTrack()が呼ばれてrecommendが更新されてnavigateが競合する
+                //AddTrack()から呼ばれたupdateTrack()の場合は遷移しない。
                 if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
                     viewPager.setCurrentItem(1,true)
                     viewModel.isNavigateRecommendFragment.postValue(false)
                 }
             })
 
-            //playlistを監視して、playlistFragmentへ遷移
             isNavigatePlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
                 if (isNavigate) {
                     viewPager.setCurrentItem(2,true)

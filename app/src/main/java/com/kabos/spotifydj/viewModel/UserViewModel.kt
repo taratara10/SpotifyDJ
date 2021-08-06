@@ -11,6 +11,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
+import com.kabos.spotifydj.ui.adapter.DragTrackCallback
 import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -35,6 +36,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isLoadingDownerTrack = MutableLiveData(false)
 
     //Navigate Flag
+    val isNavigateSearchFragment = MutableLiveData(false)
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
 
@@ -61,6 +63,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         override fun onClick(trackInfo: TrackInfo) {
             updateCurrentTrack(trackInfo)
         }
+    }
+
+    val dragTrackCallback = object :DragTrackCallback{
+        override fun onClick(trackInfo: TrackInfo) {
+            updateCurrentTrack(trackInfo)
+        }
+
+        override fun playback(trackInfo: TrackInfo) {
+            playbackTrack(trackInfo)
+        }
+
+        override fun onSwiped(position: Int) {
+            removeTrackFromLocalPlaylist(position)
+        }
+
+        override fun onDropped(initial: Int, final: Int) {
+            changeTrackPositionInLocalPlaylist(initial,final)
+        }
+
     }
 
     /**
@@ -235,6 +256,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
+
+    //onSwipe callback
+    private fun removeTrackFromLocalPlaylist(position:Int){
+        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        playlist.removeAt(position)
+        currentPlaylist.postValue(playlist)
+    }
+
+    //onDrop callback
+    private fun changeTrackPositionInLocalPlaylist(initialPosition:Int, finalPosition:Int){
+        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        val item = playlist.removeAt(initialPosition)
+        playlist.add(finalPosition, item)
+        currentPlaylist.postValue(playlist)
+    }
+
+
 
     /**
      * Dialog Playlist
