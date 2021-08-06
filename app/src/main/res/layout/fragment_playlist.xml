@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/background_black"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <EditText
         android:id="@+id/et_playlist_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
         android:inputType="text"
         app:layout_constraintEnd_toStartOf="@+id/btn_save_playlist"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
@@ -26,7 +28,7 @@
         android:id="@+id/btn_add_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ADD"
+        android:text="保存する"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,7 +37,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:behind_swiped_item_icon="@drawable/ic_baseline_delete_24"
-        app:behind_swiped_item_bg_color="@android:color/holo_green_light"
+        app:behind_swiped_item_bg_color="@color/red_500"
+        app:behind_swiped_item_icon_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintHorizontal_bias="0.0"
