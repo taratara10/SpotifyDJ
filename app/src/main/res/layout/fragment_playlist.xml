@@ -34,6 +34,8 @@
         android:id="@+id/rv_playlist"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:behind_swiped_item_icon="@drawable/ic_baseline_delete_24"
+        app:behind_swiped_item_bg_color="@android:color/holo_green_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintHorizontal_bias="0.0"

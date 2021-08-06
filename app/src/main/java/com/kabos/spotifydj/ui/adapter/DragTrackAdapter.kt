@@ -16,11 +16,9 @@ class DragTrackAdapter(private val callback: DragTrackCallback, dataset: List<Tr
 
     val onItemDragListener = object :OnItemDragListener<TrackInfo>{
         override fun onItemDragged(previousPosition: Int, newPosition: Int, item: TrackInfo) {
-            TODO("Not yet implemented")
+            callback.onDropped(previousPosition,newPosition)
         }
-        override fun onItemDropped(initialPosition: Int, finalPosition: Int, item: TrackInfo) {
-            callback.onDropped(initialPosition, finalPosition, item)
-        }
+        override fun onItemDropped(initialPosition: Int, finalPosition: Int, item: TrackInfo) {  }
     }
 
     val onItemSwipeListener = object :OnItemSwipeListener<TrackInfo>{

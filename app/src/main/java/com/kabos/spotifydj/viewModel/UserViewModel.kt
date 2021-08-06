@@ -67,19 +67,19 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     val dragTrackCallback = object :DragTrackCallback{
         override fun onClick(trackInfo: TrackInfo) {
-            TODO("Not yet implemented")
+            updateCurrentTrack(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
-            TODO("Not yet implemented")
+            playbackTrack(trackInfo)
         }
 
         override fun onSwiped(position: Int) {
-            TODO("Not yet implemented")
+            removeTrackFromLocalPlaylist(position)
         }
 
-        override fun onDropped(initial: Int, final: Int, item: TrackInfo) {
-            TODO("Not yet implemented")
+        override fun onDropped(initial: Int, final: Int) {
+            changeTrackPositionInLocalPlaylist(initial,final)
         }
 
     }
@@ -256,6 +256,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
+
+    //onSwipe callback
+    private fun removeTrackFromLocalPlaylist(position:Int){
+        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        playlist.removeAt(position)
+        currentPlaylist.postValue(playlist)
+    }
+
+    //onDrop callback
+    private fun changeTrackPositionInLocalPlaylist(initialPosition:Int, finalPosition:Int){
+        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        val item = playlist.removeAt(initialPosition)
+        playlist.add(finalPosition, item)
+        currentPlaylist.postValue(playlist)
+    }
+
+
 
     /**
      * Dialog Playlist
