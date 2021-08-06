@@ -53,6 +53,8 @@ class PlaylistFragment: Fragment() {
 
             viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
                 dragTackAdapter.submitList(playlist)
+                if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
+                else tvPlaylistEmpty.visibility = View.GONE
             })
         }
 
