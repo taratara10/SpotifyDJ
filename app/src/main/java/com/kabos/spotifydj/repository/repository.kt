@@ -5,6 +5,8 @@ import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.CurrentPlayback
+import com.kabos.spotifydj.model.playback.Device
+import com.kabos.spotifydj.model.playback.Devices
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -36,10 +38,10 @@ class Repository @Inject constructor( private val userService: UserService) {
 //        userService.playback("Bearer $accessToken",id)
 //    }
 //
-    suspend fun getCurrentPlayback(accessToken: String): CurrentPlayback? {
-        val request = userService.getCurrentPlayback(generateBearer(accessToken))
+    suspend fun getUsersDevices(accessToken: String): List<Device>? {
+        val request = userService.getUsersDevices(generateBearer(accessToken))
         return if (request.isSuccessful){
-            request.body()
+            request.body()?.devices
         }else{
             Log.d("getCurrentPlayback","${request.errorBody()?.string()}")
             null

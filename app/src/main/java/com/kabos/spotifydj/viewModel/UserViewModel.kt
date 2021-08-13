@@ -302,9 +302,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * Playback
      * */
 
-    fun getCurrentPlayback() = viewModelScope.launch {
-        val currentPlayback = repository.getCurrentPlayback(mAccessToken)
-        mDeviceId = currentPlayback?.device?.id.toString()
-        Log.d("currentPlayback","$mDeviceId")
+    fun getUsesDevices() = viewModelScope.launch {
+        val usersDevices = repository.getUsersDevices(mAccessToken)
+        mDeviceId = usersDevices?.get(0)?.id.toString()
+
+        //isActiveを探す→無ければintentでSpotify開く
+        //同時にcontext uriも送る　deviceIdなしで送れる...?
+        //size == 0なら自動でそれ選択しよう
+        //type == smartPhone > 1なら 「このアプリで再生dialog 」
+
+
+        Log.d("currentPlayback","$usersDevices")
     }
 }

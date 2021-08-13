@@ -4,6 +4,7 @@ import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.CurrentPlayback
+import com.kabos.spotifydj.model.playback.Devices
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
@@ -20,10 +21,10 @@ interface UserService {
     /**
      * Player
      * */
-    @GET("me/player")
-    suspend fun getCurrentPlayback(
+    @GET("me/player/devices")
+    suspend fun getUsersDevices (
         @Header("Authorization")accessToken: String
-    ): Response<CurrentPlayback>
+    ): Response<Devices>
 
     @PUT("me/player/play")
     suspend fun playback(
