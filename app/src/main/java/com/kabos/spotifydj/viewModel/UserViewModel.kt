@@ -21,6 +21,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
+    var mDeviceId = ""
     private var mUserId = ""
     var currentPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
@@ -296,4 +297,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
+
+    /**
+     * Playback
+     * */
+
+    fun getCurrentPlayback() = viewModelScope.launch {
+        val currentPlayback = repository.getCurrentPlayback(mAccessToken)
+        mDeviceId = currentPlayback?.device?.id.toString()
+        Log.d("currentPlayback","$mDeviceId")
+    }
 }

@@ -4,10 +4,12 @@ import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.CurrentPlayback
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
+import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -34,9 +36,19 @@ class Repository @Inject constructor( private val userService: UserService) {
 //        userService.playback("Bearer $accessToken",id)
 //    }
 //
-//    suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
-//        userService.getCurrentPlayback("Bearer $accessToken")
+    suspend fun getCurrentPlayback(accessToken: String): CurrentPlayback? {
+        val request = userService.getCurrentPlayback(generateBearer(accessToken))
+        return if (request.isSuccessful){
+            request.body()
+        }else{
+            Log.d("getCurrentPlayback","${request.errorBody()?.string()}")
+            null
+        }
+    }
 
+    /**
+     * Search
+     * */
 
     suspend fun getTracksByKeyword(
         accessToken: String,
@@ -104,6 +116,10 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
+
+    /**
+     * Playlist
+     * */
     suspend fun createPlaylist(
         accessToken: String,
         userId: String,

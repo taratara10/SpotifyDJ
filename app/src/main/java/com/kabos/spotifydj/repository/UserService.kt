@@ -3,6 +3,7 @@ package com.kabos.spotifydj.repository
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.CurrentPlayback
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
@@ -16,12 +17,13 @@ interface UserService {
     suspend fun getUsersProfile(@Header("Authorization") accessToken: String):Response<User>
 
 
-//
-//    @GET("me/player/recently-played")
-//    suspend fun getRecentlyPlayed(@Header("Authorization")accessToken: String): Response<RecentlyPlaylist>
-//
-//    @GET("me/player/devices")
-//    suspend fun getCurrentPlayback(@Header("Authorization")accessToken: String): Response<Devices>
+    /**
+     * Player
+     * */
+    @GET("me/player")
+    suspend fun getCurrentPlayback(
+        @Header("Authorization")accessToken: String
+    ): Response<CurrentPlayback>
 
     @PUT("me/player/play")
     suspend fun playback(
@@ -30,7 +32,9 @@ interface UserService {
         @Body body:Playback
     )
 
-
+    /**
+     *  Search
+     * */
     @GET("search")
     suspend fun getTracksByKeyword(
         @Header("Authorization")accessToken: String,
@@ -56,10 +60,11 @@ interface UserService {
         @Query("max_energy") maxEnergy: Double,
     ):Response<RecommendTracks>
 
+
+
     /**
      *  playlist
      * */
-
     @GET("me/playlists")
     suspend fun getUsersAllPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
 
