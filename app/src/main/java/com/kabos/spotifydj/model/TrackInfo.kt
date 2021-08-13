@@ -2,7 +2,7 @@ package com.kabos.spotifydj.model
 
 data class TrackInfo(
    val id: String,
-   val uri: String,
+   val contextUri: String,
    val name: String,
    val artist: String,
    val imageUrl: String,

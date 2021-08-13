@@ -93,12 +93,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun playbackTrack(trackInfo: TrackInfo){
-
-    }
-
-
-
     /**
      * SearchFragmentの処理
      * */
@@ -150,7 +144,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         return if (trackItems != null && audioFeature != null) {
             TrackInfo(
                 id = trackItems.id,
-                uri= trackItems.uri,
+                contextUri = audioFeature.uri,
                 name = trackItems.name,
                 artist = trackItems.artists[0].name,
                 imageUrl = trackItems.album.images[0].url,
@@ -252,7 +246,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     fun postItemToPlaylist() = viewModelScope.launch {
         if (currentPlaylist.value == null) return@launch
-        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.uri }!!)
+        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.contextUri }!!)
         repository.addItemToPlaylist(mAccessToken, currentPlaylistId,body)
 
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
@@ -302,7 +296,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * Playback
      * */
 
-    fun getUsesDevices() = viewModelScope.launch {
+    fun getUsersDevices() = runBlocking {
         val usersDevices = repository.getUsersDevices(mAccessToken)
         mDeviceId = usersDevices?.get(0)?.id.toString()
 
@@ -313,5 +307,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
 
         Log.d("currentPlayback","$usersDevices")
+    }
+
+    fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch{
+
+        if (mDeviceId == "") getUsersDevices()
+
+        repository.playbackTrack(mAccessToken,mDeviceId,trackInfo.contextUri)
+        Log.d("playbackTrack","launch")
+
     }
 }

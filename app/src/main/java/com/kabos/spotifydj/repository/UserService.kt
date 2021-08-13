@@ -3,8 +3,8 @@ package com.kabos.spotifydj.repository
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
-import com.kabos.spotifydj.model.playback.CurrentPlayback
 import com.kabos.spotifydj.model.playback.Devices
+import com.kabos.spotifydj.model.playback.PlaybackBody
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
@@ -29,8 +29,8 @@ interface UserService {
     @PUT("me/player/play")
     suspend fun playback(
         @Header("Authorization")accessToken: String,
-        @Query("device_id")id: String,
-        @Body body:Playback
+        @Query("device_id")deviceId: String,
+        @Body body: PlaybackBody
     )
 
     /**
