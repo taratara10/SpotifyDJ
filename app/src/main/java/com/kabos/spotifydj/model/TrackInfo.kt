@@ -8,5 +8,6 @@ data class TrackInfo(
    val imageUrl: String,
    val tempo: Double,
    val danceability: Double,
-   val energy: Double
+   val energy: Double,
+   var isPlayback: Boolean = false
 )

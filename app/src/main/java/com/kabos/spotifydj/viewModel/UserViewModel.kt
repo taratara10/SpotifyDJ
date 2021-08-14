@@ -29,8 +29,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
-    val currentTrack = MutableLiveData<TrackInfo?>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+    val currentTrack = MutableLiveData<TrackInfo?>()
 
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
@@ -315,11 +315,39 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
     fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch{
-
         if (mDeviceId == "") getUsersDevices()
 
         repository.playbackTrack(mAccessToken,mDeviceId,trackInfo.contextUri)
+        togglePlaybackIcon(trackInfo)
         Log.d("playbackTrack","${trackInfo.contextUri}")
 
+    }
+
+    private fun togglePlaybackIcon(trackInfo: TrackInfo){
+        replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,currentPlaylist as MutableLiveData<List<TrackInfo>?>)
+
+        //currentTrackはListじゃないので別処理
+        if(currentTrack.value == trackInfo){
+            trackInfo.isPlayback = !trackInfo.isPlayback
+            currentTrack.postValue(trackInfo)
+        }
+    }
+
+    private fun replaceTrackToPlaybackTrack(trackInfo: TrackInfo,trackList:MutableLiveData<List<TrackInfo>?>){
+        if(trackList.value == null) return
+
+        val list = trackList.value!!.toMutableList()
+        //要素が無ければreturn -1
+        val index = list.indexOf(trackInfo)
+        if (index != -1) {
+            //reverse isPlayback status
+            trackInfo.isPlayback = !trackInfo.isPlayback
+            list[index] = trackInfo
+            trackList.postValue(list)
+            Log.d("replaceTrack","Sucess Toggle $trackInfo")
+        }
     }
 }
