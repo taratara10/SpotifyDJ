@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
@@ -296,9 +297,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * Playback
      * */
 
-    fun getUsersDevices() = runBlocking {
-        val usersDevices = repository.getUsersDevices(mAccessToken)
-        mDeviceId = usersDevices?.get(0)?.id.toString()
+    fun getUsersDevices() = viewModelScope.launch {
+        val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
+        if (usersDevices != null){
+            mDeviceId = usersDevices.find { it.is_active }?.id.toString()
+        }else{
+            Log.d("fetUsersDevice","No active device. $usersDevices")
+        }
 
         //isActiveを探す→無ければintentでSpotify開く
         //同時にcontext uriも送る　deviceIdなしで送れる...?
@@ -314,7 +319,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (mDeviceId == "") getUsersDevices()
 
         repository.playbackTrack(mAccessToken,mDeviceId,trackInfo.contextUri)
-        Log.d("playbackTrack","launch")
+        Log.d("playbackTrack","${trackInfo.contextUri}")
 
     }
 }

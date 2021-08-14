@@ -39,11 +39,16 @@ class Repository @Inject constructor( private val userService: UserService) {
         accessToken: String,
         deviceId: String,
         contextUri: String) {
-        userService.playback(
-            accessToken = generateBearer(accessToken),
-            deviceId= deviceId,
-            body = PlaybackBody(context_uri = contextUri)
+        try {
+            userService.playback(
+                accessToken = generateBearer(accessToken),
+                deviceId= deviceId,
+                body = PlaybackBody(uris = listOf(contextUri))
             )
+        }catch (e:Exception){
+            Log.d("playbackTrack","failed. $e")
+        }
+
         //todo 必要に応じて、errorHandleのコード書く
     }
 

@@ -78,7 +78,7 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                viewModel.getUsesDevices()
+                viewModel.getUsersDevices()
                 Log.d("aaaaaaaaaaaaaa","${viewModel.mDeviceId}")
 
                 true
