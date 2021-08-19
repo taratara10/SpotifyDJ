@@ -299,10 +299,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun getUsersDevices() = viewModelScope.launch {
         val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
+        Log.d("deviceId","$usersDevices")
         if (usersDevices != null){
             mDeviceId = usersDevices.find { it.is_active }?.id.toString()
         }else{
-            Log.d("fetUsersDevice","No active device. $usersDevices")
+            Log.d("fethUsersDevice","No active device. $usersDevices")
         }
 
         //isActiveを探す→無ければintentでSpotify開く
@@ -323,6 +324,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     }
 
+
+    //▶の再生アイコンを切り替える
     private fun togglePlaybackIcon(trackInfo: TrackInfo){
         replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
         replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
@@ -335,6 +338,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             currentTrack.postValue(trackInfo)
         }
     }
+
 
     private fun replaceTrackToPlaybackTrack(trackInfo: TrackInfo,trackList:MutableLiveData<List<TrackInfo>?>){
         if(trackList.value == null) return

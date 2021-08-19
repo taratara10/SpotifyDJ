@@ -79,7 +79,7 @@ class MainFragment: Fragment() {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
                 viewModel.getUsersDevices()
-                Log.d("aaaaaaaaaaaaaa","${viewModel.mDeviceId}")
+                Log.d("mDevideId","${viewModel.mDeviceId}")
 
                 true
             }

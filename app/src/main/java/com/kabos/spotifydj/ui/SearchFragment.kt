@@ -45,22 +45,26 @@ class SearchFragment: Fragment() {
                 layoutManager = LinearLayoutManager(activity)
                 adapter = trackAdapter
             }
+
+
+            viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
+                trackAdapter.submitList(searchResult)
+
+                if (searchResult.isNullOrEmpty()){
+                    tvSearchItemNothing.visibility = View.VISIBLE
+                }else{
+                    tvSearchItemNothing.visibility = View.GONE
+                    tvEditTextIsEmpty.visibility = View.GONE
+                }
+            })
+
+            viewModel.isLoadingSearchTrack.observe(viewLifecycleOwner,{isLoading ->
+                if (isLoading) pbSearchProgress.visibility = View.VISIBLE
+                else pbSearchProgress.visibility = View.GONE
+            })
+
+
         }
-
-        viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
-            trackAdapter.submitList(searchResult)
-
-            if (searchResult.isNullOrEmpty()){
-                binding.tvSearchItemNothing.visibility = View.VISIBLE
-            }else{
-                binding.tvSearchItemNothing.visibility = View.GONE
-            }
-        })
-
-        viewModel.isLoadingSearchTrack.observe(viewLifecycleOwner,{isLoading ->
-            if (isLoading)binding.pbSearchProgress.visibility = View.VISIBLE
-                else binding.pbSearchProgress.visibility = View.GONE
-        })
 
 
 
