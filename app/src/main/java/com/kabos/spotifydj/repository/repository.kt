@@ -20,6 +20,8 @@ class Repository @Inject constructor( private val userService: UserService) {
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
 
+
+
     suspend fun getUsersProfile(accessToken: String): User? {
         val request = userService.getUsersProfile(generateBearer(accessToken))
         return if (request.isSuccessful) request.body()
@@ -28,13 +30,10 @@ class Repository @Inject constructor( private val userService: UserService) {
             null
         }
     }
-//
-//    suspend fun getPlaylist(accessToken: String): Response<Playlist> =
-//        userService.getCurrentPlaylist("Bearer $accessToken")
-//
-//    suspend fun getRecentlyPlayed(accessToken: String): Response<RecentlyPlaylist> =
-//        userService.getRecentlyPlayed("Bearer $accessToken")
-//
+
+    /**
+     * Player
+     * */
     suspend fun playbackTrack(
         accessToken: String,
         deviceId: String,
@@ -44,12 +43,23 @@ class Repository @Inject constructor( private val userService: UserService) {
                 accessToken = generateBearer(accessToken),
                 deviceId= deviceId,
                 body = PlaybackBody(uris = listOf(contextUri))
-            )
+                )
         }catch (e:Exception){
             Log.d("playbackTrack","failed. $e")
         }
 
         //todo 必要に応じて、errorHandleのコード書く
+    }
+
+    suspend fun pausePlayback(accessToken: String,deviceId: String){
+        try {
+            userService.pausePlayback(
+                accessToken = generateBearer(accessToken),
+                deviceId= deviceId
+            )
+        }catch (e:Exception){
+            Log.d("pausePlaybackTrack","failed. $e")
+        }
     }
 
     suspend fun getUsersDevices(accessToken: String): List<Device>? {

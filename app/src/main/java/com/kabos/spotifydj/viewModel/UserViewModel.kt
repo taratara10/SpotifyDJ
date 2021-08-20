@@ -319,10 +319,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch{
         if (mDeviceId == "") getUsersDevices()
 
-        repository.playbackTrack(mAccessToken,mDeviceId,trackInfo.contextUri)
+        //isPlaybackによって、再生、停止を行う
+        if (trackInfo.isPlayback){
+            repository.pausePlayback(mAccessToken,mDeviceId)
+        }else {
+            repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
+        }
         togglePlaybackIcon(trackInfo)
-        Log.d("playbackTrack","${trackInfo.contextUri}")
-
     }
 
 

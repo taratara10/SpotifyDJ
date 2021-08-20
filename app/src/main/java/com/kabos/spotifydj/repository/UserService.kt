@@ -33,6 +33,13 @@ interface UserService {
         @Body body: PlaybackBody
     )
 
+    @PUT("me/player/pause")
+    suspend fun pausePlayback(
+        @Header("Authorization")accessToken: String,
+        @Query("device_id")deviceId: String,
+    )
+
+
     /**
      *  Search
      * */
