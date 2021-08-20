@@ -2,6 +2,7 @@ package com.kabos.spotifydj.ui
 
 import android.os.Bundle
 import android.text.TextUtils.isEmpty
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,9 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SearchFragment: Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
@@ -48,6 +51,7 @@ class SearchFragment: Fragment() {
 
 
             viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
+                Log.d("searchResult","update!!!!!!!!!")
                 trackAdapter.submitList(searchResult)
 
                 if (searchResult.isNullOrEmpty()){

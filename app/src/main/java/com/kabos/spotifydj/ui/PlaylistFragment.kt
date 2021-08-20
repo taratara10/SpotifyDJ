@@ -11,7 +11,9 @@ import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PlaylistFragment: Fragment() {
 
     private lateinit var binding: FragmentPlaylistBinding

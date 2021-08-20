@@ -15,7 +15,9 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentMainBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainFragment: Fragment() {
 
     private lateinit var binding: FragmentMainBinding
@@ -69,17 +71,16 @@ class MainFragment: Fragment() {
             })
         }
 
-        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-            .getString("token", "No token").toString()
-        viewModel.initializeAccessToken(accessToken)
+//        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
+//            .getString("token", "No token").toString()
+//        viewModel.initializeAccessToken(accessToken)
 
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                viewModel.getUsersDevices()
-                Log.d("mDevideId","${viewModel.mDeviceId}")
+                Log.d("mAccessTolen","${viewModel.mAccessToken}")
 
                 true
             }
@@ -91,6 +92,14 @@ class MainFragment: Fragment() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-}
 
+    override fun onStart() {
+        super.onStart()
+        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
+            .getString("token", "No token").toString()
+        viewModel.initializeAccessToken(accessToken)
+        Log.d("MainFragment","onStartCalled")
+    }
+
+}
 

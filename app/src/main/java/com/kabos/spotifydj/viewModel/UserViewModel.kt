@@ -301,7 +301,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
         Log.d("deviceId","$usersDevices")
         if (usersDevices != null){
-            mDeviceId = usersDevices.find { it.is_active }?.id.toString()
+//          mDeviceId = usersDevices.find { it.is_active }?.id.toString()
+            mDeviceId = usersDevices.first().id
         }else{
             Log.d("fethUsersDevice","No active device. $usersDevices")
         }
@@ -344,14 +345,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if(trackList.value == null) return
 
         val list = trackList.value!!.toMutableList()
-        //要素が無ければreturn -1
-        val index = list.indexOf(trackInfo)
-        if (index != -1) {
-            //reverse isPlayback status
-            trackInfo.isPlayback = !trackInfo.isPlayback
-            list[index] = trackInfo
-            trackList.postValue(list)
-            Log.d("replaceTrack","Sucess Toggle $trackInfo")
+
+        for (item in list){
+            //他の再生中アイコンをリセット
+            if (item.isPlayback) item.isPlayback = false
+            //再生したいTrackがあれば変更
+            //todo stop/resumeの実装
+            if (item == trackInfo) item.isPlayback = true
         }
+        trackList.value = list
+
     }
 }

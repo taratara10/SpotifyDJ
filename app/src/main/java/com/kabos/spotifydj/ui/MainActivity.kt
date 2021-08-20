@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import androidx.activity.viewModels
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
 
+    private val viewModel: UserViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,10 +38,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun authorizationSpotify() {
+        //todo refreshのタイミングがよくわからない
         val accessToken = getSharedPreferences("SPOTIFY", 0)
             .getString("token", "No token").toString()
-        //todo 　refreshのタイミングがよくわからない　
-//        if (accessToken != "No Token") return
+        if (accessToken != "No Token") {
+            viewModel.initializeAccessToken(accessToken)
+            return
+        }
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(SCOPE)
             .build()
@@ -57,6 +63,8 @@ class MainActivity : AppCompatActivity() {
                     getSharedPreferences("SPOTIFY", 0).edit()
                         .putString("token", response.accessToken)
                         .apply()
+                    //以降accessTokenはviewModelのmAccessTokenを介して使う
+                    viewModel.initializeAccessToken(response.accessToken)
                     Log.d("STARTING", "GOT AUTH TOKEN")
                 }
 
