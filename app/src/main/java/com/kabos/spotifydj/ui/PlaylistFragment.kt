@@ -12,6 +12,8 @@ import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.*
 
 @AndroidEntryPoint
 class PlaylistFragment: Fragment() {
@@ -37,6 +39,24 @@ class PlaylistFragment: Fragment() {
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
+            val date = Calendar.getInstance().time
+            val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
+            etPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
+
+
+            viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
+                dragTackAdapter.submitList(playlist)
+                if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
+                else tvPlaylistEmpty.visibility = View.GONE
+            })
+
+
+
+
+
+
+
+
 
             //todo 消す
             btnSavePlaylist.setOnClickListener {
@@ -48,12 +68,6 @@ class PlaylistFragment: Fragment() {
             btnAddPlaylist.setOnClickListener {
                 viewModel.postItemToPlaylist()
             }
-
-            viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
-                dragTackAdapter.submitList(playlist)
-                if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
-                else tvPlaylistEmpty.visibility = View.GONE
-            })
         }
 
 
