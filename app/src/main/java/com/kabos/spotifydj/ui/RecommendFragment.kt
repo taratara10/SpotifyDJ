@@ -13,7 +13,9 @@ import com.kabos.spotifydj.databinding.FragmentRecommendBinding
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class RecommendFragment: Fragment() {
 
     private lateinit var binding: FragmentRecommendBinding

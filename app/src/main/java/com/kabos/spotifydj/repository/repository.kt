@@ -4,16 +4,23 @@ import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.CurrentPlayback
+import com.kabos.spotifydj.model.playback.Device
+import com.kabos.spotifydj.model.playback.Devices
+import com.kabos.spotifydj.model.playback.PlaybackBody
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
+import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
 
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
+
+
 
     suspend fun getUsersProfile(accessToken: String): User? {
         val request = userService.getUsersProfile(generateBearer(accessToken))
@@ -23,20 +30,51 @@ class Repository @Inject constructor( private val userService: UserService) {
             null
         }
     }
-//
-//    suspend fun getPlaylist(accessToken: String): Response<Playlist> =
-//        userService.getCurrentPlaylist("Bearer $accessToken")
-//
-//    suspend fun getRecentlyPlayed(accessToken: String): Response<RecentlyPlaylist> =
-//        userService.getRecentlyPlayed("Bearer $accessToken")
-//
-//    suspend fun playback(accessToken: String) {
-//        userService.playback("Bearer $accessToken",id)
-//    }
-//
-//    suspend fun getCurrentPlayback(accessToken: String): Response<Devices> =
-//        userService.getCurrentPlayback("Bearer $accessToken")
 
+    /**
+     * Player
+     * */
+    suspend fun playbackTrack(
+        accessToken: String,
+        deviceId: String,
+        contextUri: String) {
+        try {
+            userService.playback(
+                accessToken = generateBearer(accessToken),
+                deviceId= deviceId,
+                body = PlaybackBody(uris = listOf(contextUri))
+                )
+        }catch (e:Exception){
+            Log.d("playbackTrack","failed. $e")
+        }
+
+        //todo 必要に応じて、errorHandleのコード書く
+    }
+
+    suspend fun pausePlayback(accessToken: String,deviceId: String){
+        try {
+            userService.pausePlayback(
+                accessToken = generateBearer(accessToken),
+                deviceId= deviceId
+            )
+        }catch (e:Exception){
+            Log.d("pausePlaybackTrack","failed. $e")
+        }
+    }
+
+    suspend fun getUsersDevices(accessToken: String): List<Device>? {
+        val request = userService.getUsersDevices(generateBearer(accessToken))
+        return if (request.isSuccessful){
+            request.body()?.devices
+        }else{
+            Log.d("getCurrentPlayback","${request.errorBody()?.string()}")
+            null
+        }
+    }
+
+    /**
+     * Search
+     * */
 
     suspend fun getTracksByKeyword(
         accessToken: String,
@@ -104,6 +142,10 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
+
+    /**
+     * Playlist
+     * */
     suspend fun createPlaylist(
         accessToken: String,
         userId: String,

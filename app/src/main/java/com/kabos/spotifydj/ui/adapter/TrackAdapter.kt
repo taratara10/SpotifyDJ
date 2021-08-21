@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +34,14 @@ class TrackViewHolder(private val binding: AdapterTrackBinding)
                 .load(item.imageUrl)
                 .into(ivTrackImage)
 
+            if (item.isPlayback) {
+                ivPlaybackPause.visibility = View.VISIBLE
+                ivPlayback.visibility = View.GONE
+            }else {
+                ivPlaybackPause.visibility = View.GONE
+                ivPlayback.visibility = View.VISIBLE
+            }
+
             ivPlayback.setOnClickListener {
                 callback.playback(item)
             }
@@ -54,7 +63,7 @@ private object DiffCallback: DiffUtil.ItemCallback<TrackInfo>(){
     }
 
     override fun areContentsTheSame(oldItem: TrackInfo, newItem: TrackInfo): Boolean {
-        return oldItem == newItem
+        return oldItem.isPlayback == newItem.isPlayback
     }
 
 }

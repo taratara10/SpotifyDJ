@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
@@ -21,14 +22,15 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     var mAccessToken = ""
+    var mDeviceId = ""
     private var mUserId = ""
     var currentPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
-    val currentTrack = MutableLiveData<TrackInfo?>()
     val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+    val currentTrack = MutableLiveData<TrackInfo?>()
 
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
@@ -92,12 +94,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun playbackTrack(trackInfo: TrackInfo){
-
-    }
-
-
-
     /**
      * SearchFragmentの処理
      * */
@@ -149,7 +145,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         return if (trackItems != null && audioFeature != null) {
             TrackInfo(
                 id = trackItems.id,
-                uri= trackItems.uri,
+                contextUri = audioFeature.uri,
                 name = trackItems.name,
                 artist = trackItems.artists[0].name,
                 imageUrl = trackItems.album.images[0].url,
@@ -251,7 +247,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     fun postItemToPlaylist() = viewModelScope.launch {
         if (currentPlaylist.value == null) return@launch
-        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.uri }!!)
+        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.contextUri }!!)
         repository.addItemToPlaylist(mAccessToken, currentPlaylistId,body)
 
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
@@ -296,4 +292,71 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
+
+    /**
+     * Playback
+     * */
+
+    fun getUsersDevices() = viewModelScope.launch {
+        val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
+        Log.d("deviceId","$usersDevices")
+        if (usersDevices != null){
+//          mDeviceId = usersDevices.find { it.is_active }?.id.toString()
+            mDeviceId = usersDevices.first().id
+        }else{
+            Log.d("fethUsersDevice","No active device. $usersDevices")
+        }
+
+        //isActiveを探す→無ければintentでSpotify開く
+        //同時にcontext uriも送る　deviceIdなしで送れる...?
+        //size == 0なら自動でそれ選択しよう
+        //type == smartPhone > 1なら 「このアプリで再生dialog 」
+
+
+        Log.d("currentPlayback","$usersDevices")
+    }
+
+    fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch{
+        if (mDeviceId == "") getUsersDevices()
+
+        //isPlaybackによって、再生、停止を行う
+        if (trackInfo.isPlayback){
+            repository.pausePlayback(mAccessToken,mDeviceId)
+        }else {
+            repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
+        }
+        togglePlaybackIcon(trackInfo)
+    }
+
+
+    //▶の再生アイコンを切り替える
+    private fun togglePlaybackIcon(trackInfo: TrackInfo){
+        replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
+        replaceTrackToPlaybackTrack(trackInfo,currentPlaylist as MutableLiveData<List<TrackInfo>?>)
+
+        //currentTrackはListじゃないので別処理
+        if(currentTrack.value == trackInfo){
+            trackInfo.isPlayback = !trackInfo.isPlayback
+            currentTrack.postValue(trackInfo)
+        }
+    }
+
+
+    private fun replaceTrackToPlaybackTrack(trackInfo: TrackInfo,trackList:MutableLiveData<List<TrackInfo>?>){
+        if(trackList.value == null) return
+
+        val list = trackList.value!!.toMutableList()
+
+        for (item in list){
+            //他の再生中アイコンをリセット
+            if (item.isPlayback) item.isPlayback = false
+            //再生したいTrackがあれば変更
+            //todo stop/resumeの実装
+            if (item == trackInfo) item.isPlayback = true
+        }
+        trackList.value = list
+
+    }
 }
