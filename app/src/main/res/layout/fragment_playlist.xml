@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toStartOf="@+id/btn_add_playlist"
+        app:layout_constraintEnd_toStartOf="@+id/btn_save_playlist"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -28,7 +28,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/btn_save_playlist"
+        android:id="@+id/btn_edit_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="既存のプレイリストを編集する"
@@ -38,7 +38,7 @@
         app:layout_constraintTop_toTopOf="@+id/rv_playlist" />
 
     <Button
-        android:id="@+id/btn_add_playlist"
+        android:id="@+id/btn_save_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="保存する"

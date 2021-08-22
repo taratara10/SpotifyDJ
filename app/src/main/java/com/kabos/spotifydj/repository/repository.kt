@@ -4,15 +4,13 @@ import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.Item
 import com.kabos.spotifydj.model.feature.AudioFeature
-import com.kabos.spotifydj.model.playback.CurrentPlayback
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.playback.Devices
-import com.kabos.spotifydj.model.playback.PlaybackBody
-import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
+import com.kabos.spotifydj.model.requestBody.PlaybackBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.model.requestBody.AddTracksBody
+import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
-import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -146,22 +144,6 @@ class Repository @Inject constructor( private val userService: UserService) {
     /**
      * Playlist
      * */
-    suspend fun createPlaylist(
-        accessToken: String,
-        userId: String,
-        title: String): String {
-       val request = userService.createPlaylist(
-           accessToken = generateBearer(accessToken),
-           userId = userId,
-           body = CreatePlaylistBody(name = title)
-       )
-        return if(request.isSuccessful) request.body()?.id.toString()
-        else {
-            Log.d("createPlaylist","${request.errorBody()?.string()}")
-            ""
-        }
-    }
-
 
     suspend fun getUsersAllPlaylist(accessToken: String): List<PlaylistItem>? {
         val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
@@ -188,9 +170,34 @@ class Repository @Inject constructor( private val userService: UserService) {
          }
     }
 
+    suspend fun createPlaylist(
+        accessToken: String,
+        userId: String,
+        title: String): String {
+        val request = userService.createPlaylist(
+            accessToken = generateBearer(accessToken),
+            userId = userId,
+            body = CreatePlaylistBody(name = title)
+        )
+        return if(request.isSuccessful) request.body()?.id.toString()
+        else {
+            Log.d("createPlaylist","${request.errorBody()?.string()}")
+            ""
+        }
+    }
 
-    suspend fun addItemToPlaylist(accessToken: String,playlistId: String, body: AddItemToPlaylistBody) {
-        userService.addItemsToPlaylist(
+    //todo error handle
+    suspend fun addTracksToPlaylist(accessToken: String,playlistId: String, body: AddTracksBody) {
+        userService.addTracksToPlaylist(
+            accessToken = generateBearer(accessToken),
+            contentType = "application/json",
+            playlistId = playlistId,
+            body = body
+        )
+    }
+
+    suspend fun deleteTracksFromPlaylist(accessToken: String, playlistId: String, body: DeleteTracksBody) {
+        userService.deleteTracksFromPlaylist(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
             playlistId = playlistId,

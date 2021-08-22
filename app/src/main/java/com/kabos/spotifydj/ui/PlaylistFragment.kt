@@ -43,8 +43,12 @@ class PlaylistFragment: Fragment() {
             val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
             etPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
 
+            btnSavePlaylist.setOnClickListener {
+                viewModel.createPlaylist(etPlaylistTitle.text.toString())
+            }
 
-            viewModel.currentPlaylist.observe(viewLifecycleOwner,{playlist ->
+
+            viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
                 dragTackAdapter.submitList(playlist)
                 if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
                 else tvPlaylistEmpty.visibility = View.GONE
@@ -58,16 +62,6 @@ class PlaylistFragment: Fragment() {
 
 
 
-            //todo 消す
-            btnSavePlaylist.setOnClickListener {
-                //todo
-//                val title = etPlaylistTitle.text.toString()
-//                viewModel.createPlaylist("test")
-            }
-
-            btnAddPlaylist.setOnClickListener {
-                viewModel.postItemToPlaylist()
-            }
         }
 
 

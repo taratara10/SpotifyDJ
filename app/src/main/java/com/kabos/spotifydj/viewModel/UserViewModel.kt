@@ -7,13 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.model.requestBody.AddTracksBody
+import com.kabos.spotifydj.model.requestBody.DeleteTrack
+import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
-import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -24,12 +25,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     var mAccessToken = ""
     var mDeviceId = ""
     private var mUserId = ""
-    var currentPlaylistId = ""
+    var localPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
     var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
-    val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+    val localPlaylist = MutableLiveData<List<TrackInfo>>()
     val currentTrack = MutableLiveData<TrackInfo?>()
 
     //Loading Flag
@@ -223,9 +224,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      *  Playlist
      * */
     fun addTrackToCurrentPlaylist(track: TrackInfo){
-        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
-        currentPlaylist.postValue(playlist)
+        localPlaylist.postValue(playlist)
 
         isNavigatePlaylistFragment.postValue(true)
         updateCurrentTrack(track)
@@ -235,37 +236,45 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
     }
 
-    private fun initializeUserId() = runBlocking {
-        mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
-    }
-
     fun createPlaylist(title: String) = viewModelScope.launch {
-        if (mUserId == "") initializeUserId()
-        currentPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+        //initialize userId
+        if (mUserId == "")  launch {
+            mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
+        }.join()
+        localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+        postTracksToPlaylist()
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    fun postItemToPlaylist() = viewModelScope.launch {
-        if (currentPlaylist.value == null) return@launch
-        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.contextUri }!!)
-        repository.addItemToPlaylist(mAccessToken, currentPlaylistId,body)
+    fun postTracksToPlaylist() = viewModelScope.launch {
+        if (localPlaylist.value == null) return@launch
+        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
+        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
 
         //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
 
+    fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
+        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
+    }
+
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
-        val playlist = currentPlaylist.value as MutableList<TrackInfo>
-        playlist.removeAt(position)
-        currentPlaylist.postValue(playlist)
+        val playlist = localPlaylist.value as MutableList<TrackInfo>
+        val removeTrack = playlist.removeAt(position)
+        localPlaylist.postValue(playlist)
+
+        //todo イイ感じに改修する
+        deleteTracksFromPlaylist(removeTrack)
     }
 
     //onDrop callback
     private fun changeTrackPositionInLocalPlaylist(initialPosition:Int, finalPosition:Int){
-        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        val playlist = localPlaylist.value as MutableList<TrackInfo>
         val item = playlist.removeAt(initialPosition)
         playlist.add(finalPosition, item)
-        currentPlaylist.postValue(playlist)
+        localPlaylist.postValue(playlist)
     }
 
 
@@ -334,7 +343,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
         replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
         replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
-        replaceTrackToPlaybackTrack(trackInfo,currentPlaylist as MutableLiveData<List<TrackInfo>?>)
+        replaceTrackToPlaybackTrack(trackInfo,localPlaylist as MutableLiveData<List<TrackInfo>?>)
 
         //currentTrackはListじゃないので別処理
         if(currentTrack.value == trackInfo){
