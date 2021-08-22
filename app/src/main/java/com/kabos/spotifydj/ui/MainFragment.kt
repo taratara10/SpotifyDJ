@@ -93,13 +93,6 @@ class MainFragment: Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-            .getString("token", "No token").toString()
-        viewModel.initializeAccessToken(accessToken)
-        Log.d("MainFragment","onStartCalled")
-    }
 
 }
 

@@ -49,6 +49,11 @@ class SearchFragment: Fragment() {
                 adapter = trackAdapter
             }
 
+            btnLoadPlaylist.setOnClickListener {
+                viewModel.getUsersAllPlaylists()
+                findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
+            }
+
 
             viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
                 Log.d("searchResult","update!!!!!!!!!")
