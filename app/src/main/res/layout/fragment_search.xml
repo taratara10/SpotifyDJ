@@ -5,14 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/et_search_tracks"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_search_tracks"
+        style="@style/MyDenseOutlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:inputType="text"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toStartOf="@+id/btn_load_playlist"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_search_tracks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="キーワードで曲を検索"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btn_load_playlist"
@@ -21,8 +31,9 @@
         app:icon="@drawable/ic_baseline_class_24"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/til_search_tracks"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/til_search_tracks" />
 
     <TextView
         android:id="@+id/tv_edit_text_is_empty"
@@ -52,12 +63,12 @@
         android:id="@+id/rv_search_tracks_result"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintTop_toBottomOf="@+id/et_search_tracks"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/til_search_tracks" />
 
     <ProgressBar
         android:id="@+id/pb_search_progress"
@@ -69,6 +80,7 @@
         app:layout_constraintEnd_toEndOf="@id/rv_search_tracks_result"
         app:layout_constraintStart_toStartOf="@id/rv_search_tracks_result"
         app:layout_constraintTop_toTopOf="@id/rv_search_tracks_result" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_begin"
         android:layout_width="wrap_content"
