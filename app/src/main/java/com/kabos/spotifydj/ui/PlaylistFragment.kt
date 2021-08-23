@@ -43,7 +43,7 @@ class PlaylistFragment: Fragment() {
             val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
             etPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
 
-            btnSavePlaylist.setOnClickListener {
+            btnCreatePlaylist.setOnClickListener {
                 viewModel.createPlaylist(etPlaylistTitle.text.toString())
             }
 
