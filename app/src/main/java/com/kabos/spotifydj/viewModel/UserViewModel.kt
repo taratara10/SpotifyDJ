@@ -43,20 +43,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
 
-//    //TextView Flag
-//    val isDisplaySearchEmptyView = MutableLiveData(false)
-//    val isDisplayRecommendUpperEmptyView = MutableLiveData(false)
-//    val isDisplayRecommendDownerEmptyView = MutableLiveData(false)
-
-
-
-
 
 
     //共通のcallbackを各FragmentのTrackAdapterに渡して
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            addTrackToCurrentPlaylist(trackInfo)
+            addTrackToLocalPlaylist(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -223,13 +215,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      *  Playlist
      * */
-    fun addTrackToCurrentPlaylist(track: TrackInfo){
+    fun addTrackToLocalPlaylist(track: TrackInfo){
         val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         localPlaylist.postValue(playlist)
 
         isNavigatePlaylistFragment.postValue(true)
         updateCurrentTrack(track)
+        postTracksToPlaylist(track)
     }
 
     fun getUsersAllPlaylists() = viewModelScope.launch {
@@ -241,17 +234,21 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (mUserId == "")  launch {
             mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
         }.join()
-        localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
-        postTracksToPlaylist()
+
+        launch {
+            localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+        }.join()
+
+        //localPlaylistのTrackを追加
+        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
+        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    fun postTracksToPlaylist() = viewModelScope.launch {
-        if (localPlaylist.value == null) return@launch
-        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
+    fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
-
-        //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
     }
 
     fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
