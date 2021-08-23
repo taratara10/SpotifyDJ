@@ -215,15 +215,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      *  Playlist
      * */
-    fun addTrackToLocalPlaylist(track: TrackInfo){
-        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
-        playlist.add(track)
-        localPlaylist.postValue(playlist)
 
-        isNavigatePlaylistFragment.postValue(true)
-        updateCurrentTrack(track)
-        postTracksToPlaylist(track)
-    }
 
     fun getUsersAllPlaylists() = viewModelScope.launch {
         usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
@@ -245,17 +237,28 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+    private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
         if (localPlaylistId == "") return@launch
         val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
-    fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
         val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
         repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
+    //onAdd callback
+    fun addTrackToLocalPlaylist(track: TrackInfo){
+        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        playlist.add(track)
+        localPlaylist.postValue(playlist)
+
+        isNavigatePlaylistFragment.postValue(true)
+        updateCurrentTrack(track)
+        postTracksToPlaylist(track)
+    }
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
         val playlist = localPlaylist.value as MutableList<TrackInfo>
@@ -279,8 +282,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
-
-
     fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
@@ -289,6 +290,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
+
+    //todo playlistに読み込む処理
 
 
     private suspend fun getPlaylistItemById(playlistId: String)
