@@ -15,13 +15,29 @@
         <action
             android:id="@+id/action_nav_main_to_nav_user_playlist"
             app:destination="@id/nav_user_playlist" />
+        <argument
+            android:name="fromSearch"
+            app:argType="boolean"
+            android:defaultValue="false"/>
+        <argument
+            android:name="fromPlaylist"
+            app:argType="boolean"
+            android:defaultValue="false"/>
+
     </fragment>
 
     <dialog
         android:id="@+id/nav_user_playlist"
         android:name="com.kabos.spotifydj.ui.DialogUsersPlaylists"
         tools:layout="@layout/dialog_users_playlists">
-
+        <argument
+            android:name="fromSearch"
+            app:argType="boolean"
+            android:defaultValue="false"/>
+        <argument
+            android:name="fromPlaylist"
+            app:argType="boolean"
+            android:defaultValue="false"/>
     </dialog>
 
 </navigation>

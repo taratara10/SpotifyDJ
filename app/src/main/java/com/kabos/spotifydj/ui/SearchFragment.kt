@@ -51,12 +51,12 @@ class SearchFragment: Fragment() {
 
             btnLoadPlaylist.setOnClickListener {
                 viewModel.getAllPlaylists()
-                findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
+                val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
+                findNavController().navigate(action)
             }
 
 
             viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
-                Log.d("searchResult","update!!!!!!!!!")
                 trackAdapter.submitList(searchResult)
 
                 if (searchResult.isNullOrEmpty()){

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,14 +26,19 @@ class DialogUsersPlaylists: DialogFragment() {
 
     private lateinit var binding: DialogUsersPlaylistsBinding
     private val viewModel: UserViewModel by activityViewModels()
+    private val mainFragmentArgs: MainFragmentArgs by navArgs()
+
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
-            //todo if load search
-            viewModel.updatePlaylistItemByDialog(playlistItem.id)
-            viewModel.isNavigateSearchFragment.postValue(true)
-            //todo if load playlist
-
+            //check where fragment
+            if (mainFragmentArgs.fromSearch){
+                viewModel.loadPlaylistIntoSearchFragment(playlistItem.id)
+                viewModel.isNavigateSearchFragment.postValue(true)
+            }
+            if (mainFragmentArgs.fromPlaylist){
+                viewModel.isNavigatePlaylistFragment.postValue(true)
+            }
 
             findNavController().popBackStack()
         }

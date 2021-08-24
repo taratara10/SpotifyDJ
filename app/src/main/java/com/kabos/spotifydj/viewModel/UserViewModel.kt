@@ -305,7 +305,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
-    fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
+    fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
         val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
