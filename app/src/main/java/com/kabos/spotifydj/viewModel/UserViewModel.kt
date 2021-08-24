@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -24,12 +25,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     var mAccessToken = ""
     var mDeviceId = ""
-    private var mUserId = ""
+    var mUserId = ""
+    var mUserName = ""
+
     var localPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
-    val upperTrackList = MutableLiveData<List<TrackInfo>?>()
+    val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
+
+    val allPlaylists = MutableLiveData<List<PlaylistItem>?>()
+    val ownPlaylist  = MutableLiveData<List<PlaylistItem>?>()
     val localPlaylist = MutableLiveData<List<TrackInfo>>()
     val currentTrack = MutableLiveData<TrackInfo?>()
 
@@ -45,6 +50,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
 
 
+    /**
+     * callback
+     * */
     //共通のcallbackを各FragmentのTrackAdapterに渡して
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
@@ -84,6 +92,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
     fun initializeAccessToken(accessToken: String){
         mAccessToken = accessToken
+    }
+
+    private fun getUserProfile() = viewModelScope.launch {
+        val userProfile:User? = repository.getUsersProfile(mAccessToken)
+        if (userProfile != null){
+            mUserId = userProfile.id
+            mUserName = userProfile.display_name
+        }
     }
 
 
@@ -217,14 +233,24 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
 
-    fun getUsersAllPlaylists() = viewModelScope.launch {
-        usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
+    fun getAllPlaylists() = viewModelScope.launch {
+        val playlist = repository.getUsersAllPlaylist(mAccessToken)
+        if (playlist != null){
+            allPlaylists.postValue(playlist)
+            getOwnPlaylist(playlist)
+        }
     }
+
+    private suspend fun getOwnPlaylist(playlist:List<PlaylistItem>?) {
+        if (mUserName == "") getUserProfile().join()
+        ownPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
+    }
+
 
     fun createPlaylist(title: String) = viewModelScope.launch {
         //initialize userId
         if (mUserId == "")  launch {
-            mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
+            getUserProfile()
         }.join()
 
         launch {
@@ -291,7 +317,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         isLoadingSearchTrack.value = false
     }
 
-    //todo playlistに読み込む処理
 
 
     private suspend fun getPlaylistItemById(playlistId: String)
@@ -306,7 +331,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * Playback
      * */
 
-    fun getUsersDevices() = viewModelScope.launch {
+    private fun getUsersDevices() = viewModelScope.launch {
         val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
         Log.d("deviceId","$usersDevices")
         if (usersDevices != null){

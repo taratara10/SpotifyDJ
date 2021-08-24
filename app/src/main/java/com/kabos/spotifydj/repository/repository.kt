@@ -24,7 +24,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         val request = userService.getUsersProfile(generateBearer(accessToken))
         return if (request.isSuccessful) request.body()
         else{
-            Log.d("initializeUserId","${request.errorBody()?.string()}")
+            Log.d("getUserProfile","${request.errorBody()?.string()}")
             null
         }
     }

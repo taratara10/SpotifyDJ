@@ -80,12 +80,13 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                Log.d("mAccessTolen","${viewModel.mAccessToken}")
+
+
 
                 true
             }
             R.id.menu_fetch_playlist -> {
-                viewModel.getUsersAllPlaylists()
+                viewModel.getAllPlaylists()
                 findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
                 true
             }

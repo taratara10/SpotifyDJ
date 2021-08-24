@@ -50,7 +50,7 @@ class DialogUsersPlaylists: DialogFragment() {
             }
         }
 
-        viewModel.usersAllPlaylists.observe(this,{ usersPlaylist ->
+        viewModel.allPlaylists.observe(this,{ usersPlaylist ->
             playlistAdapter.submitList(usersPlaylist)
         })
     }

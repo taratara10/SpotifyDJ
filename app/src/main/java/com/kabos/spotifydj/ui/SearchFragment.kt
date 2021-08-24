@@ -50,7 +50,7 @@ class SearchFragment: Fragment() {
             }
 
             btnLoadPlaylist.setOnClickListener {
-                viewModel.getUsersAllPlaylists()
+                viewModel.getAllPlaylists()
                 findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
             }
 
