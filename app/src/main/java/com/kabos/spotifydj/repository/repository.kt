@@ -155,12 +155,12 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     }
 
-    suspend fun getPlaylistItemById(accessToken: String,playlistId: String):List<TrackItems>? {
-        val request = userService.getPlaylistItemById(
+    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String):List<TrackItems>? {
+        val request = userService.getTracksByPlaylistId(
             accessToken = generateBearer(accessToken),
             playlistId = playlistId
-        )
-         if (request.isSuccessful){
+            )
+        if (request.isSuccessful){
              //List<TrackItem>で扱いたいので、item.tackをmapで取り出す
              val items:List<Item>? = request.body()?.items
              return items?.map { it.track }

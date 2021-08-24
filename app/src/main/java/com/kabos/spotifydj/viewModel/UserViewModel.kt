@@ -32,11 +32,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
+    val localPlaylist = MutableLiveData<List<TrackInfo>?>()
+    val currentTrack = MutableLiveData<TrackInfo?>()
 
     val allPlaylists = MutableLiveData<List<PlaylistItem>?>()
-    val ownPlaylist  = MutableLiveData<List<PlaylistItem>?>()
-    val localPlaylist = MutableLiveData<List<TrackInfo>>()
-    val currentTrack = MutableLiveData<TrackInfo?>()
+    val filterOwnPlaylist = MutableLiveData<List<PlaylistItem>?>()
+
 
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
@@ -237,13 +238,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val playlist = repository.getUsersAllPlaylist(mAccessToken)
         if (playlist != null){
             allPlaylists.postValue(playlist)
-            getOwnPlaylist(playlist)
+            filterOwnPlaylist(playlist)
         }
     }
-
-    private suspend fun getOwnPlaylist(playlist:List<PlaylistItem>?) {
+    private suspend fun filterOwnPlaylist(playlist:List<PlaylistItem>?) {
         if (mUserName == "") getUserProfile().join()
-        ownPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
+        filterOwnPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
     }
 
 
@@ -308,18 +308,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
-        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
+        val trackItemsList = getTracksByPlaylistId(playlistId).await() ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
+    fun loadPlaylistIntoPlaylistFragment(playlistId: String) = viewModelScope.launch {
+        val trackItemsList = getTracksByPlaylistId(playlistId).await() ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        localPlaylist.postValue(trackInfoList)
+    }
 
 
-    private suspend fun getPlaylistItemById(playlistId: String)
+    private suspend fun getTracksByPlaylistId(playlistId: String)
         : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
-            repository.getPlaylistItemById(mAccessToken,playlistId)
+            repository.getTracksByPlaylistId(mAccessToken,playlistId)
         }
     }
 

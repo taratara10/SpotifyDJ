@@ -68,7 +68,6 @@ interface UserService {
     ):Response<RecommendTracks>
 
 
-
     /**
      *  playlist
      * */
@@ -76,7 +75,7 @@ interface UserService {
     suspend fun getUsersAllPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
 
     @GET("playlists/{playlist_id}/tracks")
-    suspend fun getPlaylistItemById(
+    suspend fun getTracksByPlaylistId(
         @Header("Authorization") accessToken: String,
         @Path("playlist_id")playlistId: String,
     ):Response<PlaylistById>

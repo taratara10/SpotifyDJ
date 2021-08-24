@@ -37,6 +37,7 @@ class DialogUsersPlaylists: DialogFragment() {
                 viewModel.isNavigateSearchFragment.postValue(true)
             }
             if (mainFragmentArgs.fromPlaylist){
+                viewModel.loadPlaylistIntoPlaylistFragment(playlistItem.id)
                 viewModel.isNavigatePlaylistFragment.postValue(true)
             }
 
@@ -61,7 +62,18 @@ class DialogUsersPlaylists: DialogFragment() {
         }
 
         viewModel.allPlaylists.observe(this,{ usersPlaylist ->
-            playlistAdapter.submitList(usersPlaylist)
+            //Searchで読み込む場合は全件表示
+            if (mainFragmentArgs.fromSearch){
+                playlistAdapter.submitList(usersPlaylist)
+            }
+        })
+
+        viewModel.filterOwnPlaylist.observe(this,{ ownPlaylist ->
+            //Playlistで読み込む場合は、編集可能な自身のプレイリストのみを表示
+            if (mainFragmentArgs.fromPlaylist){
+                playlistAdapter.submitList(ownPlaylist)
+            }
+
         })
     }
 

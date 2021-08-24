@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
@@ -54,10 +55,15 @@ class PlaylistFragment: Fragment() {
 
 
             viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
-                dragTackAdapter.submitList(playlist)
+                playlist?.let { dragTackAdapter.submitList(it) }
                 if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
                 else tvPlaylistEmpty.visibility = View.GONE
             })
+
+            btnEditPlaylist.setOnClickListener{
+                val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromPlaylist = true)
+                findNavController().navigate(action)
+            }
 
 
 
