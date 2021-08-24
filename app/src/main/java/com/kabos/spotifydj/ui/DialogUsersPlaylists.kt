@@ -28,8 +28,12 @@ class DialogUsersPlaylists: DialogFragment() {
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
+            //todo if load search
             viewModel.updatePlaylistItemByDialog(playlistItem.id)
             viewModel.isNavigateSearchFragment.postValue(true)
+            //todo if load playlist
+
+
             findNavController().popBackStack()
         }
     }

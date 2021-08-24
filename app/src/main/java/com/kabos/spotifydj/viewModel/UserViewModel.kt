@@ -249,10 +249,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun createPlaylist(title: String) = viewModelScope.launch {
         //initialize userId
-        if (mUserId == "")  launch {
-            getUserProfile()
-        }.join()
-
+        if (mUserId == "") getUserProfile().join()
         launch {
             localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
         }.join()

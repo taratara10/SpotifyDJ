@@ -39,9 +39,13 @@ class MainFragment: Fragment() {
         //setup TabLayout
         val tabLayout = binding.tabLayout
         TabLayoutMediator(tabLayout, viewPager) {tab, position ->
-            //todo titleを変える
-            tab.text = "OBJECT $position"
+            when(position){
+                0 -> tab.text = "Search"
+                1 -> tab.text = "Recommend"
+                2 -> tab.text = "Playlist"
+            }
         }.attach()
+
 
         //currentTrackの変更を監視して、自動的にrecommendFragmentへ遷移
         viewModel.apply {
@@ -71,9 +75,6 @@ class MainFragment: Fragment() {
             })
         }
 
-//        val accessToken = requireActivity().getSharedPreferences("SPOTIFY", 0)
-//            .getString("token", "No token").toString()
-//        viewModel.initializeAccessToken(accessToken)
 
     }
 
