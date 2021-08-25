@@ -38,9 +38,9 @@ class DialogUsersPlaylists: DialogFragment() {
             }
             if (mainFragmentArgs.fromPlaylist){
                 viewModel.loadPlaylistIntoPlaylistFragment(playlistItem.id)
+                viewModel.displayLoadedPlaylistTitle(playlistItem.name)
                 viewModel.isNavigatePlaylistFragment.postValue(true)
             }
-
             findNavController().popBackStack()
         }
     }

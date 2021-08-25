@@ -60,6 +60,10 @@ class PlaylistFragment: Fragment() {
                 else tvPlaylistEmpty.visibility = View.GONE
             })
 
+            viewModel.loadedPlaylistTitle.observe(viewLifecycleOwner,{title ->
+                etPlaylistTitle.setText(title)
+            })
+
             btnEditPlaylist.setOnClickListener{
                 val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromPlaylist = true)
                 findNavController().navigate(action)

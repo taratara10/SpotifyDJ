@@ -305,6 +305,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
+    val loadedPlaylistTitle = MutableLiveData<String>()
+    //editTextに読み込んだplaylist titleを表示する
+    fun displayLoadedPlaylistTitle(title: String){
+        loadedPlaylistTitle.postValue(title)
+    }
+
     fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
