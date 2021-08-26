@@ -254,7 +254,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
         }.join()
 
-        //localPlaylistのTrackを追加
+        //localPlaylistのTrackを追加　空なら終了
+        if (localPlaylist.value == null) return@launch
         val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
