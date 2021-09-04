@@ -20,12 +20,21 @@ class Repository @Inject constructor( private val userService: UserService) {
 
 
 
-    suspend fun getUsersProfile(accessToken: String): User? {
-        val request = userService.getUsersProfile(generateBearer(accessToken))
-        return if (request.isSuccessful) request.body()
-        else{
-            Log.d("getUserProfile","${request.errorBody()?.string()}")
-            null
+    suspend fun getUsersProfile(accessToken: String): UserResult {
+        return try {
+            val request = userService.getUsersProfile(generateBearer(accessToken))
+            UserResult.Success(request.body()!!)
+        } catch (e: Exception){
+            when (e) {
+                is retrofit2.HttpException -> {
+                    val reason = when (e.code()){
+                        400 -> UserResult.Failure.Reason.UnAuthorized
+                        else -> UserResult.Failure.Reason.UnKnown(e)
+                    }
+                    UserResult.Failure(reason)
+                }
+                else -> UserResult.Failure(UserResult.Failure.Reason.UnKnown(e))
+            }
         }
     }
 
@@ -74,23 +83,25 @@ class Repository @Inject constructor( private val userService: UserService) {
      * Search
      * */
 
-    suspend fun getTracksByKeyword(
-        accessToken: String,
-        keyword: String,
-        onFetchFailed: () -> Unit) : List<TrackItems>? {
-        val request = userService.getTracksByKeyword(
-            accessToken = generateBearer(accessToken),
-            keyword = keyword,
-            type = "album,track,artist"
-        )
-
-        return if (request.isSuccessful){
-            request.body()?.tracks?.items as List<TrackItems>
-        }
-        else {
-            Log.d("getTracksByKeyword","${request.errorBody()?.string()}")
-            onFetchFailed()
-            null
+    suspend fun getTracksByKeyword(accessToken: String, keyword: String): TrackItemsResult{
+        return try {
+            val request = userService.getTracksByKeyword(
+                accessToken = generateBearer(accessToken),
+                keyword = keyword,
+                type = "album,track,artist"
+            )
+            TrackItemsResult.Success(request.body()?.tracks?.items)
+        } catch (e: java.lang.Exception){
+            when (e) {
+                is retrofit2.HttpException -> {
+                    val reason = when (e.code()){
+                        400 -> TrackItemsResult.Failure.Reason.UnAuthorized
+                        else -> TrackItemsResult.Failure.Reason.UnKnown(e)
+                    }
+                    TrackItemsResult.Failure(reason)
+                }
+                else -> TrackItemsResult.Failure(TrackItemsResult.Failure.Reason.UnKnown(e))
+            }
         }
     }
 
