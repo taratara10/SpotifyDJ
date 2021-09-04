@@ -11,6 +11,8 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -18,7 +20,14 @@ class Repository @Inject constructor( private val userService: UserService) {
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
 
-
+    val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
+    private fun errorHandle(body: String?, adapter: JsonAdapter<ApiError>): Reason {
+        val apiError = adapter.fromJson(body)!!
+        return when (apiError.error.status){
+            401  -> Reason.UnAuthorized
+            else -> Reason.ResponseError(apiError.error.message)
+        }
+    }
 
     suspend fun getUsersProfile(accessToken: String): UserResult {
         return try {
@@ -28,12 +37,12 @@ class Repository @Inject constructor( private val userService: UserService) {
             when (e) {
                 is retrofit2.HttpException -> {
                     val reason = when (e.code()){
-                        400 -> UserResult.Failure.Reason.UnAuthorized
-                        else -> UserResult.Failure.Reason.UnKnown(e)
+                        400 -> Reason.UnAuthorized
+                        else -> Reason.UnKnown(e)
                     }
                     UserResult.Failure(reason)
                 }
-                else -> UserResult.Failure(UserResult.Failure.Reason.UnKnown(e))
+                else -> UserResult.Failure(Reason.UnKnown(e))
             }
         }
     }
@@ -88,20 +97,15 @@ class Repository @Inject constructor( private val userService: UserService) {
             val request = userService.getTracksByKeyword(
                 accessToken = generateBearer(accessToken),
                 keyword = keyword,
-                type = "album,track,artist"
-            )
-            TrackItemsResult.Success(request.body()?.tracks?.items)
-        } catch (e: java.lang.Exception){
-            when (e) {
-                is retrofit2.HttpException -> {
-                    val reason = when (e.code()){
-                        400 -> TrackItemsResult.Failure.Reason.UnAuthorized
-                        else -> TrackItemsResult.Failure.Reason.UnKnown(e)
-                    }
-                    TrackItemsResult.Failure(reason)
-                }
-                else -> TrackItemsResult.Failure(TrackItemsResult.Failure.Reason.UnKnown(e))
+                type = "album,track,artist")
+
+            return if (request.isSuccessful) {
+                TrackItemsResult.Success(request.body()?.tracks?.items)
+            }else{
+                TrackItemsResult.Failure(errorHandle(request.errorBody()?.string(),apiErrorAdapter))
             }
+        } catch (e: Exception){
+            TrackItemsResult.Failure(Reason.UnKnown(e))
         }
     }
 
@@ -112,7 +116,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
         return if (request.isSuccessful) request.body()
         else{
-            Log.d("getAudioFeature","${request.errorBody()?.string()}")
+//            Log.d("getAudioFeature","${request.errorBody()?.string()}")
             onFetchFailed()
             null
         }

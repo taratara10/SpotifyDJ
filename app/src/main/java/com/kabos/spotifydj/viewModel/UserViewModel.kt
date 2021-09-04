@@ -13,7 +13,7 @@ import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTrack
 import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
-import com.kabos.spotifydj.repository.FetchResult
+import com.kabos.spotifydj.repository.Reason
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.repository.TrackItemsResult
 import com.kabos.spotifydj.repository.UserResult
@@ -106,7 +106,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is UserResult.Failure -> {
                 when (result.reason) {
-                    is UserResult.Failure.Reason.UnAuthorized -> {
+                    is Reason.UnAuthorized -> {
                         //todo open login activity
                     }
                 }
@@ -140,15 +140,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
         async {
             val result = repository.getTracksByKeyword(accessToken = mAccessToken, keyword= keyword)
-            mAccessToken = ""
             when (result){
                 is TrackItemsResult.Success -> return@async result.data
                 is TrackItemsResult.Failure -> {
                     when (result.reason) {
-                        is TrackItemsResult.Failure.Reason.UnAuthorized -> {
+                        is Reason.UnAuthorized,
+                        is Reason.ResponseError,
+                        is Reason.UnKnown -> {
                             isLoadingSearchTrack.postValue(false)
-
-                            Log.d("UserProfile","NOOOOOOOOOOOOOOO token")
                             //todo display onFetchFailed textView
                         }
                     }
