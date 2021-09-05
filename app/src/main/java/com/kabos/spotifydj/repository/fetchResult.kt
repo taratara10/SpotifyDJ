@@ -8,6 +8,7 @@ import java.lang.Exception
 sealed class Reason {
      object EmptyAccessToken :Reason()
      object UnAuthorized: Reason()
+     object NotFound: Reason()
      data class ResponseError(val message: String): Reason()
      data class UnKnown(val exception: Exception): Reason()
 }

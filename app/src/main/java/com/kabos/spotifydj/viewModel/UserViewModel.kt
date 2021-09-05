@@ -364,7 +364,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         Log.d("deviceId","$usersDevices")
         if (usersDevices != null){
 //          mDeviceId = usersDevices.find { it.is_active }?.id.toString()
-            mDeviceId = usersDevices.first().id
+//            mDeviceId = usersDevices.first().id
         }else{
             Log.d("fethUsersDevice","No active device. $usersDevices")
         }

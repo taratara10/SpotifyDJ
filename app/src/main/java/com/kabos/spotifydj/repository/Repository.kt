@@ -13,6 +13,7 @@ import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor( private val userService: UserService) {
@@ -20,11 +21,13 @@ class Repository @Inject constructor( private val userService: UserService) {
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
 
-    val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
-    private fun errorHandle(body: String?, adapter: JsonAdapter<ApiError>): Reason {
-        val apiError = adapter.fromJson(body)!!
+    private val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
+
+    private fun <T> handleErrorReason(body: Response<T>): Reason {
+        val apiError = apiErrorAdapter.fromJson(body.errorBody()?.string())!!
         return when (apiError.error.status){
             401  -> Reason.UnAuthorized
+            404  -> Reason.NotFound
             else -> Reason.ResponseError(apiError.error.message)
         }
     }
@@ -32,7 +35,8 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun getUsersProfile(accessToken: String): UserResult {
         return try {
             val request = userService.getUsersProfile(generateBearer(accessToken))
-            UserResult.Success(request.body()!!)
+            return if (request.isSuccessful) UserResult.Success(request.body()!!)
+            else UserResult.Failure(handleErrorReason(request))
         } catch (e: Exception){
             when (e) {
                 is retrofit2.HttpException -> {
@@ -99,11 +103,8 @@ class Repository @Inject constructor( private val userService: UserService) {
                 keyword = keyword,
                 type = "album,track,artist")
 
-            return if (request.isSuccessful) {
-                TrackItemsResult.Success(request.body()?.tracks?.items)
-            }else{
-                TrackItemsResult.Failure(errorHandle(request.errorBody()?.string(),apiErrorAdapter))
-            }
+            return if (request.isSuccessful) TrackItemsResult.Success(request.body()?.tracks?.items)
+            else TrackItemsResult.Failure(handleErrorReason(request))
         } catch (e: Exception){
             TrackItemsResult.Failure(Reason.UnKnown(e))
         }
