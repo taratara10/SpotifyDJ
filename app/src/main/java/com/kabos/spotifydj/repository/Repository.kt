@@ -116,24 +116,19 @@ class Repository @Inject constructor( private val userService: UserService) {
                 accessToken: String,
                 trackInfo: TrackInfo,
                 fetchUpperTrack: Boolean) : TrackItemsResult {
-        //todo これenumに切り出してもよい
-        val minTempoRate = 0.9
-        val maxTempoRate = 1.1
-        val minDanceabilityRate = 0.8
-        val maxDanceabilityRate = 1.2
-        var minEnergyRate = 1.0
-        var maxEnergyRate = 1.0
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
-        if (fetchUpperTrack) maxEnergyRate = 1.2
-        if (!fetchUpperTrack) minEnergyRate = 0.8
+        var minEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
+        var maxEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
+        if (fetchUpperTrack) maxEnergyRate *= 1.2
+        if (!fetchUpperTrack) minEnergyRate *= 0.8
 
         return try {
             val request =  userService.getRecommendations(accessToken = generateBearer(accessToken),
                 seedTrackId = trackInfo.id,
-                minTempo = trackInfo.tempo * minTempoRate,
-                maxTempo = trackInfo.tempo * maxTempoRate,
-                minDancebility = trackInfo.danceability * minDanceabilityRate,
-                maxDancebility = trackInfo.danceability * maxDanceabilityRate,
+                minTempo = trackInfo.tempo * RecommendParameter.MinTempoRate.value,
+                maxTempo = trackInfo.tempo * RecommendParameter.MaxTempoRate.value,
+                minDancebility = trackInfo.danceability * RecommendParameter.MinDanceabilityRate.value,
+                maxDancebility = trackInfo.danceability * RecommendParameter.MaxDanceabilityRate.value,
                 minEnergy = trackInfo.energy * minEnergyRate,
                 maxEnergy = trackInfo.energy * maxEnergyRate,
             )
