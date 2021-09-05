@@ -23,7 +23,7 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     private val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
 
-    private fun <T> handleErrorReason(body: Response<T>): Reason {
+    private fun <T> errorReasonHandler(body: Response<T>): Reason {
         val apiError = apiErrorAdapter.fromJson(body.errorBody()?.string())!!
         return when (apiError.error.status){
             401  -> Reason.UnAuthorized
@@ -36,18 +36,9 @@ class Repository @Inject constructor( private val userService: UserService) {
         return try {
             val request = userService.getUsersProfile(generateBearer(accessToken))
             return if (request.isSuccessful) UserResult.Success(request.body()!!)
-            else UserResult.Failure(handleErrorReason(request))
+            else UserResult.Failure(errorReasonHandler(request))
         } catch (e: Exception){
-            when (e) {
-                is retrofit2.HttpException -> {
-                    val reason = when (e.code()){
-                        400 -> Reason.UnAuthorized
-                        else -> Reason.UnKnown(e)
-                    }
-                    UserResult.Failure(reason)
-                }
-                else -> UserResult.Failure(Reason.UnKnown(e))
-            }
+            UserResult.Failure(Reason.UnKnown(e))
         }
     }
 
@@ -103,87 +94,84 @@ class Repository @Inject constructor( private val userService: UserService) {
                 keyword = keyword,
                 type = "album,track,artist")
 
-            return if (request.isSuccessful) TrackItemsResult.Success(request.body()?.tracks?.items)
-            else TrackItemsResult.Failure(handleErrorReason(request))
+            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks.items)
+            else TrackItemsResult.Failure(errorReasonHandler(request))
         } catch (e: Exception){
             TrackItemsResult.Failure(Reason.UnKnown(e))
         }
     }
 
-    suspend fun getAudioFeaturesById(
-        accessToken: String,
-        id: String,
-        onFetchFailed: () -> Unit) : AudioFeature? {
-        val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
-        return if (request.isSuccessful) request.body()
-        else{
-//            Log.d("getAudioFeature","${request.errorBody()?.string()}")
-            onFetchFailed()
-            null
+    suspend fun getAudioFeaturesById(accessToken: String, id: String) : AudioFeatureResult {
+        return try {
+            val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
+
+            return if (request.isSuccessful) AudioFeatureResult.Success(request.body()!!)
+            else AudioFeatureResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            AudioFeatureResult.Failure(Reason.UnKnown(e))
         }
     }
 
     suspend fun getRecommendTracks(
-        accessToken: String,
-        trackInfo: TrackInfo,
-        fetchUpperTrack: Boolean,
-        onFetchFailed: () -> Unit) : List<TrackItems>? {
+                accessToken: String,
+                trackInfo: TrackInfo,
+                fetchUpperTrack: Boolean) : TrackItemsResult {
+        //todo これenumに切り出してもよい
         val minTempoRate = 0.9
         val maxTempoRate = 1.1
         val minDanceabilityRate = 0.8
         val maxDanceabilityRate = 1.2
         var minEnergyRate = 1.0
         var maxEnergyRate = 1.0
-
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
         if (fetchUpperTrack) maxEnergyRate = 1.2
         if (!fetchUpperTrack) minEnergyRate = 0.8
-        val request =  userService.getRecommendations(accessToken = generateBearer(accessToken),
-            seedTrackId = trackInfo.id,
-            minTempo = trackInfo.tempo * minTempoRate,
-            maxTempo = trackInfo.tempo * maxTempoRate,
-            minDancebility = trackInfo.danceability * minDanceabilityRate,
-            maxDancebility = trackInfo.danceability * maxDanceabilityRate,
-            minEnergy = trackInfo.energy * minEnergyRate,
-            maxEnergy = trackInfo.energy * maxEnergyRate,
-        )
 
-        return if (request.isSuccessful) request.body()?.tracks
-        else{
-            Log.d("getRecommendTracks","${request.errorBody()?.string()}")
-            onFetchFailed()
-            return null
+        return try {
+            val request =  userService.getRecommendations(accessToken = generateBearer(accessToken),
+                seedTrackId = trackInfo.id,
+                minTempo = trackInfo.tempo * minTempoRate,
+                maxTempo = trackInfo.tempo * maxTempoRate,
+                minDancebility = trackInfo.danceability * minDanceabilityRate,
+                maxDancebility = trackInfo.danceability * maxDanceabilityRate,
+                minEnergy = trackInfo.energy * minEnergyRate,
+                maxEnergy = trackInfo.energy * maxEnergyRate,
+            )
+
+            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks)
+            else TrackItemsResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            TrackItemsResult.Failure(Reason.UnKnown(e))
         }
-    }
+   }
 
 
     /**
      * Playlist
      * */
 
-    suspend fun getUsersAllPlaylist(accessToken: String): List<PlaylistItem>? {
-        val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
-        return if (request.isSuccessful) request.body()?.items
-        else {
-            Log.d("getUserPlaylist","${request.errorBody()?.string()}")
-            listOf()
-        }
+    suspend fun getUsersAllPlaylist(accessToken: String): PlaylistItemsResult {
+        return try {
+            val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
 
+            return if (request.isSuccessful) PlaylistItemsResult.Success(request.body()!!.items)
+            else PlaylistItemsResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            PlaylistItemsResult.Failure(Reason.UnKnown(e))
+        }
     }
 
-    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String):List<TrackItems>? {
-        val request = userService.getTracksByPlaylistId(
-            accessToken = generateBearer(accessToken),
-            playlistId = playlistId
-            )
-        if (request.isSuccessful){
-             //List<TrackItem>で扱いたいので、item.tackをmapで取り出す
-             val items:List<Item>? = request.body()?.items
-             return items?.map { it.track }
-        }else{
-             Log.d("getPlaylistItemById","${request.errorBody()?.string()}")
-             return null
-         }
+    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String):TrackItemsResult {
+        return try {
+            val request = userService.getTracksByPlaylistId(
+                accessToken = generateBearer(accessToken),
+                playlistId = playlistId)
+
+            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.items.map { it.track })
+            else TrackItemsResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            TrackItemsResult.Failure(Reason.UnKnown(e))
+        }
     }
 
     suspend fun createPlaylist(
