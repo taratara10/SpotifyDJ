@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.model.playback
+package com.kabos.spotifydj.model.requestBody
 
 data class PlaybackBody(
     val uris:List<String>,

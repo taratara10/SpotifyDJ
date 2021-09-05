@@ -5,15 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.model.requestBody.AddTracksBody
+import com.kabos.spotifydj.model.requestBody.DeleteTrack
+import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.track.TrackItems
-import com.kabos.spotifydj.repository.Repository
+import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
-import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -23,14 +25,19 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     var mAccessToken = ""
     var mDeviceId = ""
-    private var mUserId = ""
-    var currentPlaylistId = ""
+    var mUserId = ""
+    var mUserName = ""
+
+    var localPlaylistId = ""
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
-    val upperTrackList = MutableLiveData<List<TrackInfo>?>()
+    val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    var usersAllPlaylists = MutableLiveData<List<PlaylistItem>>()
-    val currentPlaylist = MutableLiveData<List<TrackInfo>>()
+    val localPlaylist = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo?>()
+
+    val allPlaylists = MutableLiveData<List<PlaylistItem>?>()
+    val filterOwnPlaylist = MutableLiveData<List<PlaylistItem>?>()
+
 
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
@@ -42,20 +49,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
 
-//    //TextView Flag
-//    val isDisplaySearchEmptyView = MutableLiveData(false)
-//    val isDisplayRecommendUpperEmptyView = MutableLiveData(false)
-//    val isDisplayRecommendDownerEmptyView = MutableLiveData(false)
 
 
-
-
-
-
+    /**
+     * callback
+     * */
     //共通のcallbackを各FragmentのTrackAdapterに渡して
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            addTrackToCurrentPlaylist(trackInfo)
+            addTrackToLocalPlaylist(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -93,6 +95,22 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         mAccessToken = accessToken
     }
 
+    private fun getUserProfile() = viewModelScope.launch {
+        when (val result = repository.getUsersProfile(mAccessToken)) {
+            is UserResult.Success -> {
+                mUserId = result.data.id
+                mUserName = result.data.display_name
+            }
+            is UserResult.Failure -> {
+                when (result.reason) {
+                    is Reason.UnAuthorized -> {
+                        //todo open login activity
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * SearchFragmentの処理
@@ -109,37 +127,59 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
         isLoadingSearchTrack.value = true
         //keywordに一致する検索結果がなければreturn
-        val trackItemsList = getTracksByKeyword(keyword).await() ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        val trackItemsList = getTracksByKeyword(keyword) ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
 
-    private suspend fun getTracksByKeyword(keyword: String): Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
+    private suspend fun getTracksByKeyword(keyword: String): List<TrackItems>? = withContext(Dispatchers.IO){
         async {
-            return@async repository.getTracksByKeyword(
-                accessToken = mAccessToken,
-                keyword= keyword,
-                onFetchFailed= {
-                    isLoadingSearchTrack.postValue(false)
-                    //todo display onFetchFailed textView
-                })
-        }
-    }
+            val result = repository.getTracksByKeyword(accessToken = mAccessToken, keyword= keyword)
+            return@async when (result){
+                is TrackItemsResult.Success -> result.data
+                is TrackItemsResult.Failure -> {
+                    when (result.reason) {
+                        is Reason.UnAuthorized,
+                        is Reason.NotFound,
+                        is Reason.ResponseError,
+                        is Reason.UnKnown -> {
+                            isLoadingSearchTrack.postValue(false)
+                            //todo display onFetchFailed textView or Toast
+                        }
+                    }
+                    null
+                }
+                else -> null
+            }
 
-    private suspend fun getAudioFeaturesById(id: String): Deferred<AudioFeature?> = withContext(Dispatchers.IO) {
-        async {
-            return@async repository.getAudioFeaturesById(
-                accessToken = mAccessToken,
-                id = id,
-                onFetchFailed = {
-                    isLoadingSearchTrack.postValue(false)
-                    isLoadingDownerTrack.postValue(false)
-                    isLoadingUpperTrack.postValue(false)
-                })
         }
-    }
+    }.await()
+
+    private suspend fun getAudioFeaturesById(id: String): AudioFeature? = withContext(Dispatchers.IO) {
+        async {
+            val result = repository.getAudioFeaturesById(accessToken = mAccessToken, id = id)
+            return@async when (result){
+                is AudioFeatureResult.Success -> result.data
+                is AudioFeatureResult.Failure -> {
+                    when (result.reason) {
+                        is Reason.UnAuthorized,
+                        is Reason.NotFound,
+                        is Reason.ResponseError,
+                        is Reason.UnKnown -> {
+                            isLoadingSearchTrack.postValue(false)
+                            isLoadingDownerTrack.postValue(false)
+                            isLoadingUpperTrack.postValue(false)
+                            //todo display onFetchFailed textView or Toast
+                        }
+                    }
+                    null
+                }
+                else -> null
+            }
+        }
+    }.await()
 
     private fun mergeTrackItemAndAudioFeature(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
         return if (trackItems != null && audioFeature != null) {
@@ -156,19 +196,20 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         } else null
     }
 
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>):Deferred<List<TrackInfo>?> = withContext(Dispatchers.IO) {
-        async {
-            //生成したTrackInfoを入れる仮の箱
-            val mergedTrackInfoList = mutableListOf<TrackInfo>()
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>): List<TrackInfo>? =
+        withContext(Dispatchers.IO) {
+            async {
+                //生成したTrackInfoを入れる仮の箱
+                val mergedTrackInfoList = mutableListOf<TrackInfo>()
 
-            trackItems.map { trackItems ->
-                val audioFeature = getAudioFeaturesById(trackItems.id).await()
-                val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
-                if (trackInfo != null) mergedTrackInfoList.add(trackInfo)
+                trackItems.map { trackItems ->
+                    val audioFeature = getAudioFeaturesById(trackItems.id)
+                    val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
+                    if (trackInfo != null) mergedTrackInfoList.add(trackInfo)
+                }
+                return@async mergedTrackInfoList
             }
-            return@async mergedTrackInfoList
-        }
-    }
+        }.await()
 
 
 
@@ -189,83 +230,129 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //fetch upperTrack
         launch {
             isLoadingUpperTrack.value = true
-            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true).await() ?: return@launch
-            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true) ?: return@launch
+            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
             upperTrackList.postValue(trackInfoList)
             isLoadingUpperTrack.value = false
         }
         //fetch downerTrack
         launch {
             isLoadingDownerTrack.value = true
-            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false).await() ?: return@launch
-            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false) ?: return@launch
+            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
             downerTrackList.postValue(trackInfoList)
             isLoadingDownerTrack.value = false
         }
     }
 
-    private suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean):Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
-        async {
-            return@async repository.getRecommendTracks(
-                accessToken = mAccessToken,
-                trackInfo = trackInfo,
-                fetchUpperTrack = fetchUpperTrack,
-                onFetchFailed = {
-                    isLoadingSearchTrack.postValue(false)
-                    isLoadingUpperTrack.postValue(false)
-                    isLoadingDownerTrack.postValue(false)
+    private suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean): List<TrackItems>? =
+        withContext(Dispatchers.IO){
+            async {
+                val result = repository.getRecommendTracks(
+                    accessToken = mAccessToken,
+                    trackInfo = trackInfo,
+                    fetchUpperTrack = fetchUpperTrack)
+                return@async when (result) {
+                    is TrackItemsResult.Success -> result.data
+                    is TrackItemsResult.Failure -> {
+                        when (result.reason){
+                            is Reason.UnAuthorized,
+                            is Reason.NotFound,
+                            is Reason.ResponseError,
+                            is Reason.UnKnown -> {
+                                isLoadingSearchTrack.postValue(false)
+                                isLoadingDownerTrack.postValue(false)
+                                isLoadingUpperTrack.postValue(false)
+                                //todo display onFetchFailed textView or Toast
+                            }
+                        }
+                        null
+                    }
+                    else -> null
                 }
-            )
-        }
-    }
+            }
+        }.await()
 
     /**
      *  Playlist
      * */
-    fun addTrackToCurrentPlaylist(track: TrackInfo){
-        val playlist = (currentPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
-        playlist.add(track)
-        currentPlaylist.postValue(playlist)
 
-        isNavigatePlaylistFragment.postValue(true)
-        updateCurrentTrack(track)
+
+    fun getAllPlaylists() = viewModelScope.launch {
+        when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
+            is PlaylistItemsResult.Success -> {
+                allPlaylists.postValue(result.data)
+                filterOwnPlaylist(result.data)
+            }
+            is PlaylistItemsResult.Failure -> {
+                when (result.reason){
+                    is Reason.UnAuthorized,
+                    is Reason.NotFound,
+                    is Reason.ResponseError,
+                    is Reason.UnKnown -> {
+                        //error handle
+                    }
+                }
+            }
+        }
+    }
+    private suspend fun filterOwnPlaylist(playlist:List<PlaylistItem>?) {
+        if (mUserName == "") getUserProfile().join()
+        filterOwnPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
     }
 
-    fun getUsersAllPlaylists() = viewModelScope.launch {
-        usersAllPlaylists.postValue(repository.getUsersAllPlaylist(mAccessToken))
-    }
-
-    private fun initializeUserId() = runBlocking {
-        mUserId = repository.getUsersProfile(mAccessToken)?.id.toString()
-    }
 
     fun createPlaylist(title: String) = viewModelScope.launch {
-        if (mUserId == "") initializeUserId()
-        currentPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+        //initialize userId
+        if (mUserId == "") getUserProfile().join()
+        launch {
+            localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+        }.join()
+
+        //localPlaylistのTrackを追加
+        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
+        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    fun postItemToPlaylist() = viewModelScope.launch {
-        if (currentPlaylist.value == null) return@launch
-        val body = AddItemToPlaylistBody(currentPlaylist.value?.map { it.contextUri }!!)
-        repository.addItemToPlaylist(mAccessToken, currentPlaylistId,body)
-
-        //todo deleteで消去してからaddしないとアレ　ついでにDiffするとありがたい
+    private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
+        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
+    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
+        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
+    }
+
+    //onAdd callback
+    fun addTrackToLocalPlaylist(track: TrackInfo){
+        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        playlist.add(track)
+        localPlaylist.postValue(playlist)
+
+        isNavigatePlaylistFragment.postValue(true)
+        updateCurrentTrack(track)
+        postTracksToPlaylist(track)
+    }
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
-        val playlist = currentPlaylist.value as MutableList<TrackInfo>
-        playlist.removeAt(position)
-        currentPlaylist.postValue(playlist)
+        val playlist = localPlaylist.value as MutableList<TrackInfo>
+        val removeTrack = playlist.removeAt(position)
+        localPlaylist.postValue(playlist)
+
+        //todo イイ感じに改修する
+        deleteTracksFromPlaylist(removeTrack)
     }
 
     //onDrop callback
     private fun changeTrackPositionInLocalPlaylist(initialPosition:Int, finalPosition:Int){
-        val playlist = currentPlaylist.value as MutableList<TrackInfo>
+        val playlist = localPlaylist.value as MutableList<TrackInfo>
         val item = playlist.removeAt(initialPosition)
         playlist.add(finalPosition, item)
-        currentPlaylist.postValue(playlist)
+        localPlaylist.postValue(playlist)
     }
 
 
@@ -273,36 +360,64 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
+    val loadedPlaylistTitle = MutableLiveData<String>()
+    //editTextに読み込んだplaylist titleを表示する
+    fun displayLoadedPlaylistTitle(title: String){
+        loadedPlaylistTitle.postValue(title)
+    }
 
-
-    fun updatePlaylistItemByDialog(playlistId: String) = viewModelScope.launch{
+    fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
-        val trackItemsList =getPlaylistItemById(playlistId).await() ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList).await()
+        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
-
-    private suspend fun getPlaylistItemById(playlistId: String)
-        : Deferred<List<TrackItems>?> = withContext(Dispatchers.IO){
-        async {
-            repository.getPlaylistItemById(mAccessToken,playlistId)
-        }
+    fun loadPlaylistIntoPlaylistFragment(playlistId: String) = viewModelScope.launch {
+        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
+        localPlaylist.postValue(trackInfoList)
     }
+
+
+    private suspend fun getTracksByPlaylistId(playlistId: String)
+        : List<TrackItems>? = withContext(Dispatchers.IO){
+            async {
+                val result = repository.getTracksByPlaylistId(mAccessToken,playlistId)
+                return@async when (result) {
+                    is TrackItemsResult.Success -> result.data
+                    is TrackItemsResult.Failure -> {
+                        when (result.reason){
+                            is Reason.UnAuthorized,
+                            is Reason.NotFound,
+                            is Reason.ResponseError,
+                            is Reason.UnKnown -> {
+                                isLoadingSearchTrack.postValue(false)
+                                isLoadingDownerTrack.postValue(false)
+                                isLoadingUpperTrack.postValue(false)
+                                //todo display onFetchFailed textView or Toast
+                            }
+                        }
+                        null
+                    }
+                    else -> null
+                }
+            }
+        }.await()
 
 
     /**
      * Playback
      * */
 
-    fun getUsersDevices() = viewModelScope.launch {
+    private fun getUsersDevices() = viewModelScope.launch {
         val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
         Log.d("deviceId","$usersDevices")
         if (usersDevices != null){
 //          mDeviceId = usersDevices.find { it.is_active }?.id.toString()
-            mDeviceId = usersDevices.first().id
+//            mDeviceId = usersDevices.first().id
         }else{
             Log.d("fethUsersDevice","No active device. $usersDevices")
         }
@@ -334,7 +449,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
         replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
         replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
-        replaceTrackToPlaybackTrack(trackInfo,currentPlaylist as MutableLiveData<List<TrackInfo>?>)
+        replaceTrackToPlaybackTrack(trackInfo,localPlaylist as MutableLiveData<List<TrackInfo>?>)
 
         //currentTrackはListじゃないので別処理
         if(currentTrack.value == trackInfo){

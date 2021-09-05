@@ -4,11 +4,10 @@ import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Devices
-import com.kabos.spotifydj.model.playback.PlaybackBody
-import com.kabos.spotifydj.model.playlist.AddItemToPlaylistBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.model.requestBody.*
 import com.kabos.spotifydj.model.track.SearchTracks
 import retrofit2.Response
 import retrofit2.http.*
@@ -69,7 +68,6 @@ interface UserService {
     ):Response<RecommendTracks>
 
 
-
     /**
      *  playlist
      * */
@@ -77,7 +75,7 @@ interface UserService {
     suspend fun getUsersAllPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
 
     @GET("playlists/{playlist_id}/tracks")
-    suspend fun getPlaylistItemById(
+    suspend fun getTracksByPlaylistId(
         @Header("Authorization") accessToken: String,
         @Path("playlist_id")playlistId: String,
     ):Response<PlaylistById>
@@ -90,18 +88,18 @@ interface UserService {
     ):Response<PlaylistItem>
 
     @POST("playlists/{playlist_id}/tracks")
-    suspend fun addItemsToPlaylist(
+    suspend fun addTracksToPlaylist(
         @Header("Authorization") accessToken: String,
         @Header("Content-Type") contentType: String,
         @Path("playlist_id")playlistId: String,
-        @Body body: AddItemToPlaylistBody
+        @Body body: AddTracksBody
     )
 
     @DELETE("playlists/{playlist_id}/tracks")
-    suspend fun deleteItemsFromPlaylist(
+    suspend fun deleteTracksFromPlaylist(
         @Header("Authorization") accessToken: String,
         @Header("Content-Type") contentType: String,
         @Path("playlist_id")playlistId: String,
-        @Path("tracks")tracks: Array<String>
+        @Body body: DeleteTracksBody
     )
 }

@@ -13,5 +13,9 @@
         android:id="@+id/menu_edit_playlist"
         android:title="プレイリストを編集する"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_restart_playlist"
+        android:title="新しく始める"
+        app:showAsAction="never"/>
 
 </menu>
