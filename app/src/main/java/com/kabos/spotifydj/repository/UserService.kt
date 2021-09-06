@@ -95,6 +95,14 @@ interface UserService {
         @Body body: AddTracksBody
     )
 
+    @PUT("playlists/{playlist_id}/tracks")
+    suspend fun reorderPlaylistsTracks(
+        @Header("Authorization") accessToken: String,
+        @Header("Content-Type") contentType: String,
+        @Path("playlist_id") playlistId: String,
+        @Body body: ReorderBody
+    )
+
     @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
     suspend fun deleteTracksFromPlaylist(
         @Header("Authorization") accessToken: String,

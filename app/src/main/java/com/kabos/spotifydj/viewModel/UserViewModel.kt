@@ -353,6 +353,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (localPlaylistId == "") return@launch
         val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
         repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
+        //todo Toast出したい
     }
 
     //onDrop callback
@@ -361,6 +362,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val item = playlist.removeAt(initialPosition)
         playlist.add(finalPosition, item)
         localPlaylist.postValue(playlist)
+
+        reorderPlaylistsTracks(initialPosition, finalPosition)
+    }
+
+    private fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch{
+        if (localPlaylistId == "") return@launch
+        repository.reorderPlaylistsTracks(mAccessToken,localPlaylistId,initialPosition,finalPosition)
+
     }
 
 

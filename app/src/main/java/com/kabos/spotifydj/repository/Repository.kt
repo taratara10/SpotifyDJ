@@ -10,6 +10,7 @@ import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
+import com.kabos.spotifydj.model.requestBody.ReorderBody
 import com.kabos.spotifydj.model.track.TrackItems
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -193,6 +194,27 @@ class Repository @Inject constructor( private val userService: UserService) {
             playlistId = playlistId,
             body = body
         )
+    }
+
+    suspend fun reorderPlaylistsTracks(
+        accessToken: String,
+        playlistId: String,
+        initialPosition: Int,
+        finalPosition: Int){
+        val request = userService.reorderPlaylistsTracks(
+            accessToken = generateBearer(accessToken),
+            contentType = "application/json",
+            playlistId = playlistId,
+            body = ReorderBody(
+                range_start = initialPosition,
+                insert_before = finalPosition
+            )
+        )
+        try {
+            request
+        }catch (e: Exception){
+              Log.d("reorderPlaylist","$e")
+        }
     }
 
     suspend fun deleteTracksFromPlaylist(accessToken: String, playlistId: String, body: DeleteTracksBody) {
