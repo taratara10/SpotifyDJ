@@ -65,6 +65,7 @@ class PlaylistFragment: Fragment() {
             })
 
             btnEditPlaylist.setOnClickListener{
+                viewModel.getAllPlaylists()
                 val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromPlaylist = true)
                 findNavController().navigate(action)
             }

@@ -81,7 +81,7 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                Log.d("mUserId","")
+                Log.d("mUserId","${viewModel.mUserName} /${viewModel.mUserId}")
 
 
                 true

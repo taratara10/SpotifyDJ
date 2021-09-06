@@ -301,7 +301,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
     private suspend fun filterOwnPlaylist(playlist:List<PlaylistItem>?) {
         if (mUserName == "") getUserProfile().join()
-        filterOwnPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
+        filterOwnPlaylist.value = playlist?.filter { it.owner.display_name == mUserName }
     }
 
 
