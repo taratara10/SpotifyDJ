@@ -95,7 +95,7 @@ interface UserService {
         @Body body: AddTracksBody
     )
 
-    @DELETE("playlists/{playlist_id}/tracks")
+    @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
     suspend fun deleteTracksFromPlaylist(
         @Header("Authorization") accessToken: String,
         @Header("Content-Type") contentType: String,

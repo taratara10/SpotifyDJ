@@ -318,18 +318,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
-    //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
-        if (localPlaylistId == "") return@launch
-        val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
-        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
-    }
 
-    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
-        if (localPlaylistId == "") return@launch
-        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
-        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
-    }
 
     //onAdd callback
     fun addTrackToLocalPlaylist(track: TrackInfo){
@@ -341,6 +330,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         updateCurrentTrack(track)
         postTracksToPlaylist(track)
     }
+    //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
+    private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
+        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
+    }
+
+
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
         val playlist = localPlaylist.value as MutableList<TrackInfo>
@@ -348,7 +345,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         localPlaylist.postValue(playlist)
 
         //todo イイ感じに改修する
+        //nobody
         deleteTracksFromPlaylist(removeTrack)
+    }
+
+    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
+        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
     //onDrop callback
