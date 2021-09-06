@@ -33,12 +33,11 @@ class DialogUsersPlaylists: DialogFragment() {
         override fun onClick(playlistItem: PlaylistItem) {
             //check where fragment
             if (mainFragmentArgs.fromSearch){
-                viewModel.loadPlaylistIntoSearchFragment(playlistItem.id)
+                viewModel.loadPlaylistIntoSearchFragment(playlistItem)
                 viewModel.isNavigateSearchFragment.postValue(true)
             }
             if (mainFragmentArgs.fromPlaylist){
-                viewModel.loadPlaylistIntoPlaylistFragment(playlistItem.id)
-                viewModel.displayLoadedPlaylistTitle(playlistItem.name)
+                viewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
                 viewModel.isNavigatePlaylistFragment.postValue(true)
             }
             findNavController().popBackStack()

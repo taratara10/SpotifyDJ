@@ -8,6 +8,7 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
+import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTrack
@@ -48,6 +49,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateSearchFragment = MutableLiveData(false)
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
+
+    var isUpdatePlaylist = false
 
 
 
@@ -361,27 +364,32 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
-    val loadedPlaylistTitle = MutableLiveData<String>()
-    //editTextに読み込んだplaylist titleを表示する
-    fun displayLoadedPlaylistTitle(title: String){
-        loadedPlaylistTitle.postValue(title)
-    }
 
-    fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
+
+    fun loadPlaylistIntoSearchFragment(playlist: PlaylistItem) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
-        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
-    fun loadPlaylistIntoPlaylistFragment(playlistId: String) = viewModelScope.launch {
-        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+    fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
+        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         localPlaylist.postValue(trackInfoList)
+        //ついでにviewModelのパラメーターも更新
+        updatePlaylistTitleAndId(playlist)
     }
+    val loadedPlaylistTitle = MutableLiveData<String>()
 
+    private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
+        //プレイリストを編集した際に、postするのに必要
+        localPlaylistId = playlist.id
+        //プレイリストのEditTextを更新
+        loadedPlaylistTitle.postValue(playlist.name)
+    }
 
     private suspend fun getTracksByPlaylistId(playlistId: String)
         : List<TrackItems>? = withContext(Dispatchers.IO){
