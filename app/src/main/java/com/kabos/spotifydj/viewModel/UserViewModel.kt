@@ -28,8 +28,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     var mDeviceId = ""
     var mUserId = ""
     var mUserName = ""
-
     var localPlaylistId = ""
+
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()

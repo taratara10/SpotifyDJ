@@ -56,8 +56,13 @@ class PlaylistFragment: Fragment() {
 
             viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
                 playlist?.let { dragTackAdapter.submitList(it) }
-                if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
-                else tvPlaylistEmpty.visibility = View.GONE
+                if(playlist.isNullOrEmpty()) {
+                    tvPlaylistEmpty.visibility = View.VISIBLE
+                    btnEditPlaylist.visibility = View.VISIBLE
+                }else {
+                    tvPlaylistEmpty.visibility = View.GONE
+                    btnEditPlaylist.visibility = View.GONE
+                }
             })
 
             viewModel.loadedPlaylistTitle.observe(viewLifecycleOwner,{title ->
