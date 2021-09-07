@@ -66,6 +66,7 @@ class SearchFragment: Fragment() {
                     tvSearchItemNothing.visibility = View.VISIBLE
                 }else{
                     tvSearchItemNothing.visibility = View.GONE
+                    tvLetSearchTrack.visibility = View.GONE
                 }
             })
 
