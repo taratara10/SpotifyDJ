@@ -24,7 +24,6 @@ class SearchFragment: Fragment() {
     private val viewModel: UserViewModel by activityViewModels()
     private val trackAdapter by lazy { TrackAdapter(viewModel.callback) }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
@@ -34,13 +33,15 @@ class SearchFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
+
             etSearchTracks.doAfterTextChanged { text ->
                 viewModel.updateSearchedTracksResult(text.toString())
-                //empty viewを表示・非表示する処理
-                if (text.isNullOrEmpty() && viewModel.searchTrackList.value.isNullOrEmpty()) {
-                    tvEditTextIsEmpty.visibility = View.VISIBLE
-                } else {
-                    tvEditTextIsEmpty.visibility = View.GONE
+                //「キーワードで検索しよう」を表示・非表示する処理
+                if (text.isNullOrEmpty()) {
+                    viewModel.searchTrackList.postValue(listOf())
+                    tvLetSearchTrack.visibility = View.VISIBLE
+                }else{
+                    tvLetSearchTrack.visibility = View.GONE
                 }
             }
 
@@ -59,11 +60,12 @@ class SearchFragment: Fragment() {
             viewModel.searchTrackList.observe(viewLifecycleOwner, { searchResult ->
                 trackAdapter.submitList(searchResult)
 
-                if (searchResult.isNullOrEmpty()){
+                //「検索結果該当なし」の表示・非表示する処理
+                // tvLetSearch(キーワードで検索しよう)が非表示の時のみ、「該当なし」を表示する
+                if (searchResult.isNullOrEmpty() && tvLetSearchTrack.visibility == View.GONE){
                     tvSearchItemNothing.visibility = View.VISIBLE
                 }else{
                     tvSearchItemNothing.visibility = View.GONE
-                    tvEditTextIsEmpty.visibility = View.GONE
                 }
             })
 
@@ -78,4 +80,6 @@ class SearchFragment: Fragment() {
 
 
     }
+
+
 }
