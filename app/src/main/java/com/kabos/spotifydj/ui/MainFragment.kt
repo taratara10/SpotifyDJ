@@ -13,6 +13,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentMainBinding
+import com.kabos.spotifydj.ui.adapter.SearchAdapter
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,6 +23,7 @@ class MainFragment: Fragment() {
 
     private lateinit var binding: FragmentMainBinding
     private val viewModel: UserViewModel by activityViewModels()
+    private lateinit var searchAdapter: SearchAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
@@ -34,7 +36,8 @@ class MainFragment: Fragment() {
 
         //setup viewPager
         val viewPager = binding.pager
-        viewPager.adapter = ViewPagerAdapter(this)
+        searchAdapter = SearchAdapter(this)
+        viewPager.adapter = searchAdapter
 
         //setup TabLayout
         val tabLayout = binding.tabLayout
@@ -82,13 +85,19 @@ class MainFragment: Fragment() {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
                 Log.d("mUserId","${viewModel.mUserName} /${viewModel.mUserId}")
-
+                searchAdapter.addFragment(1)
+                searchAdapter.notifyDataSet()
 
                 true
             }
             R.id.menu_fetch_playlist -> {
                 viewModel.getAllPlaylists()
                 findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
+                true
+            }
+            R.id.menu_restart_playlist -> {
+                searchAdapter.addFragment(2)
+                searchAdapter.notifyDataSet()
                 true
             }
             else -> super.onOptionsItemSelected(item)
