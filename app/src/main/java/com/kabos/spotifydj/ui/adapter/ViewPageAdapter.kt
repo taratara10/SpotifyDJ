@@ -3,21 +3,9 @@ package com.kabos.spotifydj.ui.adapter
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
-import com.kabos.spotifydj.ui.PlaylistFragment
-import com.kabos.spotifydj.ui.RecommendFragment
-import com.kabos.spotifydj.ui.SearchFragment
+import com.kabos.spotifydj.ui.*
 
 class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
-    override fun getItemCount(): Int = 3
-
-    override fun createFragment(position: Int): Fragment =
-        when(position) {
-            0 -> SearchFragment()
-            1 -> RecommendFragment()
-            else -> PlaylistFragment()
-        }
-}
-class SearchAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
     private var itemCount = 1
     private var fragmentMutableList = mutableListOf<Fragment>()
     private var idsMutableList = mutableListOf<Long>()
@@ -25,51 +13,48 @@ class SearchAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     init {
         fragmentMutableList.apply {
-            add(SearchFragment())
+            add(PlaylistFragment())
             add(RecommendFragment())
+            add(SearchFragment())
             forEach {
                 idsMutableList.add(it.hashCode().toLong())
             }
         }
     }
 
-    override fun getItemCount(): Int {
-        return idsMutableList.size
-    }
-    override fun getItemId(position: Int): Long {
-        return idsMutableList[position]
-    }
-    override fun containsItem(itemId: Long): Boolean {
-        return idsMutableList.contains(itemId)
-    }
+    override fun getItemCount(): Int = idsMutableList.size
 
+    override fun getItemId(position: Int): Long = idsMutableList[position]
 
-    override fun createFragment(position: Int): Fragment {
-        return fragmentMutableList[position]
-    }
+    override fun containsItem(itemId: Long): Boolean = idsMutableList.contains(itemId)
+
+    override fun createFragment(position: Int): Fragment = fragmentMutableList[position]
+
     //Add/Remove based on triggered logic
     fun addFragment(itemCount: Int){
         this.itemCount = itemCount
         //末尾のFragmentを削除
-        fragmentMutableList.removeLast()
-        idsMutableList.removeLast()
+        fragmentMutableList.removeFirst()
+        idsMutableList.removeFirst()
+
         if (itemCount == 1) {
-            fragmentMutableList.add(PlaylistFragment())
+            fragmentMutableList.add(0, EditNewPlaylistFragment())
         } else {
-            fragmentMutableList.add(SearchFragment())
+            fragmentMutableList.add(0, EditExistingPlaylistFragment())
         }
-    //Assign unique id to each fragment
-        fragmentMutableList.last() {
+
+        //Assign unique id to each fragment
+        fragmentMutableList.first() {
             idsMutableList.add(it.hashCode().toLong())
         }
     }
     fun notifyDataSet(){
         if(itemCount == 1){
-            notifyItemRemoved(1)
-            notifyItemInserted(1)
+            notifyItemRemoved(0)
+            notifyItemInserted(0)
         }else{
-            notifyItemRemoved(1)
-            notifyItemInserted(1)
+            notifyItemRemoved(0)
+            notifyItemInserted(0)
         }
     }
 }
