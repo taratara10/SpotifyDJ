@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
-import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.ui.adapter.PlaylistCallback
@@ -52,9 +52,31 @@ class PlaylistFragment: Fragment() {
         }
 
         viewModel.allPlaylists.observe(viewLifecycleOwner,{ playlist ->
-            playlistAdapter.submitList(playlist)
-            Log.d("allPlaylist","observed $playlist")
+            if (playlist == null) return@observe
+            playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
+
         })
 
+    }
+
+    private fun fixFirstItemByCreateNewPlaylist(list: List<PlaylistItem>): List<PlaylistItem>{
+        val mList = list.toMutableList()
+        //1つ目に表示する"新規作成"のアイテム
+        val firstPlaylistItem = PlaylistItem(
+            collaborative = false,
+            description = "",
+            external_urls = ExternalUrls(""),
+            href = "",
+            id = "",
+            images = listOf(Image(url = "firstItem")),
+            name = "新規作成",
+            owner = Owner("", ExternalUrlsX(""),"","","",""),
+            public = false,
+            snapshot_id = "",
+            type = "",
+            uri = "")
+
+        mList.add(0, firstPlaylistItem)
+        return mList.toList()
     }
 }
