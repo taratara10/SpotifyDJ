@@ -13,8 +13,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toStartOf="@+id/btn_create_playlist"
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -22,42 +22,21 @@
             android:id="@+id/et_playlist_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="プレイリスト名"
-            android:textColor="@color/white"
-            android:inputType="text" />
+            android:hint="プレイリスト検索"
+            android:inputType="text"
+            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/btn_edit_playlist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="既存のプレイリストを編集する"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/rv_playlist" />
 
-    <Button
-        android:id="@+id/btn_create_playlist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="作成する"
-        app:layout_constraintBottom_toBottomOf="@+id/til_playlist_title"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_playlist"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:behind_swiped_item_bg_color="@color/red_500"
-        app:behind_swiped_item_icon="@drawable/ic_baseline_delete_24"
-        app:behind_swiped_item_icon_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_playlist_title"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
+        app:layout_constraintTop_toBottomOf="@id/til_playlist_title"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView

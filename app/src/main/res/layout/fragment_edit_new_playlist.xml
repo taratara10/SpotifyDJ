@@ -23,7 +23,7 @@
             android:id="@+id/et_new_playlist_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="プレイリスト名"
+            android:hint="新規プレイリスト名"
             android:textColor="@color/white"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>

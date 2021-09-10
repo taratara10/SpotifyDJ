@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity() {
                         .apply()
                     //以降accessTokenはviewModelのmAccessTokenを介して使う
                     viewModel.initializeAccessToken(response.accessToken)
+                    //AccessTokenを取得できたらPlaylist Fragmentに表示する
+                    viewModel.getAllPlaylists()
                     Log.d("STARTING", "GOT AUTH TOKEN")
                 }
 

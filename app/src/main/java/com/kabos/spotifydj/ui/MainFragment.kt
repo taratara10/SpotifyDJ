@@ -21,8 +21,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainFragment: Fragment() {
 
     private lateinit var binding: FragmentMainBinding
-    private val viewModel: UserViewModel by activityViewModels()
     private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private val viewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
@@ -42,9 +42,9 @@ class MainFragment: Fragment() {
         val tabLayout = binding.tabLayout
         TabLayoutMediator(tabLayout, viewPager) {tab, position ->
             when(position){
-                0 -> tab.text = "Search"
+                0 -> tab.text = "Playlist"
                 1 -> tab.text = "Recommend"
-                2 -> tab.text = "Playlist"
+                2 -> tab.text = "Search"
             }
         }.attach()
 
@@ -53,7 +53,7 @@ class MainFragment: Fragment() {
         viewModel.apply {
             isNavigateSearchFragment.observe(viewLifecycleOwner,{ isNavigate ->
                 if (isNavigate){
-                    viewPager.setCurrentItem(0,true)
+                    viewPager.setCurrentItem(2,true)
                     viewModel.isNavigateSearchFragment.postValue(false)
                 }
             })
@@ -71,7 +71,7 @@ class MainFragment: Fragment() {
 
             isNavigatePlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
                 if (isNavigate) {
-                    viewPager.setCurrentItem(2,true)
+                    viewPager.setCurrentItem(0,true)
                     viewModel.isNavigatePlaylistFragment.postValue(false)
                 }
             })

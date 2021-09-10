@@ -283,7 +283,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun getAllPlaylists() = viewModelScope.launch {
         when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
             is PlaylistItemsResult.Success -> {
-                allPlaylists.postValue(result.data)
+                allPlaylists.value = result.data
                 filterOwnPlaylist(result.data)
             }
             is PlaylistItemsResult.Failure -> {
