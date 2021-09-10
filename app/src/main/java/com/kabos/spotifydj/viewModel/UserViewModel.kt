@@ -5,10 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
-import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.networkUtil.*
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTrack

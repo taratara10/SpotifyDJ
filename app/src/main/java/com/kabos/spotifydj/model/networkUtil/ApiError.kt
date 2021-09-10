@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.model
+package com.kabos.spotifydj.model.networkUtil
 
 data class ApiError(
     val error: Error

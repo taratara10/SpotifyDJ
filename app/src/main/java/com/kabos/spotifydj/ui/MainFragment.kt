@@ -13,6 +13,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentMainBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
+import com.kabos.spotifydj.util.ReplaceFragment
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -82,9 +83,7 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                Log.d("mUserId","${viewModel.mUserName} /${viewModel.mUserId}")
-                viewPagerAdapter.addFragment(1)
-                viewPagerAdapter.notifyDataSet()
+                viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
 
                 true
             }
@@ -94,8 +93,7 @@ class MainFragment: Fragment() {
                 true
             }
             R.id.menu_restart_playlist -> {
-                viewPagerAdapter.addFragment(2)
-                viewPagerAdapter.notifyDataSet()
+                viewPagerAdapter.replaceFragment(ReplaceFragment.ExistingPlaylist)
                 true
             }
             else -> super.onOptionsItemSelected(item)
