@@ -14,9 +14,11 @@ import com.kabos.spotifydj.databinding.FragmentEditNewPlaylistBinding
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.viewModel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
+@AndroidEntryPoint
 class EditNewPlaylistFragment: Fragment() {
 
     private lateinit var binding: FragmentEditNewPlaylistBinding

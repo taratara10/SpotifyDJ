@@ -103,6 +103,7 @@ class MainFragment: Fragment() {
             }
             R.id.menu_fetch_playlist -> {
                 viewPagerAdapter.replaceFragment(ReplaceFragment.ResetPlaylist)
+                //todo resetPlaylist でisNavigate New/Existing postValue(false)
                 true
             }
             R.id.menu_restart_playlist -> {

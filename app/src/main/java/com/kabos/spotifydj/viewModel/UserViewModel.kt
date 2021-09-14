@@ -326,10 +326,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
         playlist.add(track)
         localPlaylist.postValue(playlist)
-
-        isNavigatePlaylistFragment.postValue(true)
         updateCurrentTrack(track)
         postTracksToPlaylist(track)
+
+        //New or Existing playlistに移動してないなら、playlistをnewPlaylistFragmentにreplace
+        if (isNavigateNewPlaylistFragment.value!! || isNavigateExistingPlaylistFragment.value!!){
+            isNavigatePlaylistFragment.postValue(true)
+        }else{
+            isNavigateNewPlaylistFragment.postValue(true)
+        }
     }
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
