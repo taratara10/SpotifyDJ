@@ -75,6 +75,20 @@ class MainFragment: Fragment() {
                     viewModel.isNavigatePlaylistFragment.postValue(false)
                 }
             })
+
+            isNavigateNewPlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                if (isNavigate){
+                    viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
+                    viewPager.setCurrentItem(0, true)
+                }
+            })
+
+            isNavigateExistingPlaylistFragment.observe(viewLifecycleOwner,{ isNavigate ->
+                if (isNavigate) {
+                    viewPagerAdapter.replaceFragment(ReplaceFragment.ExistingPlaylist)
+                    viewPager.setCurrentItem(3, true)
+                }
+            })
         }
 
 
@@ -83,13 +97,11 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
-
+//                viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
                 true
             }
             R.id.menu_fetch_playlist -> {
-                viewModel.getAllPlaylists()
-                findNavController().navigate(R.id.action_nav_main_to_nav_user_playlist)
+                viewPagerAdapter.replaceFragment(ReplaceFragment.ResetPlaylist)
                 true
             }
             R.id.menu_restart_playlist -> {

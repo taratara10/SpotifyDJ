@@ -41,6 +41,10 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
             fragmentList.removeFirst()
             fragmentList.add(0, EditExistingPlaylistFragment())
         }
+        if (pattern == ReplaceFragment.ResetPlaylist){
+            fragmentList.removeFirst()
+            fragmentList.add(0, PlaylistFragment())
+        }
 
         //Assign unique id to each fragment
         idsList.clear()
@@ -51,16 +55,15 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
         notifyDataSet(pattern)
     }
 
-    fun notifyDataSet(pattern: ReplaceFragment){
-        if(pattern == ReplaceFragment.NewPlaylist){
+    private fun notifyDataSet(pattern: ReplaceFragment){
+        if (   pattern == ReplaceFragment.NewPlaylist
+            || pattern == ReplaceFragment.ExistingPlaylist
+            || pattern ==ReplaceFragment.ResetPlaylist
+        ){
             notifyItemRemoved(0)
             notifyItemInserted(0)
         }
 
-        if (pattern == ReplaceFragment.ExistingPlaylist){
-            notifyItemRemoved(0)
-            notifyItemInserted(0)
-        }
     }
 }
 
