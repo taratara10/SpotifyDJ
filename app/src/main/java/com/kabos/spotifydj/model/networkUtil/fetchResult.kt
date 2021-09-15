@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.repository
+package com.kabos.spotifydj.model.networkUtil
 
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
@@ -28,7 +28,7 @@ sealed class PlaylistItemsResult {
 }
 
 sealed class Reason {
-     object EmptyAccessToken :Reason()
+     object EmptyAccessToken : Reason()
      object UnAuthorized: Reason()
      object NotFound: Reason()
      data class ResponseError(val message: String): Reason()

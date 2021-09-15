@@ -2,16 +2,13 @@ package com.kabos.spotifydj.repository
 
 import android.util.Log
 import com.kabos.spotifydj.model.*
-import com.kabos.spotifydj.model.PlaylistById.Item
-import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.networkUtil.*
 import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.requestBody.PlaybackBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
-import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
-import com.kabos.spotifydj.model.track.TrackItems
-import com.squareup.moshi.JsonAdapter
+import com.kabos.spotifydj.model.requestBody.ReorderBody
 import com.squareup.moshi.Moshi
 import retrofit2.Response
 import javax.inject.Inject
@@ -87,7 +84,7 @@ class Repository @Inject constructor( private val userService: UserService) {
      * Search
      * */
 
-    suspend fun getTracksByKeyword(accessToken: String, keyword: String): TrackItemsResult{
+    suspend fun getTracksByKeyword(accessToken: String, keyword: String): TrackItemsResult {
         return try {
             val request = userService.getTracksByKeyword(
                 accessToken = generateBearer(accessToken),
@@ -156,7 +153,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
-    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String):TrackItemsResult {
+    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String): TrackItemsResult {
         return try {
             val request = userService.getTracksByPlaylistId(
                 accessToken = generateBearer(accessToken),
@@ -193,6 +190,27 @@ class Repository @Inject constructor( private val userService: UserService) {
             playlistId = playlistId,
             body = body
         )
+    }
+
+    suspend fun reorderPlaylistsTracks(
+        accessToken: String,
+        playlistId: String,
+        initialPosition: Int,
+        finalPosition: Int){
+        val request = userService.reorderPlaylistsTracks(
+            accessToken = generateBearer(accessToken),
+            contentType = "application/json",
+            playlistId = playlistId,
+            body = ReorderBody(
+                range_start = initialPosition,
+                insert_before = finalPosition
+            )
+        )
+        try {
+            request
+        }catch (e: Exception){
+              Log.d("reorderPlaylist","$e")
+        }
     }
 
     suspend fun deleteTracksFromPlaylist(accessToken: String, playlistId: String, body: DeleteTracksBody) {

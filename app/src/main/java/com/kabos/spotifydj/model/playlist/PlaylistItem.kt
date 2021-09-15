@@ -9,7 +9,7 @@ data class PlaylistItem(
     val images: List<Image>,
     val name: String,
     val owner: Owner,
-    val primary_color: Any,
+    val primary_color: Any? = null,
     val `public`: Boolean,
     val snapshot_id: String,
     val type: String,

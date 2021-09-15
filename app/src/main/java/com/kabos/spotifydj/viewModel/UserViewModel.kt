@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
-import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.networkUtil.*
 import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
@@ -27,8 +27,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     var mDeviceId = ""
     var mUserId = ""
     var mUserName = ""
-
     var localPlaylistId = ""
+
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
@@ -48,6 +48,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateSearchFragment = MutableLiveData(false)
     val isNavigateRecommendFragment = MutableLiveData(false)
     val isNavigatePlaylistFragment = MutableLiveData(false)
+    val isNavigateNewPlaylistFragment = MutableLiveData(false)
+    val isNavigateExistingPlaylistFragment = MutableLiveData(false)
+
+    var isUpdatePlaylist = false
 
 
 
@@ -281,7 +285,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun getAllPlaylists() = viewModelScope.launch {
         when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
             is PlaylistItemsResult.Success -> {
-                allPlaylists.postValue(result.data)
+                allPlaylists.value = result.data
                 filterOwnPlaylist(result.data)
             }
             is PlaylistItemsResult.Failure -> {
@@ -298,7 +302,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
     private suspend fun filterOwnPlaylist(playlist:List<PlaylistItem>?) {
         if (mUserName == "") getUserProfile().join()
-        filterOwnPlaylist.postValue(playlist?.filter { it.owner.display_name == mUserName })
+        filterOwnPlaylist.value = playlist?.filter { it.owner.display_name == mUserName }
     }
 
 
@@ -309,11 +313,29 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
         }.join()
 
-        //localPlaylistのTrackを追加
+        //localPlaylistのTrackを追加　空なら終了
+        if (localPlaylist.value == null) return@launch
         val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
+
+
+    //onAdd callback
+    fun addTrackToLocalPlaylist(track: TrackInfo){
+        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
+        playlist.add(track)
+        localPlaylist.postValue(playlist)
+        updateCurrentTrack(track)
+        postTracksToPlaylist(track)
+
+        //New or Existing playlistに移動してないなら、playlistをnewPlaylistFragmentにreplace
+        if (isNavigateNewPlaylistFragment.value!! || isNavigateExistingPlaylistFragment.value!!){
+            isNavigatePlaylistFragment.postValue(true)
+        }else{
+            isNavigateNewPlaylistFragment.postValue(true)
+        }
+    }
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
         if (localPlaylistId == "") return@launch
@@ -321,22 +343,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
-    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
-        if (localPlaylistId == "") return@launch
-        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
-        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
-    }
 
-    //onAdd callback
-    fun addTrackToLocalPlaylist(track: TrackInfo){
-        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
-        playlist.add(track)
-        localPlaylist.postValue(playlist)
-
-        isNavigatePlaylistFragment.postValue(true)
-        updateCurrentTrack(track)
-        postTracksToPlaylist(track)
-    }
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
         val playlist = localPlaylist.value as MutableList<TrackInfo>
@@ -344,7 +351,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         localPlaylist.postValue(playlist)
 
         //todo イイ感じに改修する
+        //nobody
         deleteTracksFromPlaylist(removeTrack)
+    }
+
+    private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (localPlaylistId == "") return@launch
+        val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
+        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
+        //todo Toast出したい
     }
 
     //onDrop callback
@@ -353,6 +368,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         val item = playlist.removeAt(initialPosition)
         playlist.add(finalPosition, item)
         localPlaylist.postValue(playlist)
+
+        reorderPlaylistsTracks(initialPosition, finalPosition)
+    }
+
+    private fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch{
+        if (localPlaylistId == "") return@launch
+        repository.reorderPlaylistsTracks(mAccessToken,localPlaylistId,initialPosition,finalPosition)
+
     }
 
 
@@ -360,27 +383,32 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Dialog Playlist
      * */
-    val loadedPlaylistTitle = MutableLiveData<String>()
-    //editTextに読み込んだplaylist titleを表示する
-    fun displayLoadedPlaylistTitle(title: String){
-        loadedPlaylistTitle.postValue(title)
-    }
 
-    fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
+
+    fun loadPlaylistIntoSearchFragment(playlist: PlaylistItem) = viewModelScope.launch{
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
-        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         searchTrackList.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
-    fun loadPlaylistIntoPlaylistFragment(playlistId: String) = viewModelScope.launch {
-        val trackItemsList = getTracksByPlaylistId(playlistId) ?: return@launch
+    fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
+        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         localPlaylist.postValue(trackInfoList)
+        //ついでにviewModelのパラメーターも更新
+        updatePlaylistTitleAndId(playlist)
     }
+    val loadedPlaylistTitle = MutableLiveData<String>()
 
+    private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
+        //プレイリストを編集した際に、postするのに必要
+        localPlaylistId = playlist.id
+        //プレイリストのEditTextを更新
+        loadedPlaylistTitle.postValue(playlist.name)
+    }
 
     private suspend fun getTracksByPlaylistId(playlistId: String)
         : List<TrackItems>? = withContext(Dispatchers.IO){

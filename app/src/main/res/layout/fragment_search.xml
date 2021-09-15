@@ -36,7 +36,7 @@
         app:layout_constraintTop_toTopOf="@+id/til_search_tracks" />
 
     <TextView
-        android:id="@+id/tv_edit_text_is_empty"
+        android:id="@+id/tv_let_search_track"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="アーティスト、曲名、キーワードで検索しよう"

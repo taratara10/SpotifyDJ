@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
-import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
+import com.kabos.spotifydj.model.playlist.*
+import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
+import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
@@ -22,10 +21,22 @@ class PlaylistFragment: Fragment() {
 
     private lateinit var binding: FragmentPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
-    private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
+    private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
+    private val playlistCallback = object : PlaylistCallback {
+        override fun onClick(playlistItem: PlaylistItem) {
+            if (playlistItem.id == "createNewPlaylist"){
+                viewModel.isNavigateNewPlaylistFragment.postValue(true)
+            }else{
+                viewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
+                viewModel.isNavigateExistingPlaylistFragment.postValue(true)
+            }
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentPlaylistBinding.inflate(inflater, container, false)
+
+        viewModel.getAllPlaylists()
         return binding.root
     }
 
@@ -34,52 +45,37 @@ class PlaylistFragment: Fragment() {
 
         binding.apply {
             rvPlaylist.apply {
-                layoutManager = LinearLayoutManager(activity)
-                adapter = dragTackAdapter
-                dragListener = dragTackAdapter.onItemDragListener
-                swipeListener = dragTackAdapter.onItemSwipeListener
-                disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
-            }
-
-            val date = Calendar.getInstance().time
-            val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
-            etPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
-
-            btnCreatePlaylist.setOnClickListener {
-                viewModel.createPlaylist(etPlaylistTitle.text.toString())
-                Toast.makeText(context,"プレイリストを作成しました",Toast.LENGTH_LONG).show()
-
-                //todo btnEnableどうやって管理しよか
-                it.isEnabled = false
-            }
-
-
-            viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
-                playlist?.let { dragTackAdapter.submitList(it) }
-                if(playlist.isNullOrEmpty()) tvPlaylistEmpty.visibility = View.VISIBLE
-                else tvPlaylistEmpty.visibility = View.GONE
-            })
-
-            viewModel.loadedPlaylistTitle.observe(viewLifecycleOwner,{title ->
-                etPlaylistTitle.setText(title)
-            })
-
-            btnEditPlaylist.setOnClickListener{
-                val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromPlaylist = true)
-                findNavController().navigate(action)
-            }
-
-
-
-
-
-
-
-
-
+                layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL,false)
+                adapter = playlistAdapter
+                }
         }
 
+        viewModel.allPlaylists.observe(viewLifecycleOwner,{ playlist ->
+            if (playlist == null) return@observe
+            playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
+
+        })
 
     }
 
+    private fun fixFirstItemByCreateNewPlaylist(list: List<PlaylistItem>): List<PlaylistItem>{
+        val mList = list.toMutableList()
+        //1つ目に表示する"新規作成"のアイテム
+        val firstPlaylistItem = PlaylistItem(
+            collaborative = false,
+            description = "",
+            external_urls = ExternalUrls(""),
+            href = "",
+            id = "createNewPlaylist",
+            images = listOf(Image(url = "firstItem")),
+            name = "新規作成",
+            owner = Owner("", ExternalUrlsX(""),"","","",""),
+            public = false,
+            snapshot_id = "",
+            type = "",
+            uri = "")
+
+        mList.add(0, firstPlaylistItem)
+        return mList.toList()
+    }
 }
