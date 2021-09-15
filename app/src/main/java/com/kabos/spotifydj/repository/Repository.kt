@@ -30,6 +30,8 @@ class Repository @Inject constructor( private val userService: UserService) {
     }
 
     suspend fun getUsersProfile(accessToken: String): UserResult {
+        if (accessToken.isEmpty()) return UserResult.Failure(Reason.EmptyAccessToken)
+
         return try {
             val request = userService.getUsersProfile(generateBearer(accessToken))
             return if (request.isSuccessful) UserResult.Success(request.body()!!)
@@ -70,6 +72,8 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
+    //todo replace handler
+    //returnがreasonでない場合、accessTokenEmptyはどう判定する？
     suspend fun getUsersDevices(accessToken: String): List<Device>? {
         val request = userService.getUsersDevices(generateBearer(accessToken))
         return if (request.isSuccessful){
@@ -85,6 +89,8 @@ class Repository @Inject constructor( private val userService: UserService) {
      * */
 
     suspend fun getTracksByKeyword(accessToken: String, keyword: String): TrackItemsResult {
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
+
         return try {
             val request = userService.getTracksByKeyword(
                 accessToken = generateBearer(accessToken),
@@ -99,6 +105,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     }
 
     suspend fun getAudioFeaturesById(accessToken: String, id: String) : AudioFeatureResult {
+        if (accessToken.isEmpty()) return AudioFeatureResult.Failure(Reason.EmptyAccessToken)
         return try {
             val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
 
@@ -113,6 +120,8 @@ class Repository @Inject constructor( private val userService: UserService) {
                 accessToken: String,
                 trackInfo: TrackInfo,
                 fetchUpperTrack: Boolean) : TrackItemsResult {
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
+
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
         var minEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
         var maxEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
@@ -143,6 +152,7 @@ class Repository @Inject constructor( private val userService: UserService) {
      * */
 
     suspend fun getUsersAllPlaylist(accessToken: String): PlaylistItemsResult {
+        if (accessToken.isEmpty()) return PlaylistItemsResult.Failure(Reason.EmptyAccessToken)
         return try {
             val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
 
@@ -154,6 +164,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     }
 
     suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String): TrackItemsResult {
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
         return try {
             val request = userService.getTracksByPlaylistId(
                 accessToken = generateBearer(accessToken),
