@@ -29,8 +29,8 @@ sealed class PlaylistItemsResult {
 
 sealed class Reason {
      object EmptyAccessToken : Reason()
-     object UnAuthorized: Reason()
-     object NotFound: Reason()
-     data class ResponseError(val message: String): Reason()
-     data class UnKnown(val exception: Exception): Reason()
+     object UnAuthorized: Reason() //401 The access token expired
+     object NotFound: Reason()     //404
+     data class ResponseError(val message: String): Reason() //400 BadRequest or 403 Forbidden
+     data class UnKnown(val exception: Exception): Reason()  //Non-network reason
 }

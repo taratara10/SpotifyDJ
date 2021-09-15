@@ -107,7 +107,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is UserResult.Failure -> {
                 when (result.reason) {
-                    is Reason.UnAuthorized -> {
+                    is Reason.UnAuthorized,
+                    is Reason.NotFound,
+                    is Reason.ResponseError,
+                    is Reason.UnKnown -> {
+                        Log.d("user","fail")
                         //todo open login activity
                     }
                 }
@@ -150,6 +154,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                         is Reason.ResponseError,
                         is Reason.UnKnown -> {
                             isLoadingSearchTrack.postValue(false)
+                            Log.d("getTracksByKeyword","${result.reason}")
                             //todo display onFetchFailed textView or Toast
                         }
                     }

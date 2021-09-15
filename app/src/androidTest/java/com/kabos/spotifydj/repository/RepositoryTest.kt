@@ -18,6 +18,7 @@ import com.kabos.spotifydj.model.requestBody.ReorderBody
 import com.kabos.spotifydj.model.track.SearchTracks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import okhttp3.ResponseBody
 import org.junit.Assert.*
 
 import org.junit.After
@@ -122,10 +123,32 @@ class RepositoryTest {
 
     }
 
+    val errorBody400 = "{\n" +
+            "  \"error\": {\n" +
+            "    \"status\": 400,\n" +
+            "    \"message\": \"invalid id\"\n" +
+            "  }\n" +
+            "}"
+    val errorBody401 = "{\n" +
+            "  \"error\": {\n" +
+            "    \"status\": 401,\n" +
+            "    \"message\": \"The access token expired\"\n" +
+            "  }\n" +
+            "}"
 
+    val errorBody403 = "{\n" +
+            "  \"error\": {\n" +
+            "    \"status\": 403,\n" +
+            "    \"message\": \"Forbidden\"\n" +
+            "  }\n" +
+            "}"
 
-
-
+    val errorBody404 = "{\n" +
+            "  \"error\": {\n" +
+            "    \"status\": 404,\n" +
+            "    \"message\": \"Not Found\"\n" +
+            "  }\n" +
+            "}"
 
 
     @Before
@@ -168,10 +191,76 @@ class RepositoryTest {
                 is UserResult.Failure -> assertEquals(Reason.EmptyAccessToken, result.reason)
             }
         }
-
-
     }
 
+    //private fun errorReasonHandler()のテストも兼ねてる
+    @Test
+    fun test_getUsersProfile_unAuthorized(){
+        val service = UserServiceMock()
+        val repository = Repository(service)
+
+        runBlocking {
+            val body = ResponseBody.create(null, errorBody401)
+            service.userResponse = Response.error(401,body)
+
+            when(val result = repository.getUsersProfile("token")){
+                is UserResult.Success -> fail("Response must be UserResult.Failure, but it is $result")
+                is UserResult.Failure -> assertEquals(Reason.UnAuthorized, result.reason)
+            }
+        }
+    }
+
+    //private fun errorReasonHandler()のテストも兼ねてる
+    @Test
+    fun test_getUsersProfile_notFound(){
+        val service = UserServiceMock()
+        val repository = Repository(service)
+
+        runBlocking {
+            val body = ResponseBody.create(null, errorBody404)
+            service.userResponse = Response.error(404,body)
+
+            when(val result = repository.getUsersProfile("token")){
+                is UserResult.Success -> fail("Response must be UserResult.Failure, but it is $result")
+                is UserResult.Failure -> assertEquals(Reason.NotFound, result.reason)
+            }
+        }
+    }
+    //private fun errorReasonHandler()のテストも兼ねてる
+    @Test
+    fun test_getUsersProfile_responseError(){
+        val service = UserServiceMock()
+        val repository = Repository(service)
+
+        runBlocking {
+            val body400 = ResponseBody.create(null, errorBody400)
+            service.userResponse = Response.error(400,body400)
+            when(val result = repository.getUsersProfile("token")){
+                is UserResult.Success -> fail("Response must be UserResult.Failure, but it is $result")
+                is UserResult.Failure -> assertEquals(Reason.ResponseError("invalid id"), result.reason)
+            }
+
+            val body403 = ResponseBody.create(null, errorBody403)
+            service.userResponse = Response.error(403, body403)
+            when(val result = repository.getUsersProfile("token")){
+                is UserResult.Success -> fail("Response must be UserResult.Failure, but it is $result")
+                is UserResult.Failure -> assertEquals(Reason.ResponseError("Forbidden"), result.reason)
+            }
+        }
+    }
+    //private fun errorReasonHandler()のテストも兼ねてる
+    @Test
+    fun test_getUsersProfile_fetchFailed(){
+        val service = UserServiceMock()
+        val repository = Repository(service)
+
+        runBlocking {
+            when(val result = repository.getUsersProfile("token")){
+                is UserResult.Success -> fail("Response must be UserResult.Failure, but it is $result")
+                is UserResult.Failure -> assertEquals(Reason.UnKnown(IllegalArgumentException()).javaClass, result.reason.javaClass)
+            }
+        }
+    }
     @Test
     fun playbackTrack() {
     }
