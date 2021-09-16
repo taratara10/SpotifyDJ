@@ -2,6 +2,7 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
 import com.kabos.spotifydj.model.RecommendTracks
+import com.kabos.spotifydj.model.SnapshotId
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.feature.AudioFeatures
@@ -99,7 +100,7 @@ class RepositoryTest {
             contentType: String,
             playlistId: String,
             body: AddTracksBody
-        ) {
+        ): Response<SnapshotId> {
             TODO("Not yet implemented")
         }
 
@@ -108,7 +109,7 @@ class RepositoryTest {
             contentType: String,
             playlistId: String,
             body: ReorderBody
-        ) {
+        ): Response<SnapshotId> {
             TODO("Not yet implemented")
         }
 
@@ -117,7 +118,7 @@ class RepositoryTest {
             contentType: String,
             playlistId: String,
             body: DeleteTracksBody
-        ) {
+        ): Response<SnapshotId> {
             TODO("Not yet implemented")
         }
 

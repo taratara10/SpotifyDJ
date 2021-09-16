@@ -1,5 +1,6 @@
 package com.kabos.spotifydj.model.networkUtil
 
+import com.kabos.spotifydj.model.SnapshotId
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -25,6 +26,11 @@ sealed class AudioFeatureResult {
 sealed class PlaylistItemsResult {
      data class Success(val data: List<PlaylistItem>): PlaylistItemsResult()
      data class Failure(val reason: Reason): PlaylistItemsResult()
+}
+
+sealed class EditPlaylistResult {
+     object Success:EditPlaylistResult()
+     data class Failure(val reason: Reason): EditPlaylistResult()
 }
 
 sealed class Reason {
