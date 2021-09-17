@@ -19,22 +19,23 @@ class Repository @Inject constructor( private val userService: UserService) {
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
 
     private val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
-
     private fun <T> errorReasonHandler(body: Response<T>): Reason {
         val apiError = apiErrorAdapter.fromJson(body.errorBody()?.string())!!
-        return when (apiError.error.status){
-            401  -> Reason.UnAuthorized
-            404  -> Reason.NotFound
+        return when (apiError.error.status) {
+            401 -> Reason.UnAuthorized
+            404 -> Reason.NotFound
             else -> Reason.ResponseError(apiError.error.message)
         }
     }
 
     suspend fun getUsersProfile(accessToken: String): UserResult {
+        if (accessToken.isEmpty()) return UserResult.Failure(Reason.EmptyAccessToken)
+
+        val request = userService.getUsersProfile(generateBearer(accessToken))
         return try {
-            val request = userService.getUsersProfile(generateBearer(accessToken))
-            return if (request.isSuccessful) UserResult.Success(request.body()!!)
+            if (request.isSuccessful) UserResult.Success(request.body()!!)
             else UserResult.Failure(errorReasonHandler(request))
-        } catch (e: Exception){
+        } catch (e: Exception) {
             UserResult.Failure(Reason.UnKnown(e))
         }
     }
@@ -45,37 +46,40 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun playbackTrack(
         accessToken: String,
         deviceId: String,
-        contextUri: String) {
+        contextUri: String
+    ) {
         try {
             userService.playback(
                 accessToken = generateBearer(accessToken),
-                deviceId= deviceId,
+                deviceId = deviceId,
                 body = PlaybackBody(uris = listOf(contextUri))
-                )
-        }catch (e:Exception){
-            Log.d("playbackTrack","failed. $e")
+            )
+        } catch (e: Exception) {
+            Log.d("playbackTrack", "failed. $e")
         }
 
         //todo 必要に応じて、errorHandleのコード書く
     }
 
-    suspend fun pausePlayback(accessToken: String,deviceId: String){
+    suspend fun pausePlayback(accessToken: String, deviceId: String) {
         try {
             userService.pausePlayback(
                 accessToken = generateBearer(accessToken),
-                deviceId= deviceId
+                deviceId = deviceId
             )
-        }catch (e:Exception){
-            Log.d("pausePlaybackTrack","failed. $e")
+        } catch (e: Exception) {
+            Log.d("pausePlaybackTrack", "failed. $e")
         }
     }
 
+    //todo replace handler
+    //returnがreasonでない場合、accessTokenEmptyはどう判定する？
     suspend fun getUsersDevices(accessToken: String): List<Device>? {
         val request = userService.getUsersDevices(generateBearer(accessToken))
-        return if (request.isSuccessful){
+        return if (request.isSuccessful) {
             request.body()?.devices
-        }else{
-            Log.d("getCurrentPlayback","${request.errorBody()?.string()}")
+        } else {
+            Log.d("getCurrentPlayback", "${request.errorBody()?.string()}")
             null
         }
     }
@@ -85,24 +89,25 @@ class Repository @Inject constructor( private val userService: UserService) {
      * */
 
     suspend fun getTracksByKeyword(accessToken: String, keyword: String): TrackItemsResult {
-        return try {
-            val request = userService.getTracksByKeyword(
-                accessToken = generateBearer(accessToken),
-                keyword = keyword,
-                type = "album,track,artist")
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
 
-            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks.items)
+        val request = userService.getTracksByKeyword(
+            accessToken = generateBearer(accessToken),
+            keyword = keyword,
+            type = "album,track,artist")
+        return try {
+            if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks.items)
             else TrackItemsResult.Failure(errorReasonHandler(request))
-        } catch (e: Exception){
+        } catch (e: Exception) {
             TrackItemsResult.Failure(Reason.UnKnown(e))
         }
     }
 
-    suspend fun getAudioFeaturesById(accessToken: String, id: String) : AudioFeatureResult {
+    suspend fun getAudioFeaturesById(accessToken: String, id: String): AudioFeatureResult {
+        if (accessToken.isEmpty()) return AudioFeatureResult.Failure(Reason.EmptyAccessToken)
+        val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
         return try {
-            val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
-
-            return if (request.isSuccessful) AudioFeatureResult.Success(request.body()!!)
+            if (request.isSuccessful) AudioFeatureResult.Success(request.body()!!)
             else AudioFeatureResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
             AudioFeatureResult.Failure(Reason.UnKnown(e))
@@ -110,32 +115,34 @@ class Repository @Inject constructor( private val userService: UserService) {
     }
 
     suspend fun getRecommendTracks(
-                accessToken: String,
-                trackInfo: TrackInfo,
-                fetchUpperTrack: Boolean) : TrackItemsResult {
+        accessToken: String,
+        trackInfo: TrackInfo,
+        fetchUpperTrack: Boolean
+    ): TrackItemsResult {
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
+
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
         var minEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
         var maxEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
         if (fetchUpperTrack) maxEnergyRate *= 1.2
         if (!fetchUpperTrack) minEnergyRate *= 0.8
 
+        val request = userService.getRecommendations(
+            accessToken = generateBearer(accessToken),
+            seedTrackId = trackInfo.id,
+            minTempo = trackInfo.tempo * RecommendParameter.MinTempoRate.value,
+            maxTempo = trackInfo.tempo * RecommendParameter.MaxTempoRate.value,
+            minDancebility = trackInfo.danceability * RecommendParameter.MinDanceabilityRate.value,
+            maxDancebility = trackInfo.danceability * RecommendParameter.MaxDanceabilityRate.value,
+            minEnergy = trackInfo.energy * minEnergyRate,
+            maxEnergy = trackInfo.energy * maxEnergyRate,)
         return try {
-            val request =  userService.getRecommendations(accessToken = generateBearer(accessToken),
-                seedTrackId = trackInfo.id,
-                minTempo = trackInfo.tempo * RecommendParameter.MinTempoRate.value,
-                maxTempo = trackInfo.tempo * RecommendParameter.MaxTempoRate.value,
-                minDancebility = trackInfo.danceability * RecommendParameter.MinDanceabilityRate.value,
-                maxDancebility = trackInfo.danceability * RecommendParameter.MaxDanceabilityRate.value,
-                minEnergy = trackInfo.energy * minEnergyRate,
-                maxEnergy = trackInfo.energy * maxEnergyRate,
-            )
-
-            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks)
+            if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.tracks)
             else TrackItemsResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
             TrackItemsResult.Failure(Reason.UnKnown(e))
         }
-   }
+    }
 
 
     /**
@@ -143,23 +150,23 @@ class Repository @Inject constructor( private val userService: UserService) {
      * */
 
     suspend fun getUsersAllPlaylist(accessToken: String): PlaylistItemsResult {
+        if (accessToken.isEmpty()) return PlaylistItemsResult.Failure(Reason.EmptyAccessToken)
+        val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
         return try {
-            val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
-
-            return if (request.isSuccessful) PlaylistItemsResult.Success(request.body()!!.items)
+            if (request.isSuccessful) PlaylistItemsResult.Success(request.body()!!.items)
             else PlaylistItemsResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
             PlaylistItemsResult.Failure(Reason.UnKnown(e))
         }
     }
 
-    suspend fun getTracksByPlaylistId(accessToken: String,playlistId: String): TrackItemsResult {
+    suspend fun getTracksByPlaylistId(accessToken: String, playlistId: String): TrackItemsResult {
+        if (accessToken.isEmpty()) return TrackItemsResult.Failure(Reason.EmptyAccessToken)
+        val request = userService.getTracksByPlaylistId(
+            accessToken = generateBearer(accessToken),
+            playlistId = playlistId)
         return try {
-            val request = userService.getTracksByPlaylistId(
-                accessToken = generateBearer(accessToken),
-                playlistId = playlistId)
-
-            return if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.items.map { it.track })
+            if (request.isSuccessful) TrackItemsResult.Success(request.body()!!.items.map { it.track })
             else TrackItemsResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
             TrackItemsResult.Failure(Reason.UnKnown(e))
@@ -169,34 +176,47 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun createPlaylist(
         accessToken: String,
         userId: String,
-        title: String): String {
+        title: String): CreatePlaylistResult {
         val request = userService.createPlaylist(
             accessToken = generateBearer(accessToken),
             userId = userId,
-            body = CreatePlaylistBody(name = title)
-        )
-        return if(request.isSuccessful) request.body()?.id.toString()
-        else {
-            Log.d("createPlaylist","${request.errorBody()?.string()}")
-            ""
+            body = CreatePlaylistBody(name = title))
+
+        return try {
+            if (request.isSuccessful) CreatePlaylistResult.Success(request.body()?.id.toString())
+            else CreatePlaylistResult.Failure(errorReasonHandler(request))
+        }catch (e: Exception){
+            CreatePlaylistResult.Failure(Reason.UnKnown(e))
         }
     }
 
-    //todo error handle
-    suspend fun addTracksToPlaylist(accessToken: String,playlistId: String, body: AddTracksBody) {
-        userService.addTracksToPlaylist(
+    suspend fun addTracksToPlaylist(
+        accessToken: String,
+        playlistId: String,
+        body: AddTracksBody
+    ): EditPlaylistResult {
+        if (accessToken.isEmpty()) return EditPlaylistResult.Failure(Reason.EmptyAccessToken)
+        val request = userService.addTracksToPlaylist(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
             playlistId = playlistId,
-            body = body
-        )
+            body = body)
+        return try {
+            if (request.isSuccessful) EditPlaylistResult.Success
+            else EditPlaylistResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            EditPlaylistResult.Failure(Reason.UnKnown(e))
+        }
     }
 
     suspend fun reorderPlaylistsTracks(
         accessToken: String,
         playlistId: String,
         initialPosition: Int,
-        finalPosition: Int){
+        finalPosition: Int
+    ): EditPlaylistResult {
+        if (accessToken.isEmpty()) return EditPlaylistResult.Failure(Reason.EmptyAccessToken)
+
         val request = userService.reorderPlaylistsTracks(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
@@ -206,19 +226,31 @@ class Repository @Inject constructor( private val userService: UserService) {
                 insert_before = finalPosition
             )
         )
-        try {
-            request
-        }catch (e: Exception){
-              Log.d("reorderPlaylist","$e")
+        return try {
+            if (request.isSuccessful) EditPlaylistResult.Success
+            else EditPlaylistResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            EditPlaylistResult.Failure(Reason.UnKnown(e))
         }
     }
 
-    suspend fun deleteTracksFromPlaylist(accessToken: String, playlistId: String, body: DeleteTracksBody) {
-        userService.deleteTracksFromPlaylist(
+    suspend fun deleteTracksFromPlaylist(
+        accessToken: String,
+        playlistId: String,
+        body: DeleteTracksBody
+    ): EditPlaylistResult {
+        if (accessToken.isEmpty()) return EditPlaylistResult.Failure(Reason.EmptyAccessToken)
+
+        val request = userService.deleteTracksFromPlaylist(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
             playlistId = playlistId,
-            body = body
-        )
+            body = body)
+        return try {
+            if (request.isSuccessful) EditPlaylistResult.Success
+            else EditPlaylistResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            EditPlaylistResult.Failure(Reason.UnKnown(e))
+        }
     }
 }

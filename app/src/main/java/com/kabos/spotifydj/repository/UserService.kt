@@ -93,7 +93,7 @@ interface UserService {
         @Header("Content-Type") contentType: String,
         @Path("playlist_id")playlistId: String,
         @Body body: AddTracksBody
-    )
+    ):Response<SnapshotId>
 
     @PUT("playlists/{playlist_id}/tracks")
     suspend fun reorderPlaylistsTracks(
@@ -101,7 +101,7 @@ interface UserService {
         @Header("Content-Type") contentType: String,
         @Path("playlist_id") playlistId: String,
         @Body body: ReorderBody
-    )
+    ):Response<SnapshotId>
 
     @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
     suspend fun deleteTracksFromPlaylist(
@@ -109,5 +109,5 @@ interface UserService {
         @Header("Content-Type") contentType: String,
         @Path("playlist_id")playlistId: String,
         @Body body: DeleteTracksBody
-    )
+    ):Response<SnapshotId>
 }

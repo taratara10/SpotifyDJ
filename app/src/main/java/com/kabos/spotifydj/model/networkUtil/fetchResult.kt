@@ -1,5 +1,6 @@
 package com.kabos.spotifydj.model.networkUtil
 
+import com.kabos.spotifydj.model.SnapshotId
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playlist.PlaylistItem
@@ -27,10 +28,20 @@ sealed class PlaylistItemsResult {
      data class Failure(val reason: Reason): PlaylistItemsResult()
 }
 
+sealed class CreatePlaylistResult {
+     data class Success(val playlistId: String): CreatePlaylistResult()
+     data class Failure(val reason: Reason, val emptyId: String = ""): CreatePlaylistResult()
+}
+
+sealed class EditPlaylistResult {
+     object Success:EditPlaylistResult()
+     data class Failure(val reason: Reason): EditPlaylistResult()
+}
+
 sealed class Reason {
      object EmptyAccessToken : Reason()
-     object UnAuthorized: Reason()
-     object NotFound: Reason()
-     data class ResponseError(val message: String): Reason()
-     data class UnKnown(val exception: Exception): Reason()
+     object UnAuthorized: Reason() //401 The access token expired
+     object NotFound: Reason()     //404
+     data class ResponseError(val message: String): Reason() //400 BadRequest or 403 Forbidden
+     data class UnKnown(val exception: Exception): Reason()  //Non-network reason
 }
