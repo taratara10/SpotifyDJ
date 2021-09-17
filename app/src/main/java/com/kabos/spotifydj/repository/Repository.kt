@@ -173,23 +173,20 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
-    //Todo 適切な戻り値
     suspend fun createPlaylist(
         accessToken: String,
         userId: String,
-        title: String
-    ): String {
+        title: String): CreatePlaylistResult {
         val request = userService.createPlaylist(
             accessToken = generateBearer(accessToken),
             userId = userId,
-            body = CreatePlaylistBody(name = title)
-        )
+            body = CreatePlaylistBody(name = title))
 
-        return if (request.isSuccessful) request.body()?.id.toString()
-        else {
-            Log.d("createPlaylist", "${request.errorBody()?.string()}")
-            val empty = ""
-            empty
+        return try {
+            if (request.isSuccessful) CreatePlaylistResult.Success(request.body()?.id.toString())
+            else CreatePlaylistResult.Failure(errorReasonHandler(request))
+        }catch (e: Exception){
+            CreatePlaylistResult.Failure(Reason.UnKnown(e))
         }
     }
 

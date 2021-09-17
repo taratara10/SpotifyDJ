@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.viewModel
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
+import hilt_aggregated_deps._dagger_hilt_android_internal_modules_ApplicationContextModule
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -314,11 +316,29 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun createPlaylist(title: String) = viewModelScope.launch {
         //initialize userId
         if (mUserId == "") getUserProfile().join()
+
+        //createPlaylist
         launch {
-            localPlaylistId = repository.createPlaylist(mAccessToken,mUserId,title)
+            when (val result = repository.createPlaylist(mAccessToken,mUserId,title)) {
+                is CreatePlaylistResult.Success -> {
+                    localPlaylistId = result.playlistId
+                }
+                is CreatePlaylistResult.Failure -> {
+                    when (result.reason){
+                        is Reason.UnAuthorized,
+                        is Reason.NotFound,
+                        is Reason.ResponseError,
+                        is Reason.UnKnown -> {
+                            localPlaylistId = result.emptyId
+                            //todo Toast出したい
+//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                        }
+                    }
+                }
+            }
         }.join()
 
-        //localPlaylistのTrackを追加　空なら終了
+        //localPlaylistのTrackを新規作成したplaylistに追加 空なら何もしない
         if (localPlaylist.value == null) return@launch
         val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)

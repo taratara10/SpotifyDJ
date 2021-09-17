@@ -28,6 +28,11 @@ sealed class PlaylistItemsResult {
      data class Failure(val reason: Reason): PlaylistItemsResult()
 }
 
+sealed class CreatePlaylistResult {
+     data class Success(val playlistId: String): CreatePlaylistResult()
+     data class Failure(val reason: Reason, val emptyId: String = ""): CreatePlaylistResult()
+}
+
 sealed class EditPlaylistResult {
      object Success:EditPlaylistResult()
      data class Failure(val reason: Reason): EditPlaylistResult()
