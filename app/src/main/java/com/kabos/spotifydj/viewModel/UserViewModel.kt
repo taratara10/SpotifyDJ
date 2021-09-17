@@ -344,6 +344,26 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
     }
 
+    //ExistingPlaylistのtitleを変更する
+    fun updatePlaylistTitle(title: String) = viewModelScope.launch {
+        when (val result = repository.updatePlaylistTitle(mAccessToken,localPlaylistId,title)) {
+            is EditPlaylistResult.Success -> {
+                //todo Toast(タイトルを更新しました)
+            }
+            is EditPlaylistResult.Failure -> {
+                when (result.reason){
+                    is Reason.UnAuthorized,
+                    is Reason.NotFound,
+                    is Reason.ResponseError,
+                    is Reason.UnKnown -> {
+                        //todo Toast出したい
+//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    }
+                }
+            }
+        }
+
+    }
 
 
     //onAdd callback
@@ -466,6 +486,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     private fun getUsersDevices() = viewModelScope.launch {
+        if (mUserName == "") getUserProfile().join()
         val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
         Log.d("deviceId","$usersDevices")
         if (usersDevices != null){

@@ -1,9 +1,11 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -40,6 +42,14 @@ class EditExistingPlaylistFragment: Fragment() {
                 dragListener = dragTackAdapter.onItemDragListener
                 swipeListener = dragTackAdapter.onItemSwipeListener
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
+            }
+
+            etExistingPlaylistTitle.setOnFocusChangeListener { editText, hasFocus ->
+                //focusが外れたらplaylist titleを更新
+                if (!hasFocus){
+                    editText as EditText
+                    viewModel.updatePlaylistTitle(editText.text.toString())
+                }
             }
 
             viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->

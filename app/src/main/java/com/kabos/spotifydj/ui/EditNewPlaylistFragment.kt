@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -54,6 +55,15 @@ class EditNewPlaylistFragment: Fragment() {
                 it.isEnabled = false
             }
 
+            //todo localPlaylistをrefreshする処理
+            etNewPlaylistTitle.setOnFocusChangeListener { editText, hasFocus ->
+                //focusが外れたらplaylist titleを更新
+                if (!hasFocus && viewModel.localPlaylistId.isNotEmpty()){
+                    editText as EditText
+                    viewModel.updatePlaylistTitle(editText.text.toString())
+                }
+
+            }
 
             viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
                 playlist?.let { dragTackAdapter.submitList(it) }

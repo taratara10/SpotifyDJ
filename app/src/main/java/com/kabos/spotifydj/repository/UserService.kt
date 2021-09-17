@@ -9,6 +9,7 @@ import com.kabos.spotifydj.model.playlist.Playlist
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.*
 import com.kabos.spotifydj.model.track.SearchTracks
+import okhttp3.internal.http.StatusLine
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -94,6 +95,14 @@ interface UserService {
         @Path("playlist_id")playlistId: String,
         @Body body: AddTracksBody
     ):Response<SnapshotId>
+
+    @PUT("playlists/{playlist_id}")
+    suspend fun updatePlaylistTitle(
+        @Header("Authorization") accessToken: String,
+        @Header("Content-Type") contentType: String,
+        @Path("playlist_id")playlistId: String,
+        @Body body: UpdatePlaylistTitleBody
+    ):Response<Unit>
 
     @PUT("playlists/{playlist_id}/tracks")
     suspend fun reorderPlaylistsTracks(

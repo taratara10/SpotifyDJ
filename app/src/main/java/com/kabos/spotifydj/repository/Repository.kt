@@ -4,11 +4,8 @@ import android.util.Log
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.networkUtil.*
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.requestBody.PlaybackBody
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
-import com.kabos.spotifydj.model.requestBody.AddTracksBody
-import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
-import com.kabos.spotifydj.model.requestBody.ReorderBody
+import com.kabos.spotifydj.model.requestBody.*
 import com.squareup.moshi.Moshi
 import retrofit2.Response
 import javax.inject.Inject
@@ -190,11 +187,11 @@ class Repository @Inject constructor( private val userService: UserService) {
         }
     }
 
+    //todo bodyは内部で処理したい
     suspend fun addTracksToPlaylist(
         accessToken: String,
         playlistId: String,
-        body: AddTracksBody
-    ): EditPlaylistResult {
+        body: AddTracksBody): EditPlaylistResult {
         if (accessToken.isEmpty()) return EditPlaylistResult.Failure(Reason.EmptyAccessToken)
         val request = userService.addTracksToPlaylist(
             accessToken = generateBearer(accessToken),
@@ -230,6 +227,26 @@ class Repository @Inject constructor( private val userService: UserService) {
             if (request.isSuccessful) EditPlaylistResult.Success
             else EditPlaylistResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
+            EditPlaylistResult.Failure(Reason.UnKnown(e))
+        }
+    }
+
+    suspend fun updatePlaylistTitle(
+        accessToken: String,
+        playlistId: String,
+        playlistTitle: String): EditPlaylistResult{
+        //todo これfunでまとめよう
+        if (accessToken.isEmpty()) return EditPlaylistResult.Failure(Reason.EmptyAccessToken)
+
+        val request = userService.updatePlaylistTitle(
+            accessToken = generateBearer(accessToken),
+            contentType = "application/json",
+            playlistId = playlistId,
+            body = UpdatePlaylistTitleBody(name = playlistTitle))
+        return try {
+            if (request.isSuccessful) EditPlaylistResult.Success
+            else EditPlaylistResult.Failure(errorReasonHandler(request))
+        }catch (e: java.lang.Exception){
             EditPlaylistResult.Failure(Reason.UnKnown(e))
         }
     }
