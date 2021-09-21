@@ -23,8 +23,11 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
     private val positiveButtonListener =DialogInterface.OnClickListener { _, _ ->
         //todo implement navigate and replace fragment
         //todo varidateはviewmodelの責務にしたい　handlingどーするか
-        if (viewModel.localPlaylistTitle.isNotEmpty()) viewModel.createPlaylist()
-        Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
+        if (viewModel.localPlaylistTitle.isNotEmpty()) {
+            viewModel.createPlaylist()
+            //replace existingPlaylist
+            Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -44,6 +47,9 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
                 setText(viewModel.localPlaylistTitle)
                 doAfterTextChanged { text ->
                     viewModel.localPlaylistTitle = text.toString()
+                    //emptyならErrorを表示する
+                    if (text.isNullOrEmpty()) tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
+                    else tilDialogCreatePlaylistTitle.error = null
                 }
             }
 
