@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditNewPlaylistBinding
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
@@ -47,12 +49,13 @@ class EditNewPlaylistFragment: Fragment() {
             val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
             etNewPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
 
-            btnCreatePlaylist.setOnClickListener {
-                viewModel.createPlaylist(etNewPlaylistTitle.text.toString())
-                Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
-
-                //todo btnEnableどうやって管理しよか
-                it.isEnabled = false
+            btnSavePlaylist.setOnClickListener {
+                if (viewModel.localPlaylist.value.isNullOrEmpty()){
+                    Toast.makeText(context, "まだトラックが空です",Toast.LENGTH_SHORT).show()
+                }else{
+                    viewModel.localPlaylistTitle = etNewPlaylistTitle.text.toString()
+                    findNavController().navigate(R.id.action_nav_main_to_nav_confirm_playlist)
+                }
             }
 
             //todo localPlaylistをrefreshする処理

@@ -2,7 +2,6 @@ package com.kabos.spotifydj.ui.adapter
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.adapter.FragmentViewHolder
 import com.kabos.spotifydj.ui.*
 import com.kabos.spotifydj.util.ReplaceFragment
 
@@ -13,7 +12,7 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     init {
         fragmentList.apply {
-            add(PlaylistFragment())
+            add(PlaylistMainFragment())
             add(RecommendFragment())
             add(SearchFragment())
             forEach {
@@ -43,7 +42,7 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
         }
         if (pattern == ReplaceFragment.ResetPlaylist){
             fragmentList.removeFirst()
-            fragmentList.add(0, PlaylistFragment())
+            fragmentList.add(0, PlaylistMainFragment())
         }
 
         //Assign unique id to each fragment

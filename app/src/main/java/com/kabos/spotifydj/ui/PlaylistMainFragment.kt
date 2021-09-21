@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
 @AndroidEntryPoint
-class PlaylistFragment: Fragment() {
+class PlaylistMainFragment: Fragment() {
 
     private lateinit var binding: FragmentPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()

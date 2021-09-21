@@ -30,6 +30,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     var mUserId = ""
     var mUserName = ""
     var localPlaylistId = ""
+    var localPlaylistTitle = ""
 
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
@@ -313,13 +314,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun createPlaylist(title: String) = viewModelScope.launch {
+    fun createPlaylist() = viewModelScope.launch {
         //initialize userId
         if (mUserId == "") getUserProfile().join()
 
         //createPlaylist
         launch {
-            when (val result = repository.createPlaylist(mAccessToken,mUserId,title)) {
+            when (val result = repository.createPlaylist(mAccessToken,mUserId,localPlaylistTitle)) {
                 is CreatePlaylistResult.Success -> {
                     localPlaylistId = result.playlistId
                 }

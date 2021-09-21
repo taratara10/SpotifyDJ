@@ -23,6 +23,9 @@
             android:name="fromPlaylist"
             app:argType="boolean"
             android:defaultValue="false"/>
+        <action
+            android:id="@+id/action_nav_main_to_nav_confirm_playlist"
+            app:destination="@id/nav_confirm_playlist" />
 
     </fragment>
 
@@ -38,6 +41,12 @@
             android:name="fromPlaylist"
             app:argType="boolean"
             android:defaultValue="false"/>
+    </dialog>
+
+    <dialog
+        android:id="@+id/nav_confirm_playlist"
+        android:name="com.kabos.spotifydj.ui.DialogConfirmCreatingPlaylist"
+        tools:layout="@layout/dialog_confirm_creating_playlist">
     </dialog>
 
 </navigation>
