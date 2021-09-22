@@ -9,8 +9,10 @@ import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
+import com.kabos.spotifydj.util.ReplaceFragment
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,18 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class DialogConfirmCreatingPlaylist: DialogFragment() {
     private lateinit var binding: DialogConfirmCreatingPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
-
-
-    private val negativeButtonListener = DialogInterface.OnClickListener{_,_ -> dialog?.cancel() }
-    private val positiveButtonListener =DialogInterface.OnClickListener { _, _ ->
-        //todo implement navigate and replace fragment
-        //todo varidateはviewmodelの責務にしたい　handlingどーするか
-        if (viewModel.localPlaylistTitle.isNotEmpty()) {
-            viewModel.createPlaylist()
-            //replace existingPlaylist
-            Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
-        }
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = DialogConfirmCreatingPlaylistBinding.inflate(LayoutInflater.from(context))
@@ -43,21 +33,28 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
         super.onStart()
         binding.apply {
 
-            etDialogCreatePlaylistTitle.apply {
-                setText(viewModel.localPlaylistTitle)
-                doAfterTextChanged { text ->
+            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
+            etDialogCreatePlaylistTitle.doAfterTextChanged { text ->
+                //emptyならErrorを表示する & save buttonをenableにする
+                if (text.isNullOrEmpty()) {
+                    tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
+                    btnDialogSave.isEnabled = false
+                } else {
+                    tilDialogCreatePlaylistTitle.error = null
+                    btnDialogSave.isEnabled = true
                     viewModel.localPlaylistTitle = text.toString()
-                    //emptyならErrorを表示する
-                    if (text.isNullOrEmpty()) {
-                        tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
-                        //todo save button make enable
-                    } else {
-                        tilDialogCreatePlaylistTitle.error = null
-                    }
                 }
             }
 
-
+            btnDialogCancel.setOnClickListener { dialog?.cancel() }
+            btnDialogSave  .setOnClickListener {
+                if (viewModel.localPlaylistTitle.isNotEmpty()) {
+                    viewModel.createPlaylist()
+                    viewModel.replaceFragmentFlag.value = ReplaceFragment.ExistingPlaylist
+                    dialog?.cancel()
+                    Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
+                }
+            }
 
         }
     }

@@ -17,6 +17,7 @@ import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
+import com.kabos.spotifydj.util.ReplaceFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import hilt_aggregated_deps._dagger_hilt_android_internal_modules_ApplicationContextModule
 import kotlinx.coroutines.*
@@ -53,6 +54,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigatePlaylistFragment = MutableLiveData(false)
     val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
+
+    val replaceFragmentFlag = MutableLiveData<ReplaceFragment>()
 
     var isUpdatePlaylist = false
 
@@ -163,7 +166,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     }
                     null
                 }
-                else -> null
             }
 
         }
@@ -188,7 +190,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     }
                     null
                 }
-                else -> null
             }
         }
     }.await()
@@ -280,7 +281,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                         }
                         null
                     }
-                    else -> null
                 }
             }
         }.await()
