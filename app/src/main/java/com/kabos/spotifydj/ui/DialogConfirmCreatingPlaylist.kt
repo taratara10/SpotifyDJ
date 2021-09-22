@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,24 +35,28 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
         binding = DialogConfirmCreatingPlaylistBinding.inflate(LayoutInflater.from(context))
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
-            .setTitle("プレイリストを作成する")
-            .setNegativeButton("キャンセル",negativeButtonListener)
-            .setPositiveButton("作成する", positiveButtonListener)
+            .setTitle("プレイリスト名")
             .create()
     }
 
     override fun onStart() {
         super.onStart()
         binding.apply {
+
             etDialogCreatePlaylistTitle.apply {
                 setText(viewModel.localPlaylistTitle)
                 doAfterTextChanged { text ->
                     viewModel.localPlaylistTitle = text.toString()
                     //emptyならErrorを表示する
-                    if (text.isNullOrEmpty()) tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
-                    else tilDialogCreatePlaylistTitle.error = null
+                    if (text.isNullOrEmpty()) {
+                        tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
+                        //todo save button make enable
+                    } else {
+                        tilDialogCreatePlaylistTitle.error = null
+                    }
                 }
             }
+
 
 
         }
