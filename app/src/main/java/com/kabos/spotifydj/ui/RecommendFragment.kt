@@ -47,8 +47,6 @@ class RecommendFragment: Fragment() {
                adapter = currentTrackAdapter
            }
 
-           button.setOnClickListener {
-           }
 
            viewModel.apply {
                upperTrackList.observe(viewLifecycleOwner,{upperTrackList ->

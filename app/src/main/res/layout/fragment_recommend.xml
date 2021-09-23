@@ -18,13 +18,14 @@
 
             <!--  Current Track  -->
             <TextView
-                android:id="@+id/tv_current_tracks"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Current Tracks"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_width="0dp"
+                android:layout_height="90dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/current_recommend_background"
+                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
+                app:layout_constraintTop_toTopOf="@id/rv_current_tracks" />
+
             <TextView
                 android:id="@+id/tv_current_tracks_empty"
                 android:layout_width="wrap_content"
@@ -35,6 +36,7 @@
                 app:layout_constraintStart_toStartOf="@id/guideline_begin"
                 app:layout_constraintTop_toTopOf="@+id/rv_current_tracks"
                 android:visibility="visible" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_current_tracks"
                 android:layout_width="0dp"
@@ -42,15 +44,28 @@
                 app:layout_constraintEnd_toStartOf="@+id/guideline_end"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toBottomOf="@+id/tv_current_tracks" />
+                app:layout_constraintTop_toTopOf="parent" />
 
 
+            <!--    Upper Track        -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="220dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/upper_recommend_background"
+                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
+                app:layout_constraintTop_toTopOf="@+id/tv_upper_tracks" />
 
-        <!--    Upper Track        -->
             <TextView
                 android:id="@+id/tv_upper_tracks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@color/white"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:text="Upper Tracks"
                 android:textColor="@color/upper_tracks"
                 android:textSize="18sp"
@@ -102,10 +117,22 @@
 
         <!--    Downer        -->
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="220dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/downer_recommend_background"
+                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
+                app:layout_constraintTop_toTopOf="@+id/tv_downer_tracks" />
+
+            <TextView
                 android:id="@+id/tv_downer_tracks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/white"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:text="Downer Tracks"
                 android:textColor="@color/downer_tracks"
                 android:textSize="18sp"
@@ -168,6 +195,19 @@
                 android:orientation="vertical"
                 app:layout_constraintGuide_end="24dp" />
 
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_border_begin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="12dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_border_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="12dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
