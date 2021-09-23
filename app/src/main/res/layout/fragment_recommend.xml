@@ -52,6 +52,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Upper Tracks"
+                android:textColor="@color/upper_tracks"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@id/rv_current_tracks" />
 
@@ -104,6 +107,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Downer Tracks"
+                android:textColor="@color/downer_tracks"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@+id/guideline_begin"
                 app:layout_constraintTop_toBottomOf="@+id/rv_upper_tracks_result" />
 
@@ -162,13 +168,6 @@
                 android:orientation="vertical"
                 app:layout_constraintGuide_end="24dp" />
 
-            <Button
-                android:id="@+id/button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Button"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_end" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
