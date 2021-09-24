@@ -55,6 +55,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
 
+    //isExistingでよくね？
     val replaceFragmentFlag = MutableLiveData<ReplaceFragment>()
 
     var isUpdatePlaylist = false

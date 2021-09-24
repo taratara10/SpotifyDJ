@@ -40,9 +40,9 @@ class MainFragment: Fragment() {
         val tabLayout = binding.tabLayout
         TabLayoutMediator(tabLayout, viewPager) {tab, position ->
             when(position){
-                0 -> tab.text = FragmentList.Playlist.name
-                1 -> tab.text = FragmentList.Recommend.name
-                2 -> tab.text = FragmentList.Search.name
+                FragmentList.Search.position -> tab.text = FragmentList.Search.name
+                FragmentList.Recommend.position -> tab.text = FragmentList.Recommend.name
+                FragmentList.Playlist.position -> tab.text = FragmentList.Recommend.name
             }
         }.attach()
 

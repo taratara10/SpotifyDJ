@@ -3,6 +3,7 @@ package com.kabos.spotifydj.ui.adapter
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.kabos.spotifydj.ui.*
+import com.kabos.spotifydj.util.FragmentList
 import com.kabos.spotifydj.util.ReplaceFragment
 
 class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
@@ -12,9 +13,9 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     init {
         fragmentList.apply {
-            add(PlaylistMainFragment())
-            add(RecommendFragment())
             add(SearchFragment())
+            add(RecommendFragment())
+            add(PlaylistMainFragment())
             forEach {
                 idsList.add(it.hashCode().toLong())
             }
@@ -33,16 +34,16 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
     fun replaceFragment(pattern: ReplaceFragment){
 
         if (pattern == ReplaceFragment.NewPlaylist) {
-            fragmentList.removeFirst()
-            fragmentList.add(0, EditNewPlaylistFragment())
+            fragmentList.removeAt(FragmentList.Playlist.position)
+            fragmentList.add(FragmentList.Playlist.position, EditNewPlaylistFragment())
         }
         if (pattern == ReplaceFragment.ExistingPlaylist){
-            fragmentList.removeFirst()
-            fragmentList.add(0, EditExistingPlaylistFragment())
+            fragmentList.removeAt(FragmentList.Playlist.position)
+            fragmentList.add(FragmentList.Playlist.position, EditExistingPlaylistFragment())
         }
         if (pattern == ReplaceFragment.ResetPlaylist){
-            fragmentList.removeFirst()
-            fragmentList.add(0, PlaylistMainFragment())
+            fragmentList.removeAt(FragmentList.Playlist.position)
+            fragmentList.add(FragmentList.Playlist.position, PlaylistMainFragment())
         }
 
         //Assign unique id to each fragment
@@ -57,10 +58,9 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
     private fun notifyDataSet(pattern: ReplaceFragment){
         if (   pattern == ReplaceFragment.NewPlaylist
             || pattern == ReplaceFragment.ExistingPlaylist
-            || pattern ==ReplaceFragment.ResetPlaylist
-        ){
-            notifyItemRemoved(0)
-            notifyItemInserted(0)
+            || pattern ==ReplaceFragment.ResetPlaylist){
+            notifyItemRemoved(FragmentList.Playlist.position)
+            notifyItemInserted(FragmentList.Playlist.position)
         }
 
     }
