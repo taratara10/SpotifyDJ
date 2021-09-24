@@ -65,7 +65,10 @@ class EditExistingPlaylistFragment: Fragment() {
                 etExistingPlaylistTitle.setText(title)
             })
 
-
+            viewModel.isLoadingPlaylistTrack.observe(viewLifecycleOwner,{isLoading ->
+                if (isLoading) pbPlaylistProgress.visibility = View.VISIBLE
+                else pbPlaylistProgress.visibility = View.GONE
+            })
 
         }
     }

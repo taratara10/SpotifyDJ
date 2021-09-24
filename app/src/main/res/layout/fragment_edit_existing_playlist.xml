@@ -41,6 +41,17 @@
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
         app:layout_constraintVertical_bias="1.0" />
 
+    <ProgressBar
+        android:id="@+id/pb_playlist_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/holo_green_light"
+        app:layout_constraintBottom_toBottomOf="@id/rv_existing_playlist"
+        app:layout_constraintEnd_toEndOf="@id/rv_existing_playlist"
+        app:layout_constraintStart_toStartOf="@id/rv_existing_playlist"
+        app:layout_constraintTop_toTopOf="@id/rv_existing_playlist" />
+
     <TextView
         android:id="@+id/tv_playlist_empty"
         android:layout_width="wrap_content"

@@ -47,6 +47,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isLoadingSearchTrack = MutableLiveData(false)
     val isLoadingUpperTrack = MutableLiveData(false)
     val isLoadingDownerTrack = MutableLiveData(false)
+    val isLoadingPlaylistTrack = MutableLiveData(false)
 
     //Navigate Flag
     val isNavigateSearchFragment = MutableLiveData(false)
@@ -437,9 +438,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
     fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
+        isLoadingPlaylistTrack.value = true
         val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
         localPlaylist.postValue(trackInfoList)
+        isLoadingPlaylistTrack.value = false
         //ついでにviewModelのパラメーターも更新
         updatePlaylistTitleAndId(playlist)
     }
