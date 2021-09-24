@@ -91,11 +91,6 @@ class MainFragment: Fragment() {
                 }
             })
 
-            replaceFragmentFlag.observe(viewLifecycleOwner,{ replace ->
-                viewPagerAdapter.replaceFragment(replace)
-                viewPager.setCurrentItem(FragmentList.Search.position, true)
-                viewPager.setCurrentItem(FragmentList.Playlist.position, true)
-            })
         }
 
 

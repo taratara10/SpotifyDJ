@@ -50,7 +50,7 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
             btnDialogSave  .setOnClickListener {
                 if (viewModel.localPlaylistTitle.isNotEmpty()) {
                     viewModel.createPlaylist()
-                    viewModel.replaceFragmentFlag.value = ReplaceFragment.ExistingPlaylist
+                    viewModel.isNavigateExistingPlaylistFragment.value = true
                     dialog?.cancel()
                     Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
                 }
