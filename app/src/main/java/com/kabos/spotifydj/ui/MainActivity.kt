@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         authorizationSpotify()
+        AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
     }
 
     private fun authorizationSpotify() {
