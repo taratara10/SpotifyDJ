@@ -50,7 +50,7 @@ class PlaylistMainFragment: Fragment() {
                 }
         }
 
-        viewModel.allPlaylists.observe(viewLifecycleOwner,{ playlist ->
+        viewModel.filterOwnPlaylist.observe(viewLifecycleOwner,{ playlist ->
             if (playlist == null) return@observe
             playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
 

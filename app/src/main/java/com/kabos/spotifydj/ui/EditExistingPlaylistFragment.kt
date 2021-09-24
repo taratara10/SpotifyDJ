@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -44,11 +45,22 @@ class EditExistingPlaylistFragment: Fragment() {
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
-            etExistingPlaylistTitle.setOnFocusChangeListener { editText, hasFocus ->
-                //focusが外れたらplaylist titleを更新
-                if (!hasFocus){
-                    editText as EditText
-                    viewModel.updatePlaylistTitle(editText.text.toString())
+            etExistingPlaylistTitle.apply {
+                doAfterTextChanged { text ->
+                    //emptyならErrorを表示する & save buttonをenableにする
+                    if (text.isNullOrEmpty()) {
+                        tilExistingPlaylistTitle.error = "タイトルを入力してください"
+                    } else {
+                        tilExistingPlaylistTitle.error = null
+                    }
+                }
+
+                setOnFocusChangeListener { editText, hasFocus ->
+                    //focusが外れたらplaylist titleを更新
+                    if (!hasFocus){
+                        editText as EditText
+                        viewModel.updatePlaylistTitle(editText.text.toString())
+                    }
                 }
             }
 

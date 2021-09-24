@@ -344,6 +344,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     //ExistingPlaylistのtitleを変更する
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
+        if (title.isNullOrEmpty()) return@launch
+
         when (val result = repository.updatePlaylistTitle(mAccessToken,localPlaylistId,title)) {
             is EditPlaylistResult.Success -> {
                 //todo Toast(タイトルを更新しました)
