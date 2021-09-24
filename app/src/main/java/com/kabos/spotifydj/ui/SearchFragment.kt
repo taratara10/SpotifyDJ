@@ -10,6 +10,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
@@ -48,6 +49,7 @@ class SearchFragment: Fragment() {
             rvSearchTracksResult.apply {
                 layoutManager = LinearLayoutManager(activity)
                 adapter = trackAdapter
+                addItemDecoration(DividerItemDecoration(activity,LinearLayoutManager(activity).orientation))
             }
 
             btnLoadPlaylist.setOnClickListener {

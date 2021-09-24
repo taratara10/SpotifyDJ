@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentRecommendBinding
 import com.kabos.spotifydj.model.TrackInfo
@@ -36,11 +37,13 @@ class RecommendFragment: Fragment() {
            rvUpperTracksResult.apply {
                layoutManager = LinearLayoutManager(activity)
                adapter = upperTrackAdapter
+               addItemDecoration(DividerItemDecoration(activity,LinearLayoutManager(activity).orientation))
            }
 
            rvDownerTracksResult.apply {
                layoutManager = LinearLayoutManager(activity)
                adapter = downerTrackAdapter
+               addItemDecoration(DividerItemDecoration(activity,LinearLayoutManager(activity).orientation))
            }
            rvCurrentTracks.apply{
                layoutManager = LinearLayoutManager(activity)

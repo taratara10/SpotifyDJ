@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="blue_gray_50">#ECEFF1</color>
+    <color name="blue_gray_100">#CFD8DC</color>
     <color name="red_500">#E57373</color>
     <color name="upper_tracks">#D73B7F</color>
     <color name="downer_tracks">#4CBAD4</color>

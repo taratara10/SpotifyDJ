@@ -4,8 +4,9 @@
     android:id="@+id/track_adapter"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:background="@color/blue_gray_50"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:background="@color/background_black"
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
@@ -25,6 +26,7 @@
         android:ellipsize="end"
         android:singleLine="true"
         android:textSize="18sp"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toStartOf="@+id/iv_playback"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/iv_track_image"
@@ -38,6 +40,7 @@
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:singleLine="true"
+        android:textColor="@color/blue_gray_100"
         app:layout_constraintEnd_toStartOf="@+id/iv_playback"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/iv_track_image"
@@ -50,6 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/iv_track_image"
         tools:text="BPM: 100" />
@@ -63,7 +67,8 @@
         android:src="@drawable/ic_baseline_play_circle_outline_24"
         app:layout_constraintBottom_toBottomOf="@+id/iv_drag_indicator"
         app:layout_constraintEnd_toStartOf="@+id/iv_drag_indicator"
-        app:layout_constraintTop_toTopOf="@+id/iv_drag_indicator" />
+        app:layout_constraintTop_toTopOf="@+id/iv_drag_indicator"
+        app:tint="@color/white" />
 
     <ImageView
         android:id="@+id/iv_drag_indicator"
@@ -73,6 +78,7 @@
         android:src="@drawable/ic_baseline_drag_indicator_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
