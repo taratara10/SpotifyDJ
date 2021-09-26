@@ -3,6 +3,8 @@ package com.kabos.spotifydj.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import androidx.activity.viewModels
@@ -36,8 +38,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        authorizationSpotify()
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
+
+        viewModel.needRefreshAccessToken.observe(this,{ isRefresh->
+            if (isRefresh) authorizationSpotify()
+        })
     }
 
     private fun authorizationSpotify() {
@@ -56,13 +61,19 @@ class MainActivity : AppCompatActivity() {
 
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    getSharedPreferences("SPOTIFY", 0).edit()
-                        .putString("token", response.accessToken)
-                        .apply()
-                    //以降accessTokenはviewModelのmAccessTokenを介して使う
-                    viewModel.initializeAccessToken(response.accessToken)
-                    //AccessTokenを取得できたらPlaylist Fragmentに表示する
-                    viewModel.getAllPlaylists()
+                    viewModel.apply {
+                        needRefreshAccessToken.postValue(false)
+                        //以降accessTokenはviewModelのmAccessTokenを介して扱う
+                        initializeAccessToken(response.accessToken)
+                        //初期処理として、playlistを取得して表示
+                        getAllPlaylists()
+                    }
+
+                    //accessTokenの有効期限が3600secなので、少し余裕をもってrefreshする
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        authorizationSpotify()
+                    }, 3500000)
+
                     Log.d("STARTING", "GOT AUTH TOKEN")
                 }
 

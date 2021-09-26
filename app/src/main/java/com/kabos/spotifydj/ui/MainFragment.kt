@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -14,6 +15,10 @@ import com.kabos.spotifydj.util.FragmentList
 import com.kabos.spotifydj.util.ReplaceFragment
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import android.os.Looper
+
+
+
 
 @AndroidEntryPoint
 class MainFragment: Fragment() {
@@ -93,7 +98,12 @@ class MainFragment: Fragment() {
 
         }
 
+    }
 
+    override fun onStart() {
+        super.onStart()
+        //復帰した時にaccessTokenをrefresh
+        viewModel.needRefreshAccessToken.postValue(true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

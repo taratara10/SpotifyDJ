@@ -56,6 +56,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
 
+    //MainFragment#onStart()で呼び出して、activityへ通知
+    val needRefreshAccessToken = MutableLiveData(false)
+
 
 
     /**
