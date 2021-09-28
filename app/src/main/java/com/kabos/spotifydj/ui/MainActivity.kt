@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.Menu
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
@@ -73,22 +74,18 @@ class MainActivity : AppCompatActivity() {
                     Handler(Looper.getMainLooper()).postDelayed({
                         authorizationSpotify()
                     }, 3500000)
-
                     Log.d("STARTING", "GOT AUTH TOKEN")
-                }
-
-                AuthorizationResponse.Type.ERROR ->{
-                    // Handle error response
                 }
 
                 // Most likely auth flow was cancelled
                 else -> {
-                    //TODO
+                    //再帰呼び出しでログインできるまでループする
+                    authorizationSpotify()
+                    Toast.makeText(this,"ログインに失敗しました",Toast.LENGTH_SHORT).show()
                     Log.d("SPLASH", "Cannot login")
                 }
             }
         }
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
