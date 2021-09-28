@@ -113,7 +113,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is UserResult.Failure -> {
                 when (result.reason) {
-                    is Reason.UnAuthorized,
+                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                     is Reason.NotFound,
                     is Reason.ResponseError,
                     is Reason.UnKnown -> {
@@ -155,7 +155,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 is TrackItemsResult.Success -> result.data
                 is TrackItemsResult.Failure -> {
                     when (result.reason) {
-                        is Reason.UnAuthorized,
+                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                         is Reason.NotFound,
                         is Reason.ResponseError,
                         is Reason.UnKnown -> {
@@ -178,7 +178,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 is AudioFeatureResult.Success -> result.data
                 is AudioFeatureResult.Failure -> {
                     when (result.reason) {
-                        is Reason.UnAuthorized,
+                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                         is Reason.NotFound,
                         is Reason.ResponseError,
                         is Reason.UnKnown -> {
@@ -269,7 +269,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is TrackItemsResult.Success -> result.data
                     is TrackItemsResult.Failure -> {
                         when (result.reason){
-                            is Reason.UnAuthorized,
+                            is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                             is Reason.NotFound,
                             is Reason.ResponseError,
                             is Reason.UnKnown -> {
@@ -298,7 +298,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is PlaylistItemsResult.Failure -> {
                 when (result.reason){
-                    is Reason.UnAuthorized,
+                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                     is Reason.NotFound,
                     is Reason.ResponseError,
                     is Reason.UnKnown -> {
@@ -326,7 +326,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 }
                 is CreatePlaylistResult.Failure -> {
                     when (result.reason){
-                        is Reason.UnAuthorized,
+                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                         is Reason.NotFound,
                         is Reason.ResponseError,
                         is Reason.UnKnown -> {
@@ -355,7 +355,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is EditPlaylistResult.Failure -> {
                 when (result.reason){
-                    is Reason.UnAuthorized,
+                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                     is Reason.NotFound,
                     is Reason.ResponseError,
                     is Reason.UnKnown -> {
@@ -468,7 +468,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is TrackItemsResult.Success -> result.data
                     is TrackItemsResult.Failure -> {
                         when (result.reason){
-                            is Reason.UnAuthorized,
+                            is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
                             is Reason.NotFound,
                             is Reason.ResponseError,
                             is Reason.UnKnown -> {
