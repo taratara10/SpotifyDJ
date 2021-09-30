@@ -533,7 +533,23 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         if (mDeviceId.isEmpty()) getUsersDevices()
-        repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
+
+        when (val result = repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)) {
+            is PlaybackResult.Success -> {
+               //icon変えたりする？
+            }
+            is PlaybackResult.Failure -> {
+                when (result.reason){
+                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is Reason.NotFound -> startExternalSpotifyApp.postValue(true)
+                    is Reason.ResponseError,
+                    is Reason.UnKnown -> {
+                        //todo Toast出したい
+//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    }
+                }
+            }
+        }
     }
 //        //isPlaybackによって、再生、停止を行う
 //        if (trackInfo.isPlayback){

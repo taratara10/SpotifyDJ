@@ -43,27 +43,30 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun playbackTrack(
         accessToken: String,
         deviceId: String,
-        contextUri: String) {
-        try {
-            userService.playback(
-                accessToken = generateBearer(accessToken),
-                deviceId = deviceId,
-                body = PlaybackBody(uris = listOf(contextUri))
-            )
-        } catch (e: Exception) {
-            Log.d("playbackTrack", "failed. $e")
-        }
+        contextUri: String): PlaybackResult {
+        if (accessToken.isEmpty()) return PlaybackResult.Failure(Reason.EmptyAccessToken)
 
-        //todo 必要に応じて、errorHandleのコード書く
+        val request = userService.playback(
+            accessToken = generateBearer(accessToken),
+            deviceId = deviceId,
+            body = PlaybackBody(uris = listOf(contextUri)))
+        return try {
+            if (request.isSuccessful) PlaybackResult.Success
+            else PlaybackResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            PlaybackResult.Failure(Reason.UnKnown(e))
+        }
     }
 
-    suspend fun pausePlayback(accessToken: String, deviceId: String) {
-        try {
-            userService.pausePlayback(
+    suspend fun pausePlayback(accessToken: String, deviceId: String): PlaybackResult {
+        val request = userService.pausePlayback(
                 accessToken = generateBearer(accessToken),
                 deviceId = deviceId)
+        return try {
+            if (request.isSuccessful) PlaybackResult.Success
+            else PlaybackResult.Failure(errorReasonHandler(request))
         } catch (e: Exception) {
-            Log.d("pausePlaybackTrack", "failed. $e")
+            PlaybackResult.Failure(Reason.UnKnown(e))
         }
     }
 

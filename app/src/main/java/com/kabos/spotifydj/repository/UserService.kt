@@ -31,13 +31,13 @@ interface UserService {
         @Header("Authorization")accessToken: String,
         @Query("device_id")deviceId: String,
         @Body body: PlaybackBody
-    )
+    ): Response<Unit>
 
     @PUT("me/player/pause")
     suspend fun pausePlayback(
         @Header("Authorization")accessToken: String,
         @Query("device_id")deviceId: String,
-    )
+    ):Response<Unit>
 
 
     /**

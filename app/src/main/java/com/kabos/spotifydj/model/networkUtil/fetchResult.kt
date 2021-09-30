@@ -45,6 +45,11 @@ sealed class DevicesResult {
      data class Failure(val reason: Reason): DevicesResult()
 }
 
+sealed class PlaybackResult {
+     object Success:PlaybackResult()
+     data class Failure(val reason: Reason): PlaybackResult()
+}
+
 sealed class Reason {
      object EmptyAccessToken : Reason()
      object UnAuthorized: Reason() //401 The access token expired
