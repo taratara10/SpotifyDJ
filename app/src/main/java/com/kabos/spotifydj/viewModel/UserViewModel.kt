@@ -1,5 +1,7 @@
 package com.kabos.spotifydj.viewModel
 
+import android.content.ComponentName
+import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
@@ -58,6 +60,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     //MainFragment#onStart()で呼び出して、activityへ通知
     val needRefreshAccessToken = MutableLiveData(false)
+    val startExternalSpotifyApp = MutableLiveData(false)
 
 
 
@@ -96,6 +99,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             changeTrackPositionInLocalPlaylist(initial,final)
         }
 
+    }
+
+    //todo deviceIdをSharePrefから取り出して初期化する
+    fun initializeDeviceId(deviceId: String){
+        mDeviceId = deviceId
     }
 
     /**
@@ -347,7 +355,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     //ExistingPlaylistのtitleを変更する
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
-        if (title.isNullOrEmpty()) return@launch
+        if (title.isEmpty()) return@launch
 
         when (val result = repository.updatePlaylistTitle(mAccessToken,localPlaylistId,title)) {
             is EditPlaylistResult.Success -> {
@@ -491,66 +499,77 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     private fun getUsersDevices() = viewModelScope.launch {
-        if (mUserName == "") getUserProfile().join()
-        val usersDevices:List<Device>? = repository.getUsersDevices(mAccessToken)
-        Log.d("deviceId","$usersDevices")
-        if (usersDevices != null){
-//          mDeviceId = usersDevices.find { it.is_active }?.id.toString()
-//            mDeviceId = usersDevices.first().id
-        }else{
-            Log.d("fethUsersDevice","No active device. $usersDevices")
-        }
+//        if (mUserName == "") getUserProfile().join()
 
-        //isActiveを探す→無ければintentでSpotify開く
+        when (val result = repository.getUsersDevices(mAccessToken)) {
+            is DevicesResult.Success -> {
+                //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404
+                //なので、毎回Spotifyアプリを開いて、deviceIdを取得
+                val userDevice: Device? =result.data.find { it.type == "Smartphone" }
+                if (userDevice != null) {
+                    mDeviceId = userDevice.id
+                }else {
+                    startExternalSpotifyApp.postValue(true)
+                }
+            }
+            is DevicesResult.Failure -> {
+                when (result.reason){
+                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is Reason.NotFound -> startExternalSpotifyApp.postValue(true)
+                    is Reason.ResponseError,
+                    is Reason.UnKnown -> {
+                        //todo Toast出したい
+//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    }
+                }
+            }
+        }
         //同時にcontext uriも送る　deviceIdなしで送れる...?
         //size == 0なら自動でそれ選択しよう
         //type == smartPhone > 1なら 「このアプリで再生dialog 」
 
 
-        Log.d("currentPlayback","$usersDevices")
     }
 
-    fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch{
-        if (mDeviceId == "") getUsersDevices()
-
-        //isPlaybackによって、再生、停止を行う
-        if (trackInfo.isPlayback){
-            repository.pausePlayback(mAccessToken,mDeviceId)
-        }else {
-            repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
-        }
-        togglePlaybackIcon(trackInfo)
+    fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch {
+        if (mDeviceId.isEmpty()) getUsersDevices()
+        repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
     }
+//        //isPlaybackによって、再生、停止を行う
+//        if (trackInfo.isPlayback){
+//            repository.pausePlayback(mAccessToken,mDeviceId)
+//        }else {
+//            repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
+//        }
+//        togglePlaybackIcon(trackInfo)
 
 
-    //▶の再生アイコンを切り替える
-    private fun togglePlaybackIcon(trackInfo: TrackInfo){
-        replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
-        replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
-        replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
-        replaceTrackToPlaybackTrack(trackInfo,localPlaylist as MutableLiveData<List<TrackInfo>?>)
-
-        //currentTrackはListじゃないので別処理
-        if(currentTrack.value == trackInfo){
-            trackInfo.isPlayback = !trackInfo.isPlayback
-            currentTrack.postValue(trackInfo)
-        }
-    }
-
-
-    private fun replaceTrackToPlaybackTrack(trackInfo: TrackInfo,trackList:MutableLiveData<List<TrackInfo>?>){
-        if(trackList.value == null) return
-
-        val list = trackList.value!!.toMutableList()
-
-        for (item in list){
-            //他の再生中アイコンをリセット
-            if (item.isPlayback) item.isPlayback = false
-            //再生したいTrackがあれば変更
-            //todo stop/resumeの実装
-            if (item == trackInfo) item.isPlayback = true
-        }
-        trackList.value = list
-
-    }
+//    //▶の再生アイコンを切り替える
+//    private fun togglePlaybackIcon(trackInfo: TrackInfo){
+//        replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
+//        replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
+//        replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
+//        replaceTrackToPlaybackTrack(trackInfo,localPlaylist as MutableLiveData<List<TrackInfo>?>)
+//
+//        //currentTrackはListじゃないので別処理
+//        if(currentTrack.value == trackInfo){
+//            trackInfo.isPlayback = !trackInfo.isPlayback
+//            currentTrack.postValue(trackInfo)
+//        }
+//    }
+//
+//
+//    private fun replaceTrackToPlaybackTrack(trackInfo: TrackInfo,trackList:MutableLiveData<List<TrackInfo>?>){
+//        if(trackList.value == null) return
+//
+//        val list = trackList.value!!.toMutableList()
+//
+//        for (item in list){
+//            //他の再生中アイコンをリセット
+//            if (item.isPlayback) item.isPlayback = false
+//            //再生したいTrackがあれば変更
+//            if (item == trackInfo) item.isPlayback = true
+//        }
+//        trackList.value = list
+//    }
 }

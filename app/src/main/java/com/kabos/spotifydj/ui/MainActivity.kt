@@ -1,5 +1,6 @@
 package com.kabos.spotifydj.ui
 
+import android.content.ComponentName
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -43,6 +44,14 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.needRefreshAccessToken.observe(this,{ isRefresh->
             if (isRefresh) authorizationSpotify()
+        })
+
+        viewModel.startExternalSpotifyApp.observe(this,{ startActivity->
+            if (startActivity) startActivity(
+                Intent().setComponent(
+                    ComponentName(
+                        "com.spotify.music",
+                         "com.spotify.music.MainActivity")))
         })
     }
 

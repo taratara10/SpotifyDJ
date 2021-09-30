@@ -1,5 +1,7 @@
 package com.kabos.spotifydj.ui
 
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -109,7 +111,14 @@ class MainFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.menu_new_playlist -> {
-                binding.pager.setCurrentItem(0, true)
+
+
+
+                startActivity(
+                    Intent().setComponent(
+                        ComponentName("com.spotify.music",
+                            "com.spotify.music.MainActivity")))
+
                 true
             }
             R.id.menu_fetch_playlist -> {
