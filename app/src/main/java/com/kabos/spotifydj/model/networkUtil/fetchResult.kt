@@ -3,6 +3,8 @@ package com.kabos.spotifydj.model.networkUtil
 import com.kabos.spotifydj.model.SnapshotId
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
+import com.kabos.spotifydj.model.playback.Device
+import com.kabos.spotifydj.model.playback.Devices
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.track.TrackItems
 import java.lang.Exception
@@ -36,6 +38,11 @@ sealed class CreatePlaylistResult {
 sealed class EditPlaylistResult {
      object Success:EditPlaylistResult()
      data class Failure(val reason: Reason): EditPlaylistResult()
+}
+
+sealed class DevicesResult {
+     data class Success(val data: List<Device>): DevicesResult()
+     data class Failure(val reason: Reason): DevicesResult()
 }
 
 sealed class Reason {

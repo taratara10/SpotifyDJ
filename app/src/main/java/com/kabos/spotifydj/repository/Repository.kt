@@ -43,8 +43,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun playbackTrack(
         accessToken: String,
         deviceId: String,
-        contextUri: String
-    ) {
+        contextUri: String) {
         try {
             userService.playback(
                 accessToken = generateBearer(accessToken),
@@ -62,22 +61,21 @@ class Repository @Inject constructor( private val userService: UserService) {
         try {
             userService.pausePlayback(
                 accessToken = generateBearer(accessToken),
-                deviceId = deviceId
-            )
+                deviceId = deviceId)
         } catch (e: Exception) {
             Log.d("pausePlaybackTrack", "failed. $e")
         }
     }
 
-    //todo replace handler
-    //returnがreasonでない場合、accessTokenEmptyはどう判定する？
-    suspend fun getUsersDevices(accessToken: String): List<Device>? {
+    suspend fun getUsersDevices(accessToken: String): DevicesResult {
+        if (accessToken.isEmpty()) return DevicesResult.Failure(Reason.EmptyAccessToken)
+
         val request = userService.getUsersDevices(generateBearer(accessToken))
-        return if (request.isSuccessful) {
-            request.body()?.devices
-        } else {
-            Log.d("getCurrentPlayback", "${request.errorBody()?.string()}")
-            null
+        return try {
+            if (request.isSuccessful) DevicesResult.Success(request.body()!!.devices)
+            else DevicesResult.Failure(errorReasonHandler(request))
+        } catch (e: Exception) {
+            DevicesResult.Failure(Reason.UnKnown(e))
         }
     }
 
