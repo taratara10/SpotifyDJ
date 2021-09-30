@@ -86,11 +86,15 @@ class MainActivity : AppCompatActivity() {
                     Log.d("STARTING", "GOT AUTH TOKEN")
                 }
 
+                AuthorizationResponse.Type.ERROR -> {
+                    //再帰呼び出しでログインできるまでループする
+                    authorizationSpotify()
+                    Toast.makeText(this,"ログインに失敗しました",Toast.LENGTH_SHORT).show()
+                }
                 // Most likely auth flow was cancelled
                 else -> {
                     //再帰呼び出しでログインできるまでループする
                     authorizationSpotify()
-                    Toast.makeText(this,"ログインに失敗しました",Toast.LENGTH_SHORT).show()
                     Log.d("SPLASH", "Cannot login")
                 }
             }

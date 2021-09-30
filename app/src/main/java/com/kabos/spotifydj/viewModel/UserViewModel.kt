@@ -524,9 +524,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 }
             }
         }
-        //同時にcontext uriも送る　deviceIdなしで送れる...?
-        //size == 0なら自動でそれ選択しよう
-        //type == smartPhone > 1なら 「このアプリで再生dialog 」
 
 
     }
@@ -541,7 +538,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             is PlaybackResult.Failure -> {
                 when (result.reason){
                     is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound -> startExternalSpotifyApp.postValue(true)
+                    is Reason.NotFound -> getUsersDevices()
                     is Reason.ResponseError,
                     is Reason.UnKnown -> {
                         //todo Toast出したい
