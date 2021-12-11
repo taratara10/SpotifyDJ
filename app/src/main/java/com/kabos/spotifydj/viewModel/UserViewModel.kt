@@ -1,15 +1,14 @@
 package com.kabos.spotifydj.viewModel
 
 import android.content.ComponentName
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
+import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.model.feature.AudioFeature
-import com.kabos.spotifydj.model.networkUtil.*
 import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
@@ -19,9 +18,7 @@ import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
-import com.kabos.spotifydj.util.ReplaceFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hilt_aggregated_deps._dagger_hilt_android_internal_modules_ApplicationContextModule
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -115,16 +112,19 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     private fun getUserProfile() = viewModelScope.launch {
         when (val result = repository.getUsersProfile(mAccessToken)) {
-            is UserResult.Success -> {
-                mUserId = result.data.id
-                mUserName = result.data.display_name
+            is SpotifyApiResource.Success -> {
+                val user = result.data
+                if (user != null) {
+                    mUserId = user.id
+                    mUserName = user.display_name
+                }
             }
-            is UserResult.Failure -> {
+            is SpotifyApiResource.Error -> {
                 when (result.reason) {
-                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound,
-                    is Reason.ResponseError,
-                    is Reason.UnKnown -> {
+                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.NotFound,
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
                         Log.d("user","fail")
                         //todo open login activity
                     }
@@ -160,13 +160,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         async {
             val result = repository.getTracksByKeyword(accessToken = mAccessToken, keyword= keyword)
             return@async when (result){
-                is TrackItemsResult.Success -> result.data
-                is TrackItemsResult.Failure -> {
+                is SpotifyApiResource.Success -> result.data
+                is SpotifyApiResource.Error -> {
                     when (result.reason) {
-                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                        is Reason.NotFound,
-                        is Reason.ResponseError,
-                        is Reason.UnKnown -> {
+                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.NotFound,
+                        is SpotifyApiErrorReason.ResponseError,
+                        is SpotifyApiErrorReason.UnKnown -> {
                             isLoadingSearchTrack.postValue(false)
                             Log.d("getTracksByKeyword","${result.reason}")
                             //todo display onFetchFailed textView or Toast
@@ -174,6 +174,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     }
                     null
                 }
+                else -> listOf()
             }
 
         }
@@ -183,13 +184,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         async {
             val result = repository.getAudioFeaturesById(accessToken = mAccessToken, id = id)
             return@async when (result){
-                is AudioFeatureResult.Success -> result.data
-                is AudioFeatureResult.Failure -> {
+                is SpotifyApiResource.Success -> result.data
+                is SpotifyApiResource.Error -> {
                     when (result.reason) {
-                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                        is Reason.NotFound,
-                        is Reason.ResponseError,
-                        is Reason.UnKnown -> {
+                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.NotFound,
+                        is SpotifyApiErrorReason.ResponseError,
+                        is SpotifyApiErrorReason.UnKnown -> {
                             isLoadingSearchTrack.postValue(false)
                             isLoadingDownerTrack.postValue(false)
                             isLoadingUpperTrack.postValue(false)
@@ -198,6 +199,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     }
                     null
                 }
+                else -> null
             }
         }
     }.await()
@@ -274,13 +276,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     trackInfo = trackInfo,
                     fetchUpperTrack = fetchUpperTrack)
                 return@async when (result) {
-                    is TrackItemsResult.Success -> result.data
-                    is TrackItemsResult.Failure -> {
+                    is SpotifyApiResource.Success -> result.data
+                    is SpotifyApiResource.Error -> {
                         when (result.reason){
-                            is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                            is Reason.NotFound,
-                            is Reason.ResponseError,
-                            is Reason.UnKnown -> {
+                            is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                            is SpotifyApiErrorReason.NotFound,
+                            is SpotifyApiErrorReason.ResponseError,
+                            is SpotifyApiErrorReason.UnKnown -> {
                                 isLoadingSearchTrack.postValue(false)
                                 isLoadingDownerTrack.postValue(false)
                                 isLoadingUpperTrack.postValue(false)
@@ -289,6 +291,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                         }
                         null
                     }
+                    else -> null
                 }
             }
         }.await()
@@ -300,16 +303,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun getAllPlaylists() = viewModelScope.launch {
         when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
-            is PlaylistItemsResult.Success -> {
+            is SpotifyApiResource.Success -> {
                 allPlaylists.value = result.data
                 filterOwnPlaylist(result.data)
             }
-            is PlaylistItemsResult.Failure -> {
+            is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound,
-                    is Reason.ResponseError,
-                    is Reason.UnKnown -> {
+                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.NotFound,
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
                         //error handle
                     }
                 }
@@ -329,16 +332,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //createPlaylist
         launch {
             when (val result = repository.createPlaylist(mAccessToken,mUserId,localPlaylistTitle)) {
-                is CreatePlaylistResult.Success -> {
-                    localPlaylistId = result.playlistId
+                is SpotifyApiResource.Success -> {
+                    localPlaylistId = result.data.toString()
                 }
-                is CreatePlaylistResult.Failure -> {
+                is SpotifyApiResource.Error -> {
                     when (result.reason){
-                        is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                        is Reason.NotFound,
-                        is Reason.ResponseError,
-                        is Reason.UnKnown -> {
-                            localPlaylistId = result.emptyId
+                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.NotFound,
+                        is SpotifyApiErrorReason.ResponseError,
+                        is SpotifyApiErrorReason.UnKnown -> {
+                            localPlaylistId = result.data.toString()
                             //todo Toast出したい
 //                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
                         }
@@ -358,15 +361,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (title.isEmpty()) return@launch
 
         when (val result = repository.updatePlaylistTitle(mAccessToken,localPlaylistId,title)) {
-            is EditPlaylistResult.Success -> {
+            is SpotifyApiResource.Success -> {
                 //todo Toast(タイトルを更新しました)
             }
-            is EditPlaylistResult.Failure -> {
+            is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound,
-                    is Reason.ResponseError,
-                    is Reason.UnKnown -> {
+                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.NotFound,
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
                         //todo Toast出したい
 //                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
                     }
@@ -473,13 +476,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             async {
                 val result = repository.getTracksByPlaylistId(mAccessToken,playlistId)
                 return@async when (result) {
-                    is TrackItemsResult.Success -> result.data
-                    is TrackItemsResult.Failure -> {
+                    is SpotifyApiResource.Success -> result.data
+                    is SpotifyApiResource.Error -> {
                         when (result.reason){
-                            is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                            is Reason.NotFound,
-                            is Reason.ResponseError,
-                            is Reason.UnKnown -> {
+                            is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                            is SpotifyApiErrorReason.NotFound,
+                            is SpotifyApiErrorReason.ResponseError,
+                            is SpotifyApiErrorReason.UnKnown -> {
                                 isLoadingSearchTrack.postValue(false)
                                 isLoadingDownerTrack.postValue(false)
                                 isLoadingUpperTrack.postValue(false)
@@ -502,22 +505,22 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //        if (mUserName == "") getUserProfile().join()
 
         when (val result = repository.getUsersDevices(mAccessToken)) {
-            is DevicesResult.Success -> {
+            is SpotifyApiResource.Success -> {
                 //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404
                 //なので、毎回Spotifyアプリを開いて、deviceIdを取得
-                val userDevice: Device? =result.data.find { it.type == "Smartphone" }
+                val userDevice: Device? =result.data?.find { it.type == "Smartphone" }
                 if (userDevice != null) {
                     mDeviceId = userDevice.id
                 }else {
                     startExternalSpotifyApp.postValue(true)
                 }
             }
-            is DevicesResult.Failure -> {
+            is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound -> startExternalSpotifyApp.postValue(true)
-                    is Reason.ResponseError,
-                    is Reason.UnKnown -> {
+                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.NotFound -> startExternalSpotifyApp.postValue(true)
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
                         //todo Toast出したい
 //                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
                     }
@@ -532,15 +535,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         if (mDeviceId.isEmpty()) getUsersDevices()
 
         when (val result = repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)) {
-            is PlaybackResult.Success -> {
+            is SpotifyApiResource.Success -> {
                //icon変えたりする？
             }
-            is PlaybackResult.Failure -> {
+            is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is Reason.UnAuthorized -> needRefreshAccessToken.postValue(true)
-                    is Reason.NotFound -> getUsersDevices()
-                    is Reason.ResponseError,
-                    is Reason.UnKnown -> {
+                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.NotFound -> getUsersDevices()
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
                         //todo Toast出したい
 //                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
                     }
