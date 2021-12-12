@@ -13,7 +13,7 @@ import com.kabos.spotifydj.model.track.TrackItems
 import retrofit2.Response
 import javax.inject.Inject
 
-class Repository @Inject constructor(private val userService: UserService) {
+class Repository @Inject constructor( private val userService: UserService) {
 
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
@@ -25,6 +25,7 @@ class Repository @Inject constructor(private val userService: UserService) {
             404 -> SpotifyApiErrorReason.NotFound
             else -> SpotifyApiErrorReason.ResponseError(apiError.error.message)
         }
+
     }
 
     suspend fun getUsersProfile(accessToken: String):SpotifyApiResource<User> {
