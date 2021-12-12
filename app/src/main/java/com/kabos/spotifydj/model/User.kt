@@ -7,5 +7,4 @@ data class User(
     val country: String,
     val birthday: String
 )
-// todo null check
 

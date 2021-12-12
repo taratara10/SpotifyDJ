@@ -1,8 +1,8 @@
 package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
-import com.kabos.spotifydj.model.apiResult.ApiError
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
+import com.kabos.spotifydj.model.apiResult.ErrorResponse.Companion.toSpotifyApiErrorResponse
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
@@ -10,7 +10,6 @@ import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.*
 import com.kabos.spotifydj.model.track.TrackItems
-import com.squareup.moshi.Moshi
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -19,16 +18,14 @@ class Repository @Inject constructor( private val userService: UserService) {
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
 
-    private val apiErrorAdapter = Moshi.Builder().build().adapter(ApiError::class.java)
-
-    // todo .toSpotifyApiErrorを作る
     private fun <T> errorReasonHandler(body: Response<T>): SpotifyApiErrorReason {
-        val apiError = apiErrorAdapter.fromJson(body.errorBody()?.string())!!
+        val apiError = body.toSpotifyApiErrorResponse() ?: return SpotifyApiErrorReason.UnKnown(null)
         return when (apiError.error.status) {
             401 -> SpotifyApiErrorReason.UnAuthorized
             404 -> SpotifyApiErrorReason.NotFound
             else -> SpotifyApiErrorReason.ResponseError(apiError.error.message)
         }
+
     }
 
     suspend fun getUsersProfile(accessToken: String):SpotifyApiResource<User> {

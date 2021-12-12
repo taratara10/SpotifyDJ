@@ -1,10 +1,6 @@
 package com.kabos.spotifydj.model.apiResult
 
-data class ApiError(
-    val error: Error
-)
-
-data class Error(
+data class ErrorContent(
     val message: String,
     val status: Int
 )
