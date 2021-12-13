@@ -14,11 +14,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
+import com.kabos.spotifydj.databinding.ActivityMainBinding
 import com.kabos.spotifydj.viewModel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -39,20 +41,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
-
-        viewModel.needRefreshAccessToken.observe(this,{ isRefresh->
-            if (isRefresh) authorizationSpotify()
-        })
-
-        viewModel.startExternalSpotifyApp.observe(this,{ startActivity->
-            if (startActivity) startActivity(
-                Intent().setComponent(
-                    ComponentName(
-                        "com.spotify.music",
-                         "com.spotify.music.MainActivity")))
-        })
+        initViewModels()
     }
 
     private fun authorizationSpotify() {
@@ -83,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                     Handler(Looper.getMainLooper()).postDelayed({
                         authorizationSpotify()
                     }, 3500000)
-                    Log.d("STARTING", "GOT AUTH TOKEN")
+                    Timber.d("GOT AUTH TOKEN")
                 }
 
                 AuthorizationResponse.Type.ERROR -> {
@@ -95,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     //再帰呼び出しでログインできるまでループする
                     authorizationSpotify()
-                    Log.d("SPLASH", "Cannot login")
+                    Timber.tag("SPLASH").d("Cannot login")
                 }
             }
         }
@@ -109,5 +102,21 @@ class MainActivity : AppCompatActivity() {
         //Fragmentのコールバックがあればそれを実行する
         if (onBackPressedDispatcher.hasEnabledCallbacks()) onBackPressedDispatcher.onBackPressed()
         return true
+    }
+
+    private fun initViewModels() {
+        viewModel.apply {
+            needRefreshAccessToken.observe(this@MainActivity){ isRefresh->
+                if (isRefresh) authorizationSpotify()
+            }
+
+            startExternalSpotifyApp.observe(this@MainActivity){ startActivity->
+                if (startActivity) startActivity(
+                    Intent().setComponent(
+                        ComponentName(
+                            "com.spotify.music",
+                            "com.spotify.music.MainActivity")))
+            }
+        }
     }
 }
