@@ -13,7 +13,7 @@ import com.kabos.spotifydj.model.track.TrackItems
 import retrofit2.Response
 import javax.inject.Inject
 
-class Repository @Inject constructor( private val userService: UserService) {
+class Repository @Inject constructor( private val spotifyApi: SpotifyApi) {
 
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
@@ -31,7 +31,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun getUsersProfile(accessToken: String):SpotifyApiResource<User> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return  try {
-            val request = userService.getUsersProfile(generateBearer(accessToken))
+            val request = spotifyApi.getUsersProfile(generateBearer(accessToken))
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!)
             else SpotifyApiResource.Error(errorReasonHandler(request))
         } catch (e: Exception) {
@@ -49,7 +49,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {
-            val request = userService.playback(
+            val request = spotifyApi.playback(
                 accessToken = generateBearer(accessToken),
                 deviceId = deviceId,
                 body = PlaybackBody(uris = listOf(contextUri)))
@@ -63,7 +63,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun pausePlayback(accessToken: String, deviceId: String): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
-            val request = userService.pausePlayback(
+            val request = spotifyApi.pausePlayback(
                 accessToken = generateBearer(accessToken),
                 deviceId = deviceId)
             if (request.isSuccessful) SpotifyApiResource.Success(true)
@@ -77,7 +77,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {
-            val request = userService.getUsersDevices(generateBearer(accessToken))
+            val request = spotifyApi.getUsersDevices(generateBearer(accessToken))
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!.devices)
             else SpotifyApiResource.Error(errorReasonHandler(request))
         } catch (e: Exception) {
@@ -92,7 +92,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {
-            val request = userService.getTracksByKeyword(
+            val request = spotifyApi.getTracksByKeyword(
                 accessToken = generateBearer(accessToken),
                 keyword = keyword,
                 type = "album,track,artist")
@@ -106,7 +106,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     suspend fun getAudioFeaturesById(accessToken: String, id: String): SpotifyApiResource<AudioFeature> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
-            val request = userService.getAudioFeaturesById(generateBearer(accessToken), id)
+            val request = spotifyApi.getAudioFeaturesById(generateBearer(accessToken), id)
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!)
             else SpotifyApiResource.Error(errorReasonHandler(request))
         } catch (e: Exception) {
@@ -127,7 +127,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (fetchUpperTrack) maxEnergyRate *= 1.2
         if (!fetchUpperTrack) minEnergyRate *= 0.8
 
-        val request = userService.getRecommendations(
+        val request = spotifyApi.getRecommendations(
             accessToken = generateBearer(accessToken),
             seedTrackId = trackInfo.id,
             minTempo = trackInfo.tempo * RecommendParameter.MinTempoRate.value,
@@ -151,7 +151,7 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun getUsersAllPlaylist(accessToken: String): SpotifyApiResource<List<PlaylistItem>> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
-        val request = userService.getUsersAllPlaylists(generateBearer(accessToken))
+        val request = spotifyApi.getUsersAllPlaylists(generateBearer(accessToken))
         return try {
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!.items)
             else SpotifyApiResource.Error(errorReasonHandler(request))
@@ -162,7 +162,7 @@ class Repository @Inject constructor( private val userService: UserService) {
 
     suspend fun getTracksByPlaylistId(accessToken: String, playlistId: String): SpotifyApiResource<List<TrackItems>> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
-        val request = userService.getTracksByPlaylistId(
+        val request = spotifyApi.getTracksByPlaylistId(
             accessToken = generateBearer(accessToken),
             playlistId = playlistId)
         return try {
@@ -180,7 +180,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {
-            val request = userService.createPlaylist(
+            val request = spotifyApi.createPlaylist(
                 accessToken = generateBearer(accessToken),
                 userId = userId,
                 body = CreatePlaylistBody(name = title))
@@ -198,7 +198,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         body: AddTracksBody): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
-            val request = userService.addTracksToPlaylist(
+            val request = spotifyApi.addTracksToPlaylist(
                 accessToken = generateBearer(accessToken),
                 contentType = "application/json",
                 playlistId = playlistId,
@@ -218,7 +218,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     ): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
-        val request = userService.reorderPlaylistsTracks(
+        val request = spotifyApi.reorderPlaylistsTracks(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
             playlistId = playlistId,
@@ -243,7 +243,7 @@ class Repository @Inject constructor( private val userService: UserService) {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {
-            val request = userService.updatePlaylistTitle(
+            val request = spotifyApi.updatePlaylistTitle(
                 accessToken = generateBearer(accessToken),
                 contentType = "application/json",
                 playlistId = playlistId,
@@ -262,7 +262,7 @@ class Repository @Inject constructor( private val userService: UserService) {
     ): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
-        val request = userService.deleteTracksFromPlaylist(
+        val request = spotifyApi.deleteTracksFromPlaylist(
             accessToken = generateBearer(accessToken),
             contentType = "application/json",
             playlistId = playlistId,

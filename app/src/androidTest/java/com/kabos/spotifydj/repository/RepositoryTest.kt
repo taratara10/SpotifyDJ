@@ -5,7 +5,6 @@ import com.kabos.spotifydj.model.RecommendTracks
 import com.kabos.spotifydj.model.SnapshotId
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.feature.AudioFeature
-import com.kabos.spotifydj.model.feature.AudioFeatures
 import com.kabos.spotifydj.model.networkUtil.Reason
 import com.kabos.spotifydj.model.networkUtil.UserResult
 import com.kabos.spotifydj.model.playback.Devices
@@ -17,7 +16,6 @@ import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.model.requestBody.PlaybackBody
 import com.kabos.spotifydj.model.requestBody.ReorderBody
 import com.kabos.spotifydj.model.track.SearchTracks
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
 import org.junit.Assert.*
@@ -29,7 +27,7 @@ import retrofit2.Response
 
 class RepositoryTest {
 
-    class UserServiceMock: UserService {
+    class UserServiceMock: SpotifyApi {
         var userResponse: Response<User>? = null
         override suspend fun getUsersProfile(accessToken: String): Response<User>
         = userResponse ?: throw IllegalArgumentException("UserResponse is null")

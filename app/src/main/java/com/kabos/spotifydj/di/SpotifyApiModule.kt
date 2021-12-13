@@ -1,7 +1,7 @@
 package com.kabos.spotifydj.di
 
-import com.kabos.spotifydj.repository.Repository
-import com.kabos.spotifydj.repository.UserService
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.ENDPOINT
+import com.kabos.spotifydj.repository.SpotifyApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,21 +12,13 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-object ApiModule {
-
-    val ENDPOINT = "https://api.spotify.com/v1/"
-
+object SpotifyApiModule {
     @Singleton
     @Provides
-    fun provideUserService(): UserService =
+    fun provideSpotifyApi(): SpotifyApi =
         Retrofit.Builder()
             .baseUrl(ENDPOINT)
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
-            .create(UserService::class.java)
-
-    @Singleton
-    @Provides
-    fun provideRepository(userService: UserService) =
-        Repository(userService)
+            .create(SpotifyApi::class.java)
 }
