@@ -15,10 +15,10 @@ import javax.inject.Singleton
 object SpotifyApiModule {
     @Singleton
     @Provides
-    fun provideSpotifyApi(): SpotifyApi =
+    fun provideSpotifyApi(moshiConverterFactory: MoshiConverterFactory): SpotifyApi =
         Retrofit.Builder()
             .baseUrl(ENDPOINT)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(moshiConverterFactory)
             .build()
             .create(SpotifyApi::class.java)
 }

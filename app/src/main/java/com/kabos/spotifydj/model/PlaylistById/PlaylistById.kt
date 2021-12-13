@@ -8,7 +8,7 @@ data class PlaylistById(
     val limit: Int,
     val next: String,
     val offset: Int,
-    val previous: Any,
+    val previous: String?,
     val total: Int
 )
 
@@ -16,6 +16,6 @@ data class PlaylistById(
 data class Item(
     val added_at: String,
     val is_local: Boolean,
-    val primary_color: Any,
+    val primary_color: String?,
     val track: TrackItems,
 )
