@@ -2,6 +2,13 @@ package com.kabos.spotifydj.repository
 
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.PlaylistById.PlaylistById
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.AUTHORIZATION
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.CONTENT_TYPE
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.DEVICE_ID
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.ID
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.PLAYLIST_ID
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.TYPE
+import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.USER_ID
 import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Devices
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
@@ -15,29 +22,29 @@ import retrofit2.http.*
 
 interface SpotifyApi {
     @GET("me")
-    suspend fun getUsersProfile(@Header("Authorization") accessToken: String):Response<User>
+    suspend fun getUsersProfile(@Header(AUTHORIZATION) accessToken: String): Response<User>
 
 
     /**
      * Player
      * */
     @GET("me/player/devices")
-    suspend fun getUsersDevices (
-        @Header("Authorization")accessToken: String
+    suspend fun getUsersDevices(
+        @Header(AUTHORIZATION) accessToken: String
     ): Response<Devices>
 
     @PUT("me/player/play")
     suspend fun playback(
-        @Header("Authorization")accessToken: String,
-        @Query("device_id")deviceId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Query(DEVICE_ID) deviceId: String,
         @Body body: PlaybackBody
     ): Response<Unit>
 
     @PUT("me/player/pause")
     suspend fun pausePlayback(
-        @Header("Authorization")accessToken: String,
-        @Query("device_id")deviceId: String,
-    ):Response<Unit>
+        @Header(AUTHORIZATION) accessToken: String,
+        @Query(DEVICE_ID) deviceId: String,
+    ): Response<Unit>
 
 
     /**
@@ -45,78 +52,78 @@ interface SpotifyApi {
      * */
     @GET("search")
     suspend fun getTracksByKeyword(
-        @Header("Authorization")accessToken: String,
-        @Query("q")keyword: String,
-        @Query("type")type: String
-    ):Response<SearchTracks>
+        @Header(AUTHORIZATION) accessToken: String,
+        @Query("q") keyword: String,
+        @Query(TYPE) type: String
+    ): Response<SearchTracks>
 
-    @GET("audio-features/{id}")
+    @GET("audio-features/{$ID}")
     suspend fun getAudioFeaturesById(
-        @Header("Authorization")accessToken: String,
-        @Path("id")id: String
+        @Header(AUTHORIZATION) accessToken: String,
+        @Path(ID) id: String
     ): Response<AudioFeature>
 
     @GET("recommendations")
     suspend fun getRecommendations(
-        @Header("Authorization") accessToken: String,
-        @Query("seed_tracks")seedTrackId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Query("seed_tracks") seedTrackId: String,
         @Query("min_tempo") minTempo: Double,
         @Query("max_tempo") maxTempo: Double,
         @Query("min_danceability") minDancebility: Double,
         @Query("max_danceability") maxDancebility: Double,
         @Query("min_energy") minEnergy: Double,
         @Query("max_energy") maxEnergy: Double,
-    ):Response<RecommendTracks>
+    ): Response<RecommendTracks>
 
 
     /**
      *  playlist
      * */
     @GET("me/playlists")
-    suspend fun getUsersAllPlaylists(@Header("Authorization")accessToken: String): Response<Playlist>
+    suspend fun getUsersAllPlaylists(@Header(AUTHORIZATION) accessToken: String): Response<Playlist>
 
-    @GET("playlists/{playlist_id}/tracks")
+    @GET("playlists/{$PLAYLIST_ID}/tracks")
     suspend fun getTracksByPlaylistId(
-        @Header("Authorization") accessToken: String,
-        @Path("playlist_id")playlistId: String,
-    ):Response<PlaylistById>
+        @Header(AUTHORIZATION) accessToken: String,
+        @Path(PLAYLIST_ID) playlistId: String,
+    ): Response<PlaylistById>
 
-    @POST("users/{user_id}/playlists")
+    @POST("users/{$USER_ID}/playlists")
     suspend fun createPlaylist(
-        @Header("Authorization") accessToken: String,
-        @Path("user_id")userId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Path(USER_ID) userId: String,
         @Body body: CreatePlaylistBody
-    ):Response<PlaylistItem>
+    ): Response<PlaylistItem>
 
-    @POST("playlists/{playlist_id}/tracks")
+    @POST("playlists/{$PLAYLIST_ID}/tracks")
     suspend fun addTracksToPlaylist(
-        @Header("Authorization") accessToken: String,
-        @Header("Content-Type") contentType: String,
-        @Path("playlist_id")playlistId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Header(CONTENT_TYPE) contentType: String,
+        @Path(PLAYLIST_ID) playlistId: String,
         @Body body: AddTracksBody
-    ):Response<SnapshotId>
+    ): Response<SnapshotId>
 
-    @PUT("playlists/{playlist_id}")
+    @PUT("playlists/{$PLAYLIST_ID}")
     suspend fun updatePlaylistTitle(
-        @Header("Authorization") accessToken: String,
-        @Header("Content-Type") contentType: String,
-        @Path("playlist_id")playlistId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Header(CONTENT_TYPE) contentType: String,
+        @Path(PLAYLIST_ID) playlistId: String,
         @Body body: UpdatePlaylistTitleBody
-    ):Response<Unit>
+    ): Response<Unit>
 
-    @PUT("playlists/{playlist_id}/tracks")
+    @PUT("playlists/{$PLAYLIST_ID}/tracks")
     suspend fun reorderPlaylistsTracks(
-        @Header("Authorization") accessToken: String,
-        @Header("Content-Type") contentType: String,
-        @Path("playlist_id") playlistId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Header(CONTENT_TYPE) contentType: String,
+        @Path(PLAYLIST_ID) playlistId: String,
         @Body body: ReorderBody
-    ):Response<SnapshotId>
+    ): Response<SnapshotId>
 
-    @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
+    @HTTP(method = "DELETE", path = "playlists/{$PLAYLIST_ID}/tracks", hasBody = true)
     suspend fun deleteTracksFromPlaylist(
-        @Header("Authorization") accessToken: String,
-        @Header("Content-Type") contentType: String,
-        @Path("playlist_id")playlistId: String,
+        @Header(AUTHORIZATION) accessToken: String,
+        @Header(CONTENT_TYPE) contentType: String,
+        @Path(PLAYLIST_ID) playlistId: String,
         @Body body: DeleteTracksBody
-    ):Response<SnapshotId>
+    ): Response<SnapshotId>
 }
