@@ -68,8 +68,7 @@ class PlaylistMainFragment: Fragment() {
 
     private fun initViewModels() {
         viewModel.apply {
-            filterOwnPlaylist.observe(viewLifecycleOwner) { playlist ->
-                if (playlist == null) return@observe
+            userCreatedPlaylist.observe(viewLifecycleOwner) { playlist ->
                 playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
             }
             getAllPlaylists()

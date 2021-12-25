@@ -164,9 +164,9 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
 
     suspend fun getUsersAllPlaylist(accessToken: String): SpotifyApiResource<List<PlaylistItem>> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
-        val request = spotifyApi.getUsersAllPlaylists(generateBearer(accessToken))
         return try {
-            if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!.items)
+            val request = spotifyApi.getUsersAllPlaylists(generateBearer(accessToken))
+            if (request.isSuccessful) SpotifyApiResource.Success(request.body()?.items ?: listOf())
             else SpotifyApiResource.Error(errorReasonHandler(request))
         } catch (e: Exception) {
             SpotifyApiResource.Error(SpotifyApiErrorReason.UnKnown(e))

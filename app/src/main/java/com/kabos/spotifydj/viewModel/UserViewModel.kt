@@ -1,6 +1,5 @@
 package com.kabos.spotifydj.viewModel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,12 +21,13 @@ import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.Pager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
-    var mAccessToken = ""
+    private var mAccessToken = ""
     var mDeviceId = ""
     var mUserId = ""
     var mUserName = ""
@@ -40,8 +40,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val localPlaylist = MutableLiveData<List<TrackInfo>?>()
     val currentTrack = MutableLiveData<TrackInfo?>()
 
-    val allPlaylists = MutableLiveData<List<PlaylistItem>?>()
-    val filterOwnPlaylist = MutableLiveData<List<PlaylistItem>?>()
+    private val _usersPlaylist = MutableLiveData<List<PlaylistItem>>()
+    private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
 
 
     //Loading Flag
@@ -61,6 +61,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val needRefreshAccessToken = MutableLiveData(false)
     val startExternalSpotifyApp = MutableLiveData(false)
 
+    val usersPlaylist: LiveData<List<PlaylistItem>>
+        get() = _usersPlaylist
+    val userCreatedPlaylist: LiveData<List<PlaylistItem>>
+        get() = _userCreatedPlaylist
     val setRootFragmentPagerPosition: LiveData<OneShotEvent<Pager>>
         get() = _setRootFragmentPagerPosition
 
@@ -113,9 +117,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
     fun initializeAccessToken(accessToken: String){
         mAccessToken = accessToken
+        initUserAccount()
     }
 
-    private fun getUserProfile() = viewModelScope.launch {
+    private fun initUserAccount() = viewModelScope.launch {
         when (val result = repository.getUsersProfile(mAccessToken)) {
             is SpotifyApiResource.Success -> {
                 val user = result.data
@@ -130,7 +135,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is SpotifyApiErrorReason.NotFound,
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
-                        Log.d("user","fail")
                         //todo open login activity
                     }
                 }
@@ -308,8 +312,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun getAllPlaylists() = viewModelScope.launch {
         when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
             is SpotifyApiResource.Success -> {
-                allPlaylists.value = result.data
-                filterOwnPlaylist(result.data)
+                val playlist = result.data ?: listOf()
+                _usersPlaylist.postValue(playlist)
+                filterOwnPlaylist(playlist)
+                Timber.d("playlist/ ${playlist}// users${_userCreatedPlaylist.value}")
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
@@ -323,17 +329,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
         }
     }
-    private suspend fun filterOwnPlaylist(playlist:List<PlaylistItem>?) {
-        if (mUserName == "") getUserProfile().join()
-        filterOwnPlaylist.value = playlist?.filter { it.owner.display_name == mUserName }
+    private fun filterOwnPlaylist(playlist:List<PlaylistItem>) {
+        // todo idでなくていいの？
+        _userCreatedPlaylist.postValue(playlist.filter { it.owner.display_name == mUserName })
     }
 
 
     fun createPlaylist() = viewModelScope.launch {
-        //initialize userId
-        if (mUserId == "") getUserProfile().join()
-
-        //createPlaylist
         launch {
             when (val result = repository.createPlaylist(mAccessToken,mUserId,localPlaylistTitle)) {
                 is SpotifyApiResource.Success -> {
@@ -506,8 +508,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     private fun getUsersDevices() = viewModelScope.launch {
-//        if (mUserName == "") getUserProfile().join()
-
         when (val result = repository.getUsersDevices(mAccessToken)) {
             is SpotifyApiResource.Success -> {
                 //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404

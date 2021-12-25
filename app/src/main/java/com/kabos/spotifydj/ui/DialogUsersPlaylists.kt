@@ -24,11 +24,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DialogUsersPlaylists: DialogFragment() {
-
     private lateinit var binding: DialogUsersPlaylistsBinding
     private val viewModel: UserViewModel by activityViewModels()
     private val mainFragmentArgs: MainFragmentArgs by navArgs()
-
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
@@ -54,27 +52,29 @@ class DialogUsersPlaylists: DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        initViewModels()
         binding.apply {
-            rvUsersPlaylist.apply {
-                layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL,false)
-                adapter = playlistAdapter
-            }
+            rvUsersPlaylist.adapter = playlistAdapter
         }
 
-        viewModel.allPlaylists.observe(this,{ usersPlaylist ->
-            //Searchで読み込む場合は全件表示
-            if (mainFragmentArgs.fromSearch){
-                playlistAdapter.submitList(usersPlaylist)
-            }
-        })
+    }
 
-        viewModel.filterOwnPlaylist.observe(this,{ ownPlaylist ->
-            //Playlistで読み込む場合は、編集可能な自身のプレイリストのみを表示
-            if (mainFragmentArgs.fromPlaylist){
-                playlistAdapter.submitList(ownPlaylist)
+    private fun initViewModels() {
+        viewModel.apply {
+            usersPlaylist.observe(this@DialogUsersPlaylists) { playlist ->
+                //Searchで読み込む場合は全件表示
+                if (mainFragmentArgs.fromSearch){
+                    playlistAdapter.submitList(playlist)
+                }
             }
 
-        })
+            userCreatedPlaylist.observe(this@DialogUsersPlaylists) { playlist ->
+                //Playlistで読み込む場合は、編集可能な自身のプレイリストのみを表示
+                if (mainFragmentArgs.fromPlaylist){
+                    playlistAdapter.submitList(playlist)
+                }
+            }
+        }
     }
 
 }
