@@ -2,6 +2,7 @@ package com.kabos.spotifydj.model.apiResult
 
 import com.squareup.moshi.Moshi
 import retrofit2.Response
+import timber.log.Timber
 import java.lang.Exception
 
 data class ErrorResponse(
@@ -16,6 +17,7 @@ data class ErrorResponse(
                      converter.fromJson(errorBody.string())
                  } else null
             } catch (e: Exception) {
+                Timber.d("Error convertSpotifyApiErrorResponse $e")
                 null
             }
         }

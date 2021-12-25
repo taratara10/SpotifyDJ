@@ -7,8 +7,6 @@ data class TrackItems(
     val disc_number: Int,
     val duration_ms: Int,
     val explicit: Boolean,
-    val external_ids: ExternalIds,
-    val external_urls: ExternalUrlsXXX,
     val href: String,
     val id: String,
     val is_local: Boolean,
