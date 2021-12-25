@@ -18,6 +18,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.ui.adapter.PlaylistCallback
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,11 +35,11 @@ class DialogUsersPlaylists: DialogFragment() {
             //check where fragment
             if (mainFragmentArgs.fromSearch){
                 viewModel.loadPlaylistIntoSearchFragment(playlistItem)
-                viewModel.isNavigateSearchFragment.postValue(true)
+                viewModel.navigateRootFragmentPagerPosition(Pager.Search)
             }
             if (mainFragmentArgs.fromPlaylist){
                 viewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
-                viewModel.isNavigatePlaylistFragment.postValue(true)
+                viewModel.navigateRootFragmentPagerPosition(Pager.Playlist)
             }
             findNavController().popBackStack()
         }

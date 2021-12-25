@@ -82,29 +82,10 @@ class MainFragment: Fragment() {
     private fun initViewModels() {
         viewModel.apply {
             val viewPager = binding.pager
-            isNavigateSearchFragment.observe(viewLifecycleOwner) { isNavigate ->
-                if (isNavigate){
-                    viewPager.setCurrentItem(Pager.Search.position,true)
-                    // todo oneShotにする
-                    viewModel.isNavigateSearchFragment.postValue(false)
-                }
-            }
 
-            isNavigateRecommendFragment.observe(viewLifecycleOwner) { isNavigate ->
-                //viewModel#AddTrack() でisNavigatePlaylist(true)
-                //viewModel#updateCurrentTrack()でisNavigateRecommend(true)
-                //viewModel#AddTrack()の内部でupdateCurrentTrack()が呼ばれてrecommendが更新されてnavigateが競合する
-                //AddTrack()から呼ばれたupdateTrack()の場合は遷移しない。
-                if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
-                    viewPager.setCurrentItem(Pager.Recommend.position,true)
-                    viewModel.isNavigateRecommendFragment.postValue(false)
-                }
-            }
-
-            isNavigatePlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
-                if (isNavigate) {
-                    viewPager.setCurrentItem(Pager.Playlist.position,true)
-                    viewModel.isNavigatePlaylistFragment.postValue(false)
+            setRootFragmentPagerPosition.observe(viewLifecycleOwner) { event ->
+                event.getContentIfNotHandled()?.let { pager ->
+                    viewPager.setCurrentItem(pager.position, true)
                 }
             }
 

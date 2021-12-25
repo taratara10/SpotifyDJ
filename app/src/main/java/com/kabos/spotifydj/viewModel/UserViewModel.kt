@@ -1,7 +1,7 @@
 package com.kabos.spotifydj.viewModel
 
-import android.content.ComponentName
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +19,7 @@ import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
 import com.kabos.spotifydj.util.OneShotEvent
+import com.kabos.spotifydj.util.Pager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -50,9 +51,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isLoadingPlaylistTrack = MutableLiveData(false)
 
     //Navigate Flag
-    val isNavigateSearchFragment = MutableLiveData(false)
-    val isNavigateRecommendFragment = MutableLiveData(false)
-    val isNavigatePlaylistFragment = MutableLiveData(false)
+    private val _setRootFragmentPagerPosition = MutableLiveData<OneShotEvent<Pager>>()
+
+    // これ消したい
     val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
 
@@ -60,12 +61,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val needRefreshAccessToken = MutableLiveData(false)
     val startExternalSpotifyApp = MutableLiveData(false)
 
+    val setRootFragmentPagerPosition: LiveData<OneShotEvent<Pager>>
+        get() = _setRootFragmentPagerPosition
 
 
     /**
      * callback
      * */
-    //共通のcallbackを各FragmentのTrackAdapterに渡して
+    // 共通のcallbackを各FragmentのTrackAdapterに渡して
+    // todo これいかんでしょ
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             addTrackToLocalPlaylist(trackInfo)
@@ -169,7 +173,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                         is SpotifyApiErrorReason.ResponseError,
                         is SpotifyApiErrorReason.UnKnown -> {
                             isLoadingSearchTrack.postValue(false)
-                            Log.d("getTracksByKeyword","${result.reason}")
                             //todo display onFetchFailed textView or Toast
                         }
                     }
@@ -243,7 +246,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
     fun updateCurrentTrack(track: TrackInfo){
-        isNavigateRecommendFragment.postValue(true)
+        navigateRootFragmentPagerPosition(Pager.Recommend)
         currentTrack.value = track
         updateRecommendTrack()
     }
@@ -391,7 +394,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         //New or Existing playlistに移動してないなら、playlistをnewPlaylistFragmentにreplace
         if (isNavigateNewPlaylistFragment.value!! || isNavigateExistingPlaylistFragment.value!!){
-            isNavigatePlaylistFragment.postValue(true)
+            navigateRootFragmentPagerPosition(Pager.Playlist)
         }else{
             isNavigateNewPlaylistFragment.postValue(true)
         }
@@ -589,4 +592,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //        }
 //        trackList.value = list
 //    }
+
+    fun navigateRootFragmentPagerPosition(pager: Pager) {
+        _setRootFragmentPagerPosition.postValue(OneShotEvent(pager))
+    }
 }
