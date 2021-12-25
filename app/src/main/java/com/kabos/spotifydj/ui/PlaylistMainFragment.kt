@@ -18,7 +18,6 @@ import java.util.*
 
 @AndroidEntryPoint
 class PlaylistMainFragment: Fragment() {
-
     private lateinit var binding: FragmentPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
@@ -33,29 +32,17 @@ class PlaylistMainFragment: Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentPlaylistBinding.inflate(inflater, container, false)
-
-        viewModel.getAllPlaylists()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        initViewModels()
         binding.apply {
-            rvPlaylist.apply {
-                layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL,false)
-                adapter = playlistAdapter
-                }
+            rvPlaylist.adapter = playlistAdapter
         }
-
-        viewModel.filterOwnPlaylist.observe(viewLifecycleOwner,{ playlist ->
-            if (playlist == null) return@observe
-            playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
-
-        })
-
     }
 
     private fun fixFirstItemByCreateNewPlaylist(list: List<PlaylistItem>): List<PlaylistItem>{
@@ -77,5 +64,15 @@ class PlaylistMainFragment: Fragment() {
 
         mList.add(0, firstPlaylistItem)
         return mList.toList()
+    }
+
+    private fun initViewModels() {
+        viewModel.apply {
+            filterOwnPlaylist.observe(viewLifecycleOwner) { playlist ->
+                if (playlist == null) return@observe
+                playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
+            }
+            getAllPlaylists()
+        }
     }
 }

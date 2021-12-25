@@ -19,7 +19,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainFragment: Fragment() {
-
     private lateinit var binding: FragmentMainBinding
     private val viewPagerAdapter: ViewPagerAdapter by lazy { ViewPagerAdapter(this) }
     private val viewModel: UserViewModel by activityViewModels()
