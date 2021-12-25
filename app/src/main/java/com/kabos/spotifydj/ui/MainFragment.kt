@@ -12,7 +12,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentMainBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
-import com.kabos.spotifydj.util.FragmentList
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.ReplaceFragment
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,9 +72,9 @@ class MainFragment: Fragment() {
     private fun initTabLayoutLabel(tabLayout: TabLayout, pager: ViewPager2) {
         TabLayoutMediator(tabLayout, pager) { tab, position ->
             when (position) {
-                FragmentList.Search.position -> tab.text = FragmentList.Search.name
-                FragmentList.Recommend.position -> tab.text = FragmentList.Recommend.name
-                FragmentList.Playlist.position -> tab.text = FragmentList.Recommend.name
+                Pager.Search.position -> tab.text = Pager.Search.name
+                Pager.Recommend.position -> tab.text = Pager.Recommend.name
+                Pager.Playlist.position -> tab.text = Pager.Recommend.name
             }
         }.attach()
     }
@@ -84,7 +84,7 @@ class MainFragment: Fragment() {
             val viewPager = binding.pager
             isNavigateSearchFragment.observe(viewLifecycleOwner) { isNavigate ->
                 if (isNavigate){
-                    viewPager.setCurrentItem(FragmentList.Search.position,true)
+                    viewPager.setCurrentItem(Pager.Search.position,true)
                     // todo oneShotにする
                     viewModel.isNavigateSearchFragment.postValue(false)
                 }
@@ -96,14 +96,14 @@ class MainFragment: Fragment() {
                 //viewModel#AddTrack()の内部でupdateCurrentTrack()が呼ばれてrecommendが更新されてnavigateが競合する
                 //AddTrack()から呼ばれたupdateTrack()の場合は遷移しない。
                 if (isNavigate && !viewModel.isNavigatePlaylistFragment.value!!){
-                    viewPager.setCurrentItem(FragmentList.Recommend.position,true)
+                    viewPager.setCurrentItem(Pager.Recommend.position,true)
                     viewModel.isNavigateRecommendFragment.postValue(false)
                 }
             }
 
             isNavigatePlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
                 if (isNavigate) {
-                    viewPager.setCurrentItem(FragmentList.Playlist.position,true)
+                    viewPager.setCurrentItem(Pager.Playlist.position,true)
                     viewModel.isNavigatePlaylistFragment.postValue(false)
                 }
             }
@@ -112,16 +112,16 @@ class MainFragment: Fragment() {
                 if (isNavigate){
                     viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
                     //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
-                    viewPager.setCurrentItem(FragmentList.Search.position, true)
-                    viewPager.setCurrentItem(FragmentList.Playlist.position,true)
+                    viewPager.setCurrentItem(Pager.Search.position, true)
+                    viewPager.setCurrentItem(Pager.Playlist.position,true)
                 }
             }
 
             isNavigateExistingPlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
                 if (isNavigate) {
                     viewPagerAdapter.replaceFragment(ReplaceFragment.ExistingPlaylist)
-                    viewPager.setCurrentItem(FragmentList.Search.position, true)
-                    viewPager.setCurrentItem(FragmentList.Playlist.position, true)
+                    viewPager.setCurrentItem(Pager.Search.position, true)
+                    viewPager.setCurrentItem(Pager.Playlist.position, true)
                 }
             }
 

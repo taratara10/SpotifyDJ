@@ -3,7 +3,7 @@ package com.kabos.spotifydj.ui.adapter
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.kabos.spotifydj.ui.*
-import com.kabos.spotifydj.util.FragmentList
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.ReplaceFragment
 
 class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
@@ -34,16 +34,16 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
     fun replaceFragment(pattern: ReplaceFragment){
 
         if (pattern == ReplaceFragment.NewPlaylist) {
-            fragmentList.removeAt(FragmentList.Playlist.position)
-            fragmentList.add(FragmentList.Playlist.position, EditNewPlaylistFragment())
+            fragmentList.removeAt(Pager.Playlist.position)
+            fragmentList.add(Pager.Playlist.position, EditNewPlaylistFragment())
         }
         if (pattern == ReplaceFragment.ExistingPlaylist){
-            fragmentList.removeAt(FragmentList.Playlist.position)
-            fragmentList.add(FragmentList.Playlist.position, EditExistingPlaylistFragment())
+            fragmentList.removeAt(Pager.Playlist.position)
+            fragmentList.add(Pager.Playlist.position, EditExistingPlaylistFragment())
         }
         if (pattern == ReplaceFragment.ResetPlaylist){
-            fragmentList.removeAt(FragmentList.Playlist.position)
-            fragmentList.add(FragmentList.Playlist.position, PlaylistMainFragment())
+            fragmentList.removeAt(Pager.Playlist.position)
+            fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
         }
 
         //Assign unique id to each fragment
@@ -59,8 +59,8 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
         if (   pattern == ReplaceFragment.NewPlaylist
             || pattern == ReplaceFragment.ExistingPlaylist
             || pattern ==ReplaceFragment.ResetPlaylist){
-            notifyItemRemoved(FragmentList.Playlist.position)
-            notifyItemInserted(FragmentList.Playlist.position)
+            notifyItemRemoved(Pager.Playlist.position)
+            notifyItemInserted(Pager.Playlist.position)
         }
 
     }
