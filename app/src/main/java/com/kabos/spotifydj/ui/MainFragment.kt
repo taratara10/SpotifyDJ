@@ -42,7 +42,7 @@ class MainFragment: Fragment() {
     override fun onStart() {
         super.onStart()
         //復帰した時にaccessTokenをrefresh
-        viewModel.needRefreshAccessToken.postValue(true)
+        viewModel.refreshAccessToken()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -64,13 +64,7 @@ class MainActivity : AppCompatActivity() {
 
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    viewModel.apply {
-                        needRefreshAccessToken.postValue(false)
-                        //以降accessTokenはviewModelのmAccessTokenを介して扱う
-                        initializeAccessToken(response.accessToken)
-                        //初期処理として、playlistを取得して表示
-                        getAllPlaylists()
-                    }
+                    viewModel.initializeAccessToken(response.accessToken)
 
                     //accessTokenの有効期限が3600secなので、少し余裕をもってrefreshする
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -101,8 +95,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewModels() {
         viewModel.apply {
-            needRefreshAccessToken.observe(this@MainActivity){ isRefresh->
-                if (isRefresh) authorizationSpotify()
+            needRefreshAccessToken.observe(this@MainActivity){ event ->
+                event.getContentIfNotHandled()?.let { needRefresh ->
+                    if (needRefresh) authorizationSpotify()
+                }
             }
 
             startExternalSpotifyApp.observe(this@MainActivity){ startActivity->

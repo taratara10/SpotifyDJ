@@ -58,7 +58,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
 
     //MainFragment#onStart()で呼び出して、activityへ通知
-    val needRefreshAccessToken = MutableLiveData(false)
+    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
     val startExternalSpotifyApp = MutableLiveData(false)
 
     val usersPlaylist: LiveData<List<PlaylistItem>>
@@ -67,6 +67,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _userCreatedPlaylist
     val setRootFragmentPagerPosition: LiveData<OneShotEvent<Pager>>
         get() = _setRootFragmentPagerPosition
+    val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
+        get() = _needRefreshAccessToken
 
 
     /**
@@ -115,7 +117,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * Util
      * */
-    fun initializeAccessToken(accessToken: String){
+    fun initializeAccessToken(accessToken: String) {
         mAccessToken = accessToken
         initUserAccount()
     }
@@ -128,10 +130,11 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     mUserId = user.id
                     mUserName = user.display_name
                 }
+                getAllPlaylists()
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound,
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
@@ -172,7 +175,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 is SpotifyApiResource.Success -> result.data
                 is SpotifyApiResource.Error -> {
                     when (result.reason) {
-                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                         is SpotifyApiErrorReason.NotFound,
                         is SpotifyApiErrorReason.ResponseError,
                         is SpotifyApiErrorReason.UnKnown -> {
@@ -195,7 +198,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 is SpotifyApiResource.Success -> result.data
                 is SpotifyApiResource.Error -> {
                     when (result.reason) {
-                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                         is SpotifyApiErrorReason.NotFound,
                         is SpotifyApiErrorReason.ResponseError,
                         is SpotifyApiErrorReason.UnKnown -> {
@@ -287,7 +290,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is SpotifyApiResource.Success -> result.data
                     is SpotifyApiResource.Error -> {
                         when (result.reason){
-                            is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                            is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                             is SpotifyApiErrorReason.NotFound,
                             is SpotifyApiErrorReason.ResponseError,
                             is SpotifyApiErrorReason.UnKnown -> {
@@ -319,7 +322,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound,
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
@@ -343,7 +346,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 }
                 is SpotifyApiResource.Error -> {
                     when (result.reason){
-                        is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                         is SpotifyApiErrorReason.NotFound,
                         is SpotifyApiErrorReason.ResponseError,
                         is SpotifyApiErrorReason.UnKnown -> {
@@ -372,7 +375,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound,
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
@@ -485,7 +488,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is SpotifyApiResource.Success -> result.data
                     is SpotifyApiResource.Error -> {
                         when (result.reason){
-                            is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                            is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                             is SpotifyApiErrorReason.NotFound,
                             is SpotifyApiErrorReason.ResponseError,
                             is SpotifyApiErrorReason.UnKnown -> {
@@ -521,7 +524,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound -> startExternalSpotifyApp.postValue(true)
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
@@ -544,7 +547,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> needRefreshAccessToken.postValue(true)
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound -> getUsersDevices()
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
@@ -595,5 +598,9 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     fun navigateRootFragmentPagerPosition(pager: Pager) {
         _setRootFragmentPagerPosition.postValue(OneShotEvent(pager))
+    }
+
+    fun refreshAccessToken() {
+        _needRefreshAccessToken.postValue(OneShotEvent(true))
     }
 }
