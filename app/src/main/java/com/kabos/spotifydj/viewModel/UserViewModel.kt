@@ -28,9 +28,9 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
 
     private var mAccessToken = ""
-    var mDeviceId = ""
-    var mUserId = ""
-    var mUserName = ""
+    private var mDeviceId = ""
+    private var mUserId = ""
+    private var mUserName = ""
     var localPlaylistId = ""
     var localPlaylistTitle = ""
 
@@ -138,7 +138,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                     is SpotifyApiErrorReason.NotFound,
                     is SpotifyApiErrorReason.ResponseError,
                     is SpotifyApiErrorReason.UnKnown -> {
-                        //todo open login activity
+                        Timber.d("${result.reason}")
                     }
                 }
             }
@@ -318,7 +318,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 val playlist = result.data ?: listOf()
                 _usersPlaylist.postValue(playlist)
                 filterOwnPlaylist(playlist)
-                Timber.d("playlist/ ${playlist}// users${_userCreatedPlaylist.value}")
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){

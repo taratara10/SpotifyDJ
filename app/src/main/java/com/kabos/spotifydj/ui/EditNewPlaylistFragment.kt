@@ -21,9 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
-@AndroidEntryPoint
 class EditNewPlaylistFragment: Fragment() {
-
     private lateinit var binding: FragmentEditNewPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
     private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
