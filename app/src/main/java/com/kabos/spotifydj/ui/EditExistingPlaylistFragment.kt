@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -35,7 +36,7 @@ class EditExistingPlaylistFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        initViewModels()
         binding.apply {
             rvExistingPlaylist.apply {
                 layoutManager = LinearLayoutManager(activity)
@@ -64,24 +65,23 @@ class EditExistingPlaylistFragment: Fragment() {
                 }
             }
 
-            viewModel.localPlaylist.observe(viewLifecycleOwner,{playlist ->
-                playlist?.let { dragTackAdapter.submitList(it) }
-                if(playlist.isNullOrEmpty()) {
-                    tvPlaylistEmpty.visibility = View.VISIBLE
-                }else {
-                    tvPlaylistEmpty.visibility = View.GONE
-                }
-            })
+        }
+    }
 
-            viewModel.loadedPlaylistTitle.observe(viewLifecycleOwner,{title ->
-                etExistingPlaylistTitle.setText(title)
-            })
+    private fun initViewModels() {
+        viewModel.apply {
+            editingPlaylist.observe(viewLifecycleOwner) { playlist ->
+                dragTackAdapter.submitList(playlist)
+                binding.tvPlaylistEmpty.isVisible = playlist.isNullOrEmpty()
+            }
 
-            viewModel.isLoadingPlaylistTrack.observe(viewLifecycleOwner,{isLoading ->
-                if (isLoading) pbPlaylistProgress.visibility = View.VISIBLE
-                else pbPlaylistProgress.visibility = View.GONE
-            })
+            editingPlaylistTitle.observe(viewLifecycleOwner) { title ->
+                binding.etExistingPlaylistTitle.setText(title)
+            }
 
+            viewModel.isLoadingPlaylistTrack.observe(viewLifecycleOwner) { isLoading ->
+                binding.pbPlaylistProgress.isVisible = isLoading
+            }
         }
     }
 }

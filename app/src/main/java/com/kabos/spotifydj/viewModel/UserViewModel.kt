@@ -17,8 +17,7 @@ import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.*
 import com.kabos.spotifydj.ui.adapter.AdapterCallback
 import com.kabos.spotifydj.ui.adapter.DragTrackCallback
-import com.kabos.spotifydj.util.OneShotEvent
-import com.kabos.spotifydj.util.Pager
+import com.kabos.spotifydj.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -31,15 +30,14 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private var mDeviceId = ""
     private var mUserId = ""
     private var mUserName = ""
-    var localPlaylistId = ""
-    var localPlaylistTitle = ""
+     var editingPlaylistId = ""
 
     val searchTrackList = MutableLiveData<List<TrackInfo>?>()
     val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
     val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    val localPlaylist = MutableLiveData<List<TrackInfo>?>()
-    val currentTrack = MutableLiveData<TrackInfo?>()
-
+    val currentTrack = MutableLiveData<TrackInfo>()
+    private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
+    private val _editingPlaylistTitle = MutableLiveData<String>()
     private val _usersPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
 
@@ -52,14 +50,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
     //Navigate Flag
     private val _setRootFragmentPagerPosition = MutableLiveData<OneShotEvent<Pager>>()
+    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
+    val startExternalSpotifyApp = MutableLiveData(false)
 
     // これ消したい
     val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val isNavigateExistingPlaylistFragment = MutableLiveData(false)
 
-    //MainFragment#onStart()で呼び出して、activityへ通知
-    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
-    val startExternalSpotifyApp = MutableLiveData(false)
 
     val usersPlaylist: LiveData<List<PlaylistItem>>
         get() = _usersPlaylist
@@ -69,8 +66,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _setRootFragmentPagerPosition
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
-
-
+    val editingPlaylist: LiveData<List<TrackInfo>>
+        get() = _editingPlaylist
+    val editingPlaylistTitle: LiveData<String>
+        get() = _editingPlaylistTitle
     /**
      * callback
      * */
@@ -78,7 +77,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     // todo これいかんでしょ
     val callback = object: AdapterCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            addTrackToLocalPlaylist(trackInfo)
+            addTrackToEditingPlaylist(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -337,38 +336,34 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
 
-    fun createPlaylist() = viewModelScope.launch {
-        launch {
-            when (val result = repository.createPlaylist(mAccessToken,mUserId,localPlaylistTitle)) {
-                is SpotifyApiResource.Success -> {
-                    localPlaylistId = result.data.toString()
-                }
-                is SpotifyApiResource.Error -> {
-                    when (result.reason){
-                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                        is SpotifyApiErrorReason.NotFound,
-                        is SpotifyApiErrorReason.ResponseError,
-                        is SpotifyApiErrorReason.UnKnown -> {
-                            localPlaylistId = result.data.toString()
-                            //todo Toast出したい
+    fun createPlaylist(title: String) = viewModelScope.launch {
+        when (val result = repository.createPlaylist(mAccessToken, mUserId, title)) {
+            is SpotifyApiResource.Success -> {
+                editingPlaylistId = result.data.toString()
+            }
+            is SpotifyApiResource.Error -> {
+                when (result.reason){
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    is SpotifyApiErrorReason.NotFound,
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
 //                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
-                        }
                     }
                 }
             }
-        }.join()
-
+        }
+        //todo createPlaylist時に、editingPalylistの内容をpostする処理
         //localPlaylistのTrackを新規作成したplaylistに追加 空なら何もしない
-        if (localPlaylist.value == null) return@launch
-        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
-        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
+//        if (localPlaylist.value == null) return@launch
+//        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
+//        repository.addTracksToPlaylist(mAccessToken, editingPlaylistId, requestBody)
     }
 
     //ExistingPlaylistのtitleを変更する
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
         if (title.isEmpty()) return@launch
 
-        when (val result = repository.updatePlaylistTitle(mAccessToken,localPlaylistId,title)) {
+        when (val result = repository.updatePlaylistTitle(mAccessToken, editingPlaylistId, title)) {
             is SpotifyApiResource.Success -> {
                 //todo Toast(タイトルを更新しました)
             }
@@ -384,15 +379,12 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 }
             }
         }
-
     }
 
-
     //onAdd callback
-    fun addTrackToLocalPlaylist(track: TrackInfo){
-        val playlist = (localPlaylist.value ?: mutableListOf()) as MutableList<TrackInfo>
-        playlist.add(track)
-        localPlaylist.postValue(playlist)
+    fun addTrackToEditingPlaylist(track: TrackInfo){
+        _editingPlaylist.addItem(track)
+
         updateCurrentTrack(track)
         postTracksToPlaylist(track)
 
@@ -403,45 +395,45 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
             isNavigateNewPlaylistFragment.postValue(true)
         }
     }
+
+
+
+
+
+
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     private fun postTracksToPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
-        if (localPlaylistId == "") return@launch
+        if (editingPlaylistId.isEmpty()) return@launch
         val requestBody = AddTracksBody(listOf(trackInfo.contextUri))
-        repository.addTracksToPlaylist(mAccessToken, localPlaylistId, requestBody)
+        repository.addTracksToPlaylist(mAccessToken, editingPlaylistId, requestBody)
     }
 
 
     //onSwipe callback
     private fun removeTrackFromLocalPlaylist(position:Int){
-        val playlist = localPlaylist.value as MutableList<TrackInfo>
-        val removeTrack = playlist.removeAt(position)
-        localPlaylist.postValue(playlist)
+        val removeTrack = _editingPlaylist.removeAt(position)
 
-        //todo イイ感じに改修する
-        //nobody
-        deleteTracksFromPlaylist(removeTrack)
+        //todo deleteと処理をまとめたい
+        if (removeTrack != null) deleteTracksFromPlaylist(removeTrack)
     }
 
     private fun deleteTracksFromPlaylist(trackInfo: TrackInfo) = viewModelScope.launch {
-        if (localPlaylistId == "") return@launch
+        if (editingPlaylistId.isEmpty()) return@launch
+        // todo ここrepositoryに押し込む
         val requestBody = DeleteTracksBody(listOf(DeleteTrack(trackInfo.contextUri)))
-        repository.deleteTracksFromPlaylist(mAccessToken, localPlaylistId, requestBody)
+        repository.deleteTracksFromPlaylist(mAccessToken, editingPlaylistId, requestBody)
         //todo Toast出したい
     }
 
     //onDrop callback
     private fun changeTrackPositionInLocalPlaylist(initialPosition:Int, finalPosition:Int){
-        val playlist = localPlaylist.value as MutableList<TrackInfo>
-        val item = playlist.removeAt(initialPosition)
-        playlist.add(finalPosition, item)
-        localPlaylist.postValue(playlist)
-
+        _editingPlaylist.replacePosition(initialPosition, finalPosition)
         reorderPlaylistsTracks(initialPosition, finalPosition)
     }
 
     private fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch{
-        if (localPlaylistId == "") return@launch
-        repository.reorderPlaylistsTracks(mAccessToken,localPlaylistId,initialPosition,finalPosition)
+        if (editingPlaylistId.isEmpty()) return@launch
+        repository.reorderPlaylistsTracks(mAccessToken,editingPlaylistId,initialPosition,finalPosition)
 
     }
 
@@ -465,20 +457,22 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         isLoadingPlaylistTrack.value = true
         val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-        localPlaylist.postValue(trackInfoList)
+        _editingPlaylist.postValue(trackInfoList ?: listOf())
         isLoadingPlaylistTrack.value = false
         //ついでにviewModelのパラメーターも更新
         updatePlaylistTitleAndId(playlist)
     }
-    val loadedPlaylistTitle = MutableLiveData<String>()
 
     private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
-        //プレイリストを編集した際に、postするのに必要
-        localPlaylistId = playlist.id
-        //プレイリストのEditTextを更新
-        loadedPlaylistTitle.postValue(playlist.name)
+        editingPlaylistId = playlist.id
+        _editingPlaylistTitle.postValue(playlist.name)
     }
 
+    fun updateEditingPlaylistTitle(title: String) {
+        _editingPlaylistTitle.postValue(title)
+    }
+
+    // todo suspendを抹消しろ
     private suspend fun getTracksByPlaylistId(playlistId: String)
         : List<TrackItems>? = withContext(Dispatchers.IO){
             async {

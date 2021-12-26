@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class DialogConfirmCreatingPlaylist: DialogFragment() {
     private lateinit var binding: DialogConfirmCreatingPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
+    private var playlistTitle = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = DialogConfirmCreatingPlaylistBinding.inflate(LayoutInflater.from(context))
@@ -33,7 +34,8 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
         super.onStart()
         binding.apply {
 
-            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
+            // todo playlistTitleに置換したけど問題ない？
+//            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
             etDialogCreatePlaylistTitle.doAfterTextChanged { text ->
                 //emptyならErrorを表示する & save buttonをenableにする
                 if (text.isNullOrEmpty()) {
@@ -42,14 +44,14 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
                 } else {
                     tilDialogCreatePlaylistTitle.error = null
                     btnDialogSave.isEnabled = true
-                    viewModel.localPlaylistTitle = text.toString()
+                    playlistTitle = text.toString()
                 }
             }
 
             btnDialogCancel.setOnClickListener { dialog?.cancel() }
             btnDialogSave  .setOnClickListener {
-                if (viewModel.localPlaylistTitle.isNotEmpty()) {
-                    viewModel.createPlaylist()
+                if (playlistTitle.isNotEmpty()) {
+                    viewModel.createPlaylist(playlistTitle)
                     viewModel.isNavigateExistingPlaylistFragment.value = true
                     dialog?.cancel()
                     Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
