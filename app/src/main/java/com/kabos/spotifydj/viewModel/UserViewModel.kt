@@ -154,15 +154,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     /**
      * SearchFragmentの処理
      * */
-
-    /**
-     * 1. getTracksByKeyword: 基本情報となるTrackItemをlistで取得
-     * 2.generateTrackInfo
-     *      2-1. getAudioFeatureById: TrackItemのidを元にtempoとかを取得
-     *      3-1. mergeTrackItemAndAudioFeatureで TrackInfoを生成
-     * 3.対応するLiveDataにpost
-     */
-
     fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch {
         isLoadingSearchTrack.value = true
         when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
@@ -183,62 +174,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         isLoadingSearchTrack.postValue(false)
     }
 
-    private suspend fun getAudioFeaturesById(id: String): AudioFeature? = withContext(Dispatchers.IO) {
-        async {
-            val result = repository.getAudioFeaturesById(accessToken = mAccessToken, id = id)
-            return@async when (result){
-                is SpotifyApiResource.Success -> result.data
-                is SpotifyApiResource.Error -> {
-                    when (result.reason) {
-                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                        is SpotifyApiErrorReason.NotFound,
-                        is SpotifyApiErrorReason.ResponseError,
-                        is SpotifyApiErrorReason.UnKnown -> {
-                            isLoadingSearchTrack.postValue(false)
-                            isLoadingDownerTrack.postValue(false)
-                            isLoadingUpperTrack.postValue(false)
-                            //todo display onFetchFailed textView or Toast
-                        }
-                    }
-                    null
-                }
-                else -> null
-            }
-        }
-    }.await()
-
-    private fun mergeTrackItemAndAudioFeature(trackItems: TrackItems?, audioFeature: AudioFeature?): TrackInfo? {
-        return if (trackItems != null && audioFeature != null) {
-            TrackInfo(
-                id = trackItems.id,
-                contextUri = audioFeature.uri,
-                name = trackItems.name,
-                artist = trackItems.artists[0].name,
-                imageUrl = trackItems.album.images[0].url,
-                tempo = audioFeature.tempo,
-                danceability = audioFeature.danceability,
-                energy = audioFeature.energy
-            )
-        } else null
-    }
-
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>): List<TrackInfo> =
-        withContext(Dispatchers.IO) {
-            async {
-                //生成したTrackInfoを入れる仮の箱
-                val mergedTrackInfoList = mutableListOf<TrackInfo>()
-
-                trackItems.map { trackItems ->
-                    val audioFeature = getAudioFeaturesById(trackItems.id)
-                    val trackInfo = mergeTrackItemAndAudioFeature(trackItems, audioFeature)
-                    if (trackInfo != null) mergedTrackInfoList.add(trackInfo)
-                }
-                return@async mergedTrackInfoList
-            }
-        }.await()
-
-
-
     /**
      * Recommendの処理
      * */
@@ -246,64 +181,51 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
     fun updateCurrentTrack(track: TrackInfo){
         navigateRootFragmentPagerPosition(Pager.Recommend)
-        _currentTrack.value = track
-        updateRecommendTrack()
+        _currentTrack.postValue(track)
+        updateUpperRecommendTrack(track)
+        updateDownerRecommendTrack(track)
     }
 
-
-    private fun updateRecommendTrack() = viewModelScope.launch{
-        if (currentTrack.value == null) return@launch
-        //fetch upperTrack
-        launch {
-            isLoadingUpperTrack.value = true
-            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true) ?: return@launch
-            val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
-            _upperTracks.postValue(trackInfoList)
-            isLoadingUpperTrack.value = false
-        }
-        //fetch downerTrack
-        launch {
-            isLoadingDownerTrack.value = true
-            val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false) ?: return@launch
-            val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
-            _downerTracks.postValue(trackInfoList)
-            isLoadingDownerTrack.value = false
-        }
-    }
-
-    private suspend fun getRecommendTracks(trackInfo: TrackInfo, fetchUpperTrack: Boolean): List<TrackItems>? =
-        withContext(Dispatchers.IO){
-            async {
-                val result = repository.getRecommendTracks(
-                    accessToken = mAccessToken,
-                    trackInfo = trackInfo,
-                    fetchUpperTrack = fetchUpperTrack)
-                return@async when (result) {
-                    is SpotifyApiResource.Success -> result.data
-                    is SpotifyApiResource.Error -> {
-                        when (result.reason){
-                            is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                            is SpotifyApiErrorReason.NotFound,
-                            is SpotifyApiErrorReason.ResponseError,
-                            is SpotifyApiErrorReason.UnKnown -> {
-                                isLoadingSearchTrack.postValue(false)
-                                isLoadingDownerTrack.postValue(false)
-                                isLoadingUpperTrack.postValue(false)
-                                //todo display onFetchFailed textView or Toast
-                            }
-                        }
-                        null
+    private fun updateUpperRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
+        isLoadingUpperTrack.value = true
+        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, true)) {
+            is SpotifyApiResource.Success -> {
+                _upperTracks.postValue(result.data ?: listOf())
+            }
+            is SpotifyApiResource.Error -> {
+                when (result.reason){
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    else  -> {
+                        //error handle
                     }
-                    else -> null
                 }
             }
-        }.await()
+        }
+        isLoadingUpperTrack.value = false
+    }
+
+    private fun updateDownerRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
+        isLoadingDownerTrack.value = true
+        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, false)) {
+            is SpotifyApiResource.Success -> {
+                _downerTracks.postValue(result.data ?: listOf())
+            }
+            is SpotifyApiResource.Error -> {
+                when (result.reason){
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    else  -> {
+                        //error handle
+                    }
+                }
+            }
+        }
+        isLoadingDownerTrack.value = false
+    }
+
 
     /**
      *  Playlist
      * */
-
-
     fun getAllPlaylists() = viewModelScope.launch {
         when (val result = repository.getUsersAllPlaylist(mAccessToken)) {
             is SpotifyApiResource.Success -> {

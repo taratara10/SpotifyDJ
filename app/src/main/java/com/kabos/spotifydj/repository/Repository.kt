@@ -1,5 +1,6 @@
 package com.kabos.spotifydj.repository
 
+import com.bumptech.glide.load.resource.file.FileResource
 import com.kabos.spotifydj.model.*
 import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.APPLICATION_JSON
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
@@ -103,7 +104,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
      * */
 
     suspend fun searchTrackInfo(accessToken: String, keyword: String): SpotifyApiResource<List<TrackInfo>> {
-        val mergedTrackInfos = mutableListOf<TrackInfo>()
+        val trackInfos = mutableListOf<TrackInfo>()
         var errorReason: SpotifyApiErrorReason? = null
         coroutineScope {
             val trackItems = async {
@@ -124,7 +125,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
                         is SpotifyApiResource.Success -> {
                             val audioFeature: AudioFeature = result.data ?: return@forEach
                             val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
-                            mergedTrackInfos.add(trackInfo)
+                            trackInfos.add(trackInfo)
                         }
                     }
                 }
@@ -132,8 +133,9 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
 
         return if (errorReason != null) SpotifyApiResource.Error(errorReason!!)
-        else SpotifyApiResource.Success(mergedTrackInfos)
+        else SpotifyApiResource.Success(trackInfos)
     }
+
 
     private fun generateTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
         val artists: List<ArtistX> = trackItems.artists
@@ -185,7 +187,44 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
     }
 
-    suspend fun getRecommendTracks(
+    suspend fun getRecommendTrackInfos(
+        accessToken: String,
+        trackInfo: TrackInfo,
+        fetchUpperTrack: Boolean
+    ): SpotifyApiResource<List<TrackInfo>> {
+        val trackInfos = mutableListOf<TrackInfo>()
+        var errorReason: SpotifyApiErrorReason? = null
+        coroutineScope {
+            val trackItems = async {
+                return@async when (val result = getRecommendTrackItems(accessToken, trackInfo, fetchUpperTrack)) {
+                    is SpotifyApiResource.Success -> result.data ?: listOf()
+                    is SpotifyApiResource.Error -> {
+                        errorReason = result.reason
+                        listOf()
+                    }
+                }
+            }.await()
+
+            if (errorReason != null) return@coroutineScope
+
+            async {
+                trackItems.forEach{ trackItem ->
+                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                        is SpotifyApiResource.Success -> {
+                            val audioFeature: AudioFeature = result.data ?: return@forEach
+                            val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
+                            trackInfos.add(trackInfo)
+                        }
+                    }
+                }
+            }.await()
+        }
+
+        return if (errorReason != null) SpotifyApiResource.Error(errorReason!!)
+        else SpotifyApiResource.Success(trackInfos)
+    }
+
+    private suspend fun getRecommendTrackItems(
         accessToken: String,
         trackInfo: TrackInfo,
         fetchUpperTrack: Boolean
