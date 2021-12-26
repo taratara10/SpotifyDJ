@@ -25,23 +25,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
-
     private var mAccessToken = ""
     private var mDeviceId = ""
     private var mUserId = ""
     private var mUserName = ""
-     var editingPlaylistId = ""
+    private var editingPlaylistId = ""
 
-    val searchTrackList = MutableLiveData<List<TrackInfo>?>()
-    val upperTrackList  = MutableLiveData<List<TrackInfo>?>()
-    val downerTrackList = MutableLiveData<List<TrackInfo>?>()
-    val currentTrack = MutableLiveData<TrackInfo>()
+    private val _searchTracks = MutableLiveData<List<TrackInfo>>()
+    private val _upperTracks = MutableLiveData<List<TrackInfo>>()
+    private val _downerTracks = MutableLiveData<List<TrackInfo>>()
+    private val _currentTrack = MutableLiveData<TrackInfo>()
     private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
     private val _editingPlaylistTitle = MutableLiveData<String>()
     private val _usersPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
-
-
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
     val isLoadingUpperTrack = MutableLiveData(false)
@@ -70,6 +67,15 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _editingPlaylist
     val editingPlaylistTitle: LiveData<String>
         get() = _editingPlaylistTitle
+    val searchTracks: LiveData<List<TrackInfo>>
+        get() = _searchTracks
+    val upperTracks: LiveData<List<TrackInfo>>
+        get() = _upperTracks
+    val downerTracks: LiveData<List<TrackInfo>>
+        get() = _downerTracks
+    val currentTrack: LiveData<TrackInfo>
+        get() = _currentTrack
+
     /**
      * callback
      * */
@@ -162,7 +168,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //keywordに一致する検索結果がなければreturn
         val trackItemsList = getTracksByKeyword(keyword) ?: return@launch
         val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-        searchTrackList.postValue(trackInfoList)
+        _searchTracks.postValue(trackInfoList ?: listOf())
         isLoadingSearchTrack.value = false
     }
 
@@ -229,7 +235,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         } else null
     }
 
-    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>): List<TrackInfo>? =
+    private suspend fun generateTrackInfoList(trackItems: List<TrackItems>): List<TrackInfo> =
         withContext(Dispatchers.IO) {
             async {
                 //生成したTrackInfoを入れる仮の箱
@@ -253,7 +259,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
     fun updateCurrentTrack(track: TrackInfo){
         navigateRootFragmentPagerPosition(Pager.Recommend)
-        currentTrack.value = track
+        _currentTrack.value = track
         updateRecommendTrack()
     }
 
@@ -264,16 +270,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         launch {
             isLoadingUpperTrack.value = true
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = true) ?: return@launch
-            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-            upperTrackList.postValue(trackInfoList)
+            val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
+            _upperTracks.postValue(trackInfoList)
             isLoadingUpperTrack.value = false
         }
         //fetch downerTrack
         launch {
             isLoadingDownerTrack.value = true
             val trackItemsList = getRecommendTracks(currentTrack.value!!, fetchUpperTrack = false) ?: return@launch
-            val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-            downerTrackList.postValue(trackInfoList)
+            val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
+            _downerTracks.postValue(trackInfoList)
             isLoadingDownerTrack.value = false
         }
     }
@@ -448,16 +454,16 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         //keywordに一致する検索結果がなければreturn
         isLoadingSearchTrack.value = true
         val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-        searchTrackList.postValue(trackInfoList)
+        val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
+        _searchTracks.postValue(trackInfoList)
         isLoadingSearchTrack.value = false
     }
 
     fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
         isLoadingPlaylistTrack.value = true
         val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-        _editingPlaylist.postValue(trackInfoList ?: listOf())
+        val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
+        _editingPlaylist.postValue(trackInfoList )
         isLoadingPlaylistTrack.value = false
         //ついでにviewModelのパラメーターも更新
         updatePlaylistTitleAndId(playlist)
@@ -466,6 +472,10 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
         editingPlaylistId = playlist.id
         _editingPlaylistTitle.postValue(playlist.name)
+    }
+
+    fun clearSearchTracks() {
+        _searchTracks.postValue(listOf())
     }
 
     fun updateEditingPlaylistTitle(title: String) {
@@ -564,7 +574,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //    private fun togglePlaybackIcon(trackInfo: TrackInfo){
 //        replaceTrackToPlaybackTrack(trackInfo,searchTrackList)
 //        replaceTrackToPlaybackTrack(trackInfo,upperTrackList)
-//        replaceTrackToPlaybackTrack(trackInfo,downerTrackList)
+//        replaceTrackToPlaybackTrack(trackInfo,_downerTracs)
 //        replaceTrackToPlaybackTrack(trackInfo,localPlaylist as MutableLiveData<List<TrackInfo>?>)
 //
 //        //currentTrackはListじゃないので別処理

@@ -53,15 +53,15 @@ class EditNewPlaylistFragment: Fragment() {
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_playlist)
             }
 
-            //todo localPlaylistをrefreshする処理
-            etNewPlaylistTitle.setOnFocusChangeListener { editText, hasFocus ->
-                //focusが外れたらplaylist titleを更新
-                if (!hasFocus && viewModel.editingPlaylistId.isNotEmpty()){
-                    editText as EditText
-                    viewModel.updatePlaylistTitle(editText.text.toString())
-                }
-
-            }
+            //todo dialogに置き換える
+//            etNewPlaylistTitle.setOnFocusChangeListener { editText, hasFocus ->
+//                //focusが外れたらplaylist titleを更新
+//                if (!hasFocus && viewModel.editingPlaylistId.isNotEmpty()){
+//                    editText as EditText
+//                    viewModel.updatePlaylistTitle(editText.text.toString())
+//                }
+//
+//            }
 
 
 

@@ -24,7 +24,6 @@ import java.util.*
 
 @AndroidEntryPoint
 class EditExistingPlaylistFragment: Fragment() {
-
     private lateinit var binding: FragmentEditExistingPlaylistBinding
     private val viewModel: UserViewModel by activityViewModels()
     private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
@@ -79,7 +78,7 @@ class EditExistingPlaylistFragment: Fragment() {
                 binding.etExistingPlaylistTitle.setText(title)
             }
 
-            viewModel.isLoadingPlaylistTrack.observe(viewLifecycleOwner) { isLoading ->
+            isLoadingPlaylistTrack.observe(viewLifecycleOwner) { isLoading ->
                 binding.pbPlaylistProgress.isVisible = isLoading
             }
         }

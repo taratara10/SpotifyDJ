@@ -52,15 +52,15 @@ class RecommendFragment: Fragment() {
 
 
            viewModel.apply {
-               upperTrackList.observe(viewLifecycleOwner,{upperTrackList ->
-                   upperTrackAdapter.submitList(upperTrackList)
-                   updateEmptyTextView(upperTrackList,tvUpperTracksNothing)
-               })
+               upperTracks.observe(viewLifecycleOwner) { tracks ->
+                   upperTrackAdapter.submitList(tracks)
+                   updateEmptyTextView(tracks, tvUpperTracksNothing)
+               }
 
-               downerTrackList.observe(viewLifecycleOwner,{downerTrackList ->
-                   downerTrackAdapter.submitList(downerTrackList)
-                   updateEmptyTextView(downerTrackList,tvDownerTracksNothing)
-               })
+               downerTracks.observe(viewLifecycleOwner){ tracks ->
+                   downerTrackAdapter.submitList(tracks)
+                   updateEmptyTextView(tracks, tvDownerTracksNothing)
+               }
 
                currentTrack.observe(viewLifecycleOwner,{currentTrack ->
                    //adapterがList<TrackInfo>で受け取るので、Listでラップする
