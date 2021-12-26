@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">SpotifyDJ</string>
-    <string name="track_tempo">BPM: %f</string>
+    <string name="track_tempo">BPM: %1$.1f</string>
 </resources>
