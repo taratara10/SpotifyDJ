@@ -1,7 +1,6 @@
 package com.kabos.spotifydj.ui.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -9,17 +8,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kabos.spotifydj.R
-import com.kabos.spotifydj.databinding.AdapterTrackBinding.inflate
-import com.kabos.spotifydj.databinding.AdapterTrackBinding
+import com.kabos.spotifydj.databinding.ListItemTrackBinding
 import com.kabos.spotifydj.model.TrackInfo
-import timber.log.Timber
-import kotlin.math.roundToInt
 
 class TrackAdapter(private val callback: AdapterCallback)
     : ListAdapter<TrackInfo, TrackAdapter.TrackViewHolder>(DiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = inflate(layoutInflater, parent, false)
+        val binding = ListItemTrackBinding.inflate(layoutInflater, parent, false)
         return TrackViewHolder(binding)
     }
 
@@ -27,7 +23,7 @@ class TrackAdapter(private val callback: AdapterCallback)
         holder.bind(getItem(position))
     }
 
-    inner class TrackViewHolder(private val binding: AdapterTrackBinding)
+    inner class TrackViewHolder(private val binding: ListItemTrackBinding)
         : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: TrackInfo){
             binding.apply {

@@ -10,7 +10,6 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
     private var fragmentList = mutableListOf<Fragment>()
     private var idsList = mutableListOf<Long>()
 
-
     init {
         fragmentList.apply {
             add(SearchFragment())
@@ -54,15 +53,10 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
         notifyDataSet(pattern)
     }
-
-    private fun notifyDataSet(pattern: ReplaceFragment){
-        if (   pattern == ReplaceFragment.NewPlaylist
-            || pattern == ReplaceFragment.ExistingPlaylist
-            || pattern ==ReplaceFragment.ResetPlaylist){
-            notifyItemRemoved(Pager.Playlist.position)
-            notifyItemInserted(Pager.Playlist.position)
-        }
-
+    // todo なにしてんのこれ？？？？
+    private fun notifyDataSet(pattern: ReplaceFragment) {
+        notifyItemRemoved(Pager.Playlist.position)
+        notifyItemInserted(Pager.Playlist.position)
     }
 }
 
