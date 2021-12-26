@@ -10,11 +10,19 @@ import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.CreatePlaylistBody
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.*
+import com.kabos.spotifydj.model.track.ArtistX
+import com.kabos.spotifydj.model.track.Image
 import com.kabos.spotifydj.model.track.TrackItems
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import retrofit2.Response
+import timber.log.Timber
 import javax.inject.Inject
 
 class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
+    companion object {
+        private const val SEARCH_TRACK_TYPE = "album,track,artist"
+    }
 
     //@HeaderのaccessTokenは必ず、この関数を通して入力する
     private fun generateBearer(accessToken: String) = "Bearer $accessToken"
@@ -93,7 +101,58 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     /**
      * Search
      * */
-    suspend fun getTracksByKeyword(
+
+    suspend fun searchTrackInfo(accessToken: String, keyword: String): SpotifyApiResource<List<TrackInfo>> {
+        val mergedTrackInfos = mutableListOf<TrackInfo>()
+        var errorReason: SpotifyApiErrorReason? = null
+        coroutineScope {
+            val trackItems = async {
+                return@async when(val result = getTrackItemsByKeyword(accessToken, keyword)) {
+                    is SpotifyApiResource.Success -> result.data ?: listOf()
+                    is SpotifyApiResource.Error -> {
+                        errorReason = result.reason
+                        listOf()
+                    }
+                }
+            }.await()
+
+            if (errorReason != null) return@coroutineScope
+
+            async {
+                trackItems.forEach{ trackItem ->
+                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                        is SpotifyApiResource.Success -> {
+                            val audioFeature: AudioFeature = result.data ?: return@forEach
+                            val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
+                            mergedTrackInfos.add(trackInfo)
+                        }
+                    }
+                }
+            }.await()
+        }
+
+        return if (errorReason != null) SpotifyApiResource.Error(errorReason!!)
+        else SpotifyApiResource.Success(mergedTrackInfos)
+    }
+
+    private fun generateTrackInfo(trackItems: TrackItems, audioFeature: AudioFeature): TrackInfo {
+        val artists: List<ArtistX> = trackItems.artists
+        val artistName: String = if (artists.isNotEmpty()) artists.first().name else ""
+        val albumImages: List<Image> = trackItems.album.images
+        val imageUrl: String = if (albumImages.isNotEmpty()) albumImages.first().url else ""
+        return TrackInfo(
+                id = trackItems.id,
+                contextUri = audioFeature.uri,
+                name = trackItems.name,
+                artist = artistName,
+                imageUrl = imageUrl,
+                tempo = audioFeature.tempo,
+                danceability = audioFeature.danceability,
+                energy = audioFeature.energy
+            )
+    }
+
+    private suspend fun getTrackItemsByKeyword(
         accessToken: String,
         keyword: String
     ): SpotifyApiResource<List<TrackItems>> {
@@ -103,7 +162,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             val request = spotifyApi.getTracksByKeyword(
                 accessToken = generateBearer(accessToken),
                 keyword = keyword,
-                type = "album,track,artist"
+                type = SEARCH_TRACK_TYPE
             )
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!.tracks.items)
             else SpotifyApiResource.Error(errorReasonHandler(request))
@@ -112,7 +171,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
     }
 
-    suspend fun getAudioFeaturesById(
+    private suspend fun getAudioFeaturesById(
         accessToken: String,
         id: String
     ): SpotifyApiResource<AudioFeature> {

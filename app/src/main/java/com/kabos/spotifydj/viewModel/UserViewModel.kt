@@ -163,38 +163,25 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * 3.対応するLiveDataにpost
      */
 
-    fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch{
+    fun updateSearchedTracksResult(keyword: String) = viewModelScope.launch {
         isLoadingSearchTrack.value = true
-        //keywordに一致する検索結果がなければreturn
-        val trackItemsList = getTracksByKeyword(keyword) ?: return@launch
-        val trackInfoList:List<TrackInfo>? = generateTrackInfoList(trackItemsList)
-        _searchTracks.postValue(trackInfoList ?: listOf())
-        isLoadingSearchTrack.value = false
-    }
-
-
-    private suspend fun getTracksByKeyword(keyword: String): List<TrackItems>? = withContext(Dispatchers.IO){
-        async {
-            val result = repository.getTracksByKeyword(accessToken = mAccessToken, keyword= keyword)
-            return@async when (result){
-                is SpotifyApiResource.Success -> result.data
-                is SpotifyApiResource.Error -> {
-                    when (result.reason) {
-                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                        is SpotifyApiErrorReason.NotFound,
-                        is SpotifyApiErrorReason.ResponseError,
-                        is SpotifyApiErrorReason.UnKnown -> {
-                            isLoadingSearchTrack.postValue(false)
-                            //todo display onFetchFailed textView or Toast
-                        }
-                    }
-                    null
-                }
-                else -> listOf()
+        when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
+            is SpotifyApiResource.Success -> {
+                _searchTracks.postValue(result.data ?: listOf())
             }
-
+            is SpotifyApiResource.Error -> {
+                when (result.reason) {
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    is SpotifyApiErrorReason.NotFound,
+                    is SpotifyApiErrorReason.ResponseError,
+                    is SpotifyApiErrorReason.UnKnown -> {
+                        //todo display onFetchFailed textView or Toast
+                    }
+                }
+            }
         }
-    }.await()
+        isLoadingSearchTrack.postValue(false)
+    }
 
     private suspend fun getAudioFeaturesById(id: String): AudioFeature? = withContext(Dispatchers.IO) {
         async {
