@@ -270,8 +270,44 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             SpotifyApiResource.Error(SpotifyApiErrorReason.UnKnown(e))
         }
     }
+    // todo trackItemsの関数だけ変更すれば使いまわせる
+    suspend fun getTrackInfosByPlaylistId(
+        accessToken: String,
+        playlistId: String
+    ): SpotifyApiResource<List<TrackInfo>> {
+        val trackInfos = mutableListOf<TrackInfo>()
+        var errorReason: SpotifyApiErrorReason? = null
+        coroutineScope {
+            val trackItems = async {
+                return@async when (val result = getTrackItemsByPlaylistId(accessToken, playlistId)) {
+                    is SpotifyApiResource.Success -> result.data ?: listOf()
+                    is SpotifyApiResource.Error -> {
+                        errorReason = result.reason
+                        listOf()
+                    }
+                }
+            }.await()
 
-    suspend fun getTracksByPlaylistId(
+            if (errorReason != null) return@coroutineScope
+
+            async {
+                trackItems.forEach{ trackItem ->
+                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                        is SpotifyApiResource.Success -> {
+                            val audioFeature: AudioFeature = result.data ?: return@forEach
+                            val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
+                            trackInfos.add(trackInfo)
+                        }
+                    }
+                }
+            }.await()
+        }
+
+        return if (errorReason != null) SpotifyApiResource.Error(errorReason!!)
+        else SpotifyApiResource.Success(trackInfos)
+    }
+
+    private suspend fun getTrackItemsByPlaylistId(
         accessToken: String,
         playlistId: String
     ): SpotifyApiResource<List<TrackItems>> {
@@ -359,7 +395,6 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         playlistId: String,
         playlistTitle: String
     ): SpotifyApiResource<Boolean> {
-        //todo これfunでまとめよう
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
         return try {

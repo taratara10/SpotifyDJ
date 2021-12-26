@@ -360,22 +360,35 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
 
     fun loadPlaylistIntoSearchFragment(playlist: PlaylistItem) = viewModelScope.launch{
-        //keywordに一致する検索結果がなければreturn
-        isLoadingSearchTrack.value = true
-        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
-        val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
-        _searchTracks.postValue(trackInfoList)
-        isLoadingSearchTrack.value = false
+        getTracksByPlaylistId(playlist.id, Pager.Search)
     }
 
+
     fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
-        isLoadingPlaylistTrack.value = true
-        val trackItemsList = getTracksByPlaylistId(playlist.id) ?: return@launch
-        val trackInfoList:List<TrackInfo> = generateTrackInfoList(trackItemsList)
-        _editingPlaylist.postValue(trackInfoList )
-        isLoadingPlaylistTrack.value = false
-        //ついでにviewModelのパラメーターも更新
+        getTracksByPlaylistId(playlist.id, Pager.Playlist)
         updatePlaylistTitleAndId(playlist)
+    }
+
+
+    private fun getTracksByPlaylistId(playlistId: String, postFragment: Pager) = viewModelScope.launch {
+        isLoadingPlaylistTrack.value = true
+        when (val result = repository.getTrackInfosByPlaylistId(mAccessToken, playlistId)) {
+            is SpotifyApiResource.Success -> {
+                when (postFragment) {
+                    is Pager.Search -> _searchTracks.postValue(result.data ?: listOf())
+                    is Pager.Playlist -> _editingPlaylist.postValue(result.data ?: listOf())
+                }
+            }
+            is SpotifyApiResource.Error -> {
+                when (result.reason){
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    else  -> {
+                        //error handle
+                    }
+                }
+            }
+        }
+        isLoadingPlaylistTrack.value = false
     }
 
     private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
@@ -390,33 +403,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun updateEditingPlaylistTitle(title: String) {
         _editingPlaylistTitle.postValue(title)
     }
-
-    // todo suspendを抹消しろ
-    private suspend fun getTracksByPlaylistId(playlistId: String)
-        : List<TrackItems>? = withContext(Dispatchers.IO){
-            async {
-                val result = repository.getTracksByPlaylistId(mAccessToken,playlistId)
-                return@async when (result) {
-                    is SpotifyApiResource.Success -> result.data
-                    is SpotifyApiResource.Error -> {
-                        when (result.reason){
-                            is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                            is SpotifyApiErrorReason.NotFound,
-                            is SpotifyApiErrorReason.ResponseError,
-                            is SpotifyApiErrorReason.UnKnown -> {
-                                isLoadingSearchTrack.postValue(false)
-                                isLoadingDownerTrack.postValue(false)
-                                isLoadingUpperTrack.postValue(false)
-                                //todo display onFetchFailed textView or Toast
-                            }
-                        }
-                        null
-                    }
-                    else -> null
-                }
-            }
-        }.await()
-
 
     /**
      * Playback
