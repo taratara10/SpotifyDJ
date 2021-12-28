@@ -17,8 +17,10 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
 import com.kabos.spotifydj.viewModel.RecommendViewModel
+import com.kabos.spotifydj.viewModel.RootViewModel
 import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding
+    private val rootViewModel: RootViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
@@ -41,6 +44,7 @@ class SearchFragment: Fragment() {
 
         override fun onClick(trackInfo: TrackInfo) {
             recommendViewModel.updateCurrentTrack(trackInfo)
+            rootViewModel.setPagerPosition(Pager.Recommend)
         }
     }
 

@@ -14,6 +14,7 @@ import com.kabos.spotifydj.databinding.FragmentMainBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.ReplaceFragment
+import com.kabos.spotifydj.viewModel.RootViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,11 +22,12 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainFragment: Fragment() {
     private lateinit var binding: FragmentMainBinding
     private val viewPagerAdapter: ViewPagerAdapter by lazy { ViewPagerAdapter(this) }
-    private val viewModel: UserViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val rootViewModel: RootViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentMainBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
+        binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -41,8 +43,7 @@ class MainFragment: Fragment() {
 
     override fun onStart() {
         super.onStart()
-        //復帰した時にaccessTokenをrefresh
-        viewModel.refreshAccessToken()
+        userViewModel.refreshAccessToken()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -79,15 +80,8 @@ class MainFragment: Fragment() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
-            val viewPager = binding.pager
-
-            setRootFragmentPagerPosition.observe(viewLifecycleOwner) { event ->
-                event.getContentIfNotHandled()?.let { pager ->
-                    viewPager.setCurrentItem(pager.position, true)
-                }
-            }
-
+        val viewPager = binding.pager
+        userViewModel.apply {
             isNavigateNewPlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
                 if (isNavigate){
                     viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
@@ -105,6 +99,12 @@ class MainFragment: Fragment() {
                 }
             }
 
+        }
+
+        rootViewModel.pagerPosition.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { pager ->
+                viewPager.setCurrentItem(pager.position, true)
+            }
         }
     }
 }

@@ -28,18 +28,22 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
-    private val REDIRECT_URI = "com.kabos.spotifydj://callback"
-    private val SCOPE = arrayOf("user-read-recently-played",
-        "playlist-read-private",
-        "playlist-read-collaborative",
-        "user-modify-playback-state",
-        "user-read-playback-state",
-        "playlist-modify-public",
-        "playlist-modify-private")
-    private val REQUEST_CODE: Int = 1337
-    // Request code that will be used to verify if the result comes from correct activity
-    // Can be any integer
+    companion object {
+        // Request code that will be used to verify if the result comes from correct activity
+        // Can be any integer
+        private const val REQUEST_CODE: Int = 1337
+        private const val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
+        private const val REDIRECT_URI = "com.kabos.spotifydj://callback"
+        private val SCOPE = arrayOf(
+            "user-read-recently-played",
+            "playlist-read-private",
+            "playlist-read-collaborative",
+            "user-modify-playback-state",
+            "user-read-playback-state",
+            "playlist-modify-public",
+            "playlist-modify-private"
+        )
+    }
 
     private val userViewModel: UserViewModel by viewModels()
     private val searchViewModel: SearchViewModel by viewModels()
@@ -63,11 +67,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             val response: AuthorizationResponse = AuthorizationClient.getResponse(resultCode, data)
-
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
                     initAccessTokenInViewModels(response.accessToken)
@@ -89,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    // todo startIntentも全部ここでobserveして、fragmentは通知送るだけにしたいかも
     private fun initViewModels() {
         userViewModel.startExternalSpotifyApp.observe(this@MainActivity){ startActivity->
             if (startActivity) startActivity(

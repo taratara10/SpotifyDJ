@@ -38,7 +38,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val isLoadingPlaylistTrack = MutableLiveData(false)
 
     //Navigate Flag
-    private val _setRootFragmentPagerPosition = MutableLiveData<OneShotEvent<Pager>>()
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
     val startExternalSpotifyApp = MutableLiveData(false)
 
@@ -51,8 +50,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _usersPlaylist
     val userCreatedPlaylist: LiveData<List<PlaylistItem>>
         get() = _userCreatedPlaylist
-    val setRootFragmentPagerPosition: LiveData<OneShotEvent<Pager>>
-        get() = _setRootFragmentPagerPosition
+
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
     val editingPlaylist: LiveData<List<TrackInfo>>
@@ -223,7 +221,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 
         //New or Existing playlistに移動してないなら、playlistをnewPlaylistFragmentにreplace
         if (isNavigateNewPlaylistFragment.value!! || isNavigateExistingPlaylistFragment.value!!){
-            navigateRootFragmentPagerPosition(Pager.Playlist)
+//            navigateRootFragmentPagerPosition(Pager.Playlist)
         }else{
             isNavigateNewPlaylistFragment.postValue(true)
         }
@@ -400,9 +398,6 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //        trackList.value = list
 //    }
 
-    fun navigateRootFragmentPagerPosition(pager: Pager) {
-        _setRootFragmentPagerPosition.postValue(OneShotEvent(pager))
-    }
 
     fun refreshAccessToken() {
         _needRefreshAccessToken.postValue(OneShotEvent(true))

@@ -13,6 +13,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.Pager
+import com.kabos.spotifydj.viewModel.RootViewModel
 import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DialogUsersPlaylists: DialogFragment() {
     private lateinit var binding: DialogUsersPlaylistsBinding
+    private val rootViewModel: RootViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val mainFragmentArgs: MainFragmentArgs by navArgs()
@@ -28,11 +30,11 @@ class DialogUsersPlaylists: DialogFragment() {
         override fun onClick(playlistItem: PlaylistItem) {
             if (mainFragmentArgs.fromSearch){
                 searchViewModel.loadPlaylistIntoSearchFragment(playlistItem.id)
-                userViewModel.navigateRootFragmentPagerPosition(Pager.Search)
+                rootViewModel.setPagerPosition(Pager.Search)
             }
             if (mainFragmentArgs.fromPlaylist){
                 userViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
-                userViewModel.navigateRootFragmentPagerPosition(Pager.Playlist)
+                rootViewModel.setPagerPosition(Pager.Playlist)
             }
             findNavController().popBackStack()
         }
