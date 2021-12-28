@@ -13,25 +13,26 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.Pager
+import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DialogUsersPlaylists: DialogFragment() {
     private lateinit var binding: DialogUsersPlaylistsBinding
-    private val viewModel: UserViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val searchViewModel: SearchViewModel by activityViewModels()
     private val mainFragmentArgs: MainFragmentArgs by navArgs()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
-            //check where fragment
             if (mainFragmentArgs.fromSearch){
-                viewModel.loadPlaylistIntoSearchFragment(playlistItem)
-                viewModel.navigateRootFragmentPagerPosition(Pager.Search)
+                searchViewModel.loadPlaylistIntoSearchFragment(playlistItem.id)
+                userViewModel.navigateRootFragmentPagerPosition(Pager.Search)
             }
             if (mainFragmentArgs.fromPlaylist){
-                viewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
-                viewModel.navigateRootFragmentPagerPosition(Pager.Playlist)
+                userViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
+                userViewModel.navigateRootFragmentPagerPosition(Pager.Playlist)
             }
             findNavController().popBackStack()
         }
@@ -54,7 +55,7 @@ class DialogUsersPlaylists: DialogFragment() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
+        userViewModel.apply {
             usersPlaylist.observe(this@DialogUsersPlaylists) { playlist ->
                 //Searchで読み込む場合は全件表示
                 if (mainFragmentArgs.fromSearch){

@@ -15,16 +15,34 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
+import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
+import com.kabos.spotifydj.util.callback.TrackCallback
+import com.kabos.spotifydj.viewModel.RecommendViewModel
+import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SearchFragment: Fragment() {
-
     private lateinit var binding: FragmentSearchBinding
-    private val viewModel: UserViewModel by activityViewModels()
-    private val trackAdapter by lazy { TrackAdapter(viewModel.callback) }
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val searchViewModel: SearchViewModel by activityViewModels()
+    private val recommendViewModel: RecommendViewModel by activityViewModels()
+    private val trackAdapter by lazy { TrackAdapter(callback) }
+    private val callback: TrackCallback = object : TrackCallback {
+        override fun addTrack(trackInfo: TrackInfo) {
+            userViewModel.addTrackToEditingPlaylist(trackInfo)
+        }
+
+        override fun playback(trackInfo: TrackInfo) {
+            userViewModel.playbackTrack(trackInfo)
+        }
+
+        override fun onClick(trackInfo: TrackInfo) {
+            recommendViewModel.updateCurrentTrack(trackInfo)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
@@ -36,14 +54,7 @@ class SearchFragment: Fragment() {
         initViewModels()
         binding.apply {
             etSearchTracks.doAfterTextChanged { text ->
-                viewModel.updateSearchedTracksResult(text.toString())
-                //「キーワードで検索しよう」を表示・非表示する処理
-                if (text.isNullOrEmpty()) {
-                    viewModel.clearSearchTracks()
-                    tvLetSearchTrack.visibility = View.VISIBLE
-                }else{
-                    tvLetSearchTrack.visibility = View.GONE
-                }
+                searchTrack(text.toString())
             }
 
             rvSearchTracksResult.apply {
@@ -53,7 +64,7 @@ class SearchFragment: Fragment() {
             }
 
             btnLoadPlaylist.setOnClickListener {
-                viewModel.getAllPlaylists()
+                userViewModel.getAllPlaylists()
                 val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
                 findNavController().navigate(action)
             }
@@ -61,7 +72,7 @@ class SearchFragment: Fragment() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
+        searchViewModel.apply {
             searchTracks.observe(viewLifecycleOwner) { searchResult ->
                 trackAdapter.submitList(searchResult)
 
@@ -84,5 +95,10 @@ class SearchFragment: Fragment() {
         }
     }
 
+    private fun searchTrack(keyword: String) {
+        if (keyword.isEmpty()) searchViewModel.clearSearchTracks()
+        else searchViewModel.searchTracks(keyword)
+        binding.tvLetSearchTrack.isVisible = keyword.isEmpty()
+    }
 
 }
