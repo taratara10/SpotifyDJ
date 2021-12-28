@@ -11,22 +11,23 @@ import com.kabos.spotifydj.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.viewModel.RootViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PlaylistMainFragment: Fragment() {
     private lateinit var binding: FragmentPlaylistBinding
-    private val viewModel: UserViewModel by activityViewModels()
+    private val rootViewModel: RootViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val playlistAdapter by lazy { PlaylistAdapter(callback) }
     private val callback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
             if (playlistItem.id == "createNewPlaylist"){
-                viewModel.isNavigateNewPlaylistFragment.postValue(true)
+//                viewModel.isNavigateNewPlaylistFragment.postValue(true)
             }else{
                 playlistViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
-                viewModel.isNavigateExistingPlaylistFragment.postValue(true)
+                rootViewModel.setEditPlaylistFragment()
             }
         }
     }

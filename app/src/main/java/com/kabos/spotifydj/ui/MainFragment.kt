@@ -57,6 +57,7 @@ class MainFragment: Fragment() {
                 true
             }
             R.id.menu_fetch_playlist -> {
+                // これ上手く機能してないけどなに？
                 viewPagerAdapter.replaceFragment(ReplaceFragment.ResetPlaylist)
                 //todo resetPlaylist でisNavigate New/Existing postValue(false)
                 true
@@ -74,38 +75,32 @@ class MainFragment: Fragment() {
             when (position) {
                 Pager.Search.position -> tab.text = Pager.Search.name
                 Pager.Recommend.position -> tab.text = Pager.Recommend.name
-                Pager.Playlist.position -> tab.text = Pager.Recommend.name
+                Pager.Playlist.position -> tab.text = Pager.Playlist.name
             }
         }.attach()
     }
 
     private fun initViewModels() {
         val viewPager = binding.pager
-        userViewModel.apply {
-            isNavigateNewPlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
-                if (isNavigate){
-                    viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
-                    //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
-                    viewPager.setCurrentItem(Pager.Search.position, true)
-                    viewPager.setCurrentItem(Pager.Playlist.position,true)
+        rootViewModel.apply {
+            isEditPlaylistFragment.observe(viewLifecycleOwner) { event ->
+                event.getContentIfNotHandled()?.let { needReplace ->
+                    if (needReplace){
+                        viewPagerAdapter.replaceFragment(ReplaceFragment.NewPlaylist)
+                        //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
+                        viewPager.setCurrentItem(Pager.Search.position, true)
+                        viewPager.setCurrentItem(Pager.Playlist.position,true)
+                    }
                 }
             }
 
-            isNavigateExistingPlaylistFragment.observe(viewLifecycleOwner) { isNavigate ->
-                if (isNavigate) {
-                    viewPagerAdapter.replaceFragment(ReplaceFragment.ExistingPlaylist)
-                    viewPager.setCurrentItem(Pager.Search.position, true)
-                    viewPager.setCurrentItem(Pager.Playlist.position, true)
+            pagerPosition.observe(viewLifecycleOwner) { event ->
+                event.getContentIfNotHandled()?.let { pager ->
+                    viewPager.setCurrentItem(pager.position, true)
                 }
             }
-
         }
 
-        rootViewModel.pagerPosition.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { pager ->
-                viewPager.setCurrentItem(pager.position, true)
-            }
-        }
     }
 }
 

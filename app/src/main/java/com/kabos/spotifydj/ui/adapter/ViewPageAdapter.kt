@@ -29,20 +29,20 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     override fun createFragment(position: Int): Fragment = fragmentList[position]
 
-
     fun replaceFragment(pattern: ReplaceFragment){
-
-        if (pattern == ReplaceFragment.NewPlaylist) {
-            fragmentList.removeAt(Pager.Playlist.position)
-            fragmentList.add(Pager.Playlist.position, EditNewPlaylistFragment())
-        }
-        if (pattern == ReplaceFragment.ExistingPlaylist){
-            fragmentList.removeAt(Pager.Playlist.position)
-            fragmentList.add(Pager.Playlist.position, EditExistingPlaylistFragment())
-        }
-        if (pattern == ReplaceFragment.ResetPlaylist){
-            fragmentList.removeAt(Pager.Playlist.position)
-            fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
+        when (pattern) {
+            ReplaceFragment.NewPlaylist -> {
+                fragmentList.removeAt(Pager.Playlist.position)
+                fragmentList.add(Pager.Playlist.position, EditNewPlaylistFragment())
+            }
+            ReplaceFragment.ExistingPlaylist -> {
+                fragmentList.removeAt(Pager.Playlist.position)
+                fragmentList.add(Pager.Playlist.position, EditExistingPlaylistFragment())
+            }
+            ReplaceFragment.ResetPlaylist -> {
+                fragmentList.removeAt(Pager.Playlist.position)
+                fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
+            }
         }
 
         //Assign unique id to each fragment
@@ -53,7 +53,7 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
         notifyDataSet(pattern)
     }
-    // todo なにしてんのこれ？？？？
+
     private fun notifyDataSet(pattern: ReplaceFragment) {
         notifyItemRemoved(Pager.Playlist.position)
         notifyItemInserted(Pager.Playlist.position)

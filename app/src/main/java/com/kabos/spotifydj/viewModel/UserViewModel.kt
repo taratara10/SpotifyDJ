@@ -29,10 +29,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private val _userAccount = MutableLiveData<User>()
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
 
-    // これ消したい
-    val isNavigateNewPlaylistFragment = MutableLiveData(false)
     val startExternalSpotifyApp = MutableLiveData(false)
-    val isNavigateExistingPlaylistFragment = MutableLiveData(false)
+
 
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken

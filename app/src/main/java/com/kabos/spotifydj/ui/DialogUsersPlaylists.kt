@@ -23,7 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class DialogUsersPlaylists: DialogFragment() {
     private lateinit var binding: DialogUsersPlaylistsBinding
     private val rootViewModel: RootViewModel by activityViewModels()
-    private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val mainFragmentArgs: MainFragmentArgs by navArgs()
