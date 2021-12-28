@@ -13,8 +13,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ActivityMainBinding
+import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.viewModel.RecommendViewModel
 import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -68,27 +70,14 @@ class MainActivity : AppCompatActivity() {
 
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    val accessToken = response.accessToken
-                    userViewModel.initializeAccessToken(accessToken)
-                    searchViewModel.initAccessToken(accessToken)
-                    recommendViewModel.initAccessToken(accessToken)
-
-                    //accessTokenの有効期限が3600secなので、少し余裕をもってrefreshする
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        authorizationSpotify()
-                    }, 3500000)
+                    initAccessTokenInViewModels(response.accessToken)
                     Timber.d("GOT AUTH TOKEN")
                 }
-
-                AuthorizationResponse.Type.ERROR -> {
-                    //再帰呼び出しでログインできるまでループする
-                    authorizationSpotify()
-                    Toast.makeText(this,"ログインに失敗しました",Toast.LENGTH_SHORT).show()
-                }
-                // Most likely auth flow was cancelled
                 else -> {
                     //再帰呼び出しでログインできるまでループする
                     authorizationSpotify()
+                    Toast.makeText(this, getString(R.string.toast_login_failer), Toast.LENGTH_SHORT)
+                        .show()
                     Timber.tag("SPLASH").d("Cannot login")
                 }
             }
@@ -101,20 +90,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewModels() {
-        userViewModel.apply {
-            needRefreshAccessToken.observe(this@MainActivity){ event ->
-                event.getContentIfNotHandled()?.let { needRefresh ->
-                    if (needRefresh) authorizationSpotify()
-                }
-            }
+        userViewModel.startExternalSpotifyApp.observe(this@MainActivity){ startActivity->
+            if (startActivity) startActivity(
+                Intent().setComponent(
+                    ComponentName(
+                        "com.spotify.music",
+                        "com.spotify.music.MainActivity")))
+        }
 
-            startExternalSpotifyApp.observe(this@MainActivity){ startActivity->
-                if (startActivity) startActivity(
-                    Intent().setComponent(
-                        ComponentName(
-                            "com.spotify.music",
-                            "com.spotify.music.MainActivity")))
+        observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
+    }
+
+    private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Boolean>>) {
+        liveData.observe(this@MainActivity){ event ->
+            event.getContentIfNotHandled()?.let { needRefresh ->
+                if (needRefresh) authorizationSpotify()
             }
         }
+    }
+
+    private fun initAccessTokenInViewModels(accessToken: String) {
+        userViewModel.initializeAccessToken(accessToken)
+        searchViewModel.initAccessToken(accessToken)
+        recommendViewModel.initAccessToken(accessToken)
     }
 }

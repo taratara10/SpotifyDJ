@@ -9,8 +9,8 @@ data class ErrorResponse(
     val error: ErrorContent
 ){
     companion object {
-        private val converter = Moshi.Builder().build().adapter(ErrorResponse::class.java)
         fun <T> Response<T>.toSpotifyApiErrorResponse(): ErrorResponse? {
+            val converter = Moshi.Builder().build().adapter(ErrorResponse::class.java)
             return try {
                  val errorBody = this.errorBody()
                  return if (errorBody != null) {
