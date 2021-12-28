@@ -1,59 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_black"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/unsaved_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/red_500"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="プレイリストはまだ保存されていません"
+            android:textColor="@color/white"
+            android:paddingVertical="@dimen/padding_8"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_existing_playlist_title"
+        android:id="@+id/title_layout"
         style="@style/MyDenseOutlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_8"
         android:textColorHint="@color/white"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        android:layout_marginTop="@dimen/margin_8"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/save_button"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/unsaved_description" >
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_existing_playlist_title"
+            android:id="@+id/title_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="プレイリスト名"
-            android:inputType="text"
-            android:textColor="@color/white" />
+            android:hint="新規プレイリスト名"
+            android:textColor="@color/white"
+            android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
-        android:id="@+id/rv_existing_playlist"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:behind_swiped_item_bg_color="@color/red_500"
-        app:behind_swiped_item_icon="@drawable/ic_baseline_delete_24"
-        app:behind_swiped_item_icon_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/til_existing_playlist_title"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <ProgressBar
-        android:id="@+id/pb_playlist_progress"
+    <Button
+        android:id="@+id/save_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:indeterminateTint="@android:color/holo_green_light"
-        app:layout_constraintBottom_toBottomOf="@id/rv_existing_playlist"
-        app:layout_constraintEnd_toEndOf="@id/rv_existing_playlist"
-        app:layout_constraintStart_toStartOf="@id/rv_existing_playlist"
-        app:layout_constraintTop_toTopOf="@id/rv_existing_playlist" />
+        android:layout_marginTop="@dimen/margin_8"
+        android:text="保存"
+        app:layout_constraintBottom_toBottomOf="@+id/title_layout"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintTop_toTopOf="@+id/title_layout" />
+
+    <com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
+        android:id="@+id/playlist_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:behind_swiped_item_bg_color="@color/red_500"
+        app:behind_swiped_item_icon="@drawable/ic_baseline_delete_24"
+        app:behind_swiped_item_icon_margin="@dimen/margin_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_layout"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_end"
+        app:layout_constraintStart_toStartOf="@+id/guideline_begin" />
 
     <TextView
-        android:id="@+id/tv_playlist_empty"
+        android:id="@+id/empty_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="＋でプレイリストに追加"
@@ -61,8 +78,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_end"
         app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintTop_toTopOf="@+id/rv_existing_playlist"
-        app:layout_constraintVertical_bias="0.38" />
+        app:layout_constraintTop_toTopOf="@+id/playlist_list" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_begin"

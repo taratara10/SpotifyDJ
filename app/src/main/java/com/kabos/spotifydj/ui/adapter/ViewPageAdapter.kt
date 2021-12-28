@@ -33,12 +33,9 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
         when (pattern) {
             ReplaceFragment.NewPlaylist -> {
                 fragmentList.removeAt(Pager.Playlist.position)
-                fragmentList.add(Pager.Playlist.position, EditNewPlaylistFragment())
+                fragmentList.add(Pager.Playlist.position, EditPlaylistFragment())
             }
-            ReplaceFragment.ExistingPlaylist -> {
-                fragmentList.removeAt(Pager.Playlist.position)
-                fragmentList.add(Pager.Playlist.position, EditExistingPlaylistFragment())
-            }
+
             ReplaceFragment.ResetPlaylist -> {
                 fragmentList.removeAt(Pager.Playlist.position)
                 fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
