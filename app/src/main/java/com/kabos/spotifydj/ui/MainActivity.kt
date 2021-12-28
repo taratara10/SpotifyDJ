@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ActivityMainBinding
+import com.kabos.spotifydj.viewModel.RecommendViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
@@ -37,7 +38,8 @@ class MainActivity : AppCompatActivity() {
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
 
-    private val viewModel: UserViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
+    private val recommendViewModel: RecommendViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +66,8 @@ class MainActivity : AppCompatActivity() {
 
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    viewModel.initializeAccessToken(response.accessToken)
+                    userViewModel.initializeAccessToken(response.accessToken)
+                    recommendViewModel.initAccessToken(response.accessToken)
 
                     //accessTokenの有効期限が3600secなので、少し余裕をもってrefreshする
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -94,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
+        userViewModel.apply {
             needRefreshAccessToken.observe(this@MainActivity){ event ->
                 event.getContentIfNotHandled()?.let { needRefresh ->
                     if (needRefresh) authorizationSpotify()

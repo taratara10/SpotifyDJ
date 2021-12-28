@@ -32,17 +32,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private var editingPlaylistId = ""
 
     private val _searchTracks = MutableLiveData<List<TrackInfo>>()
-    private val _upperTracks = MutableLiveData<List<TrackInfo>>()
-    private val _downerTracks = MutableLiveData<List<TrackInfo>>()
-    private val _currentTrack = MutableLiveData<TrackInfo>()
+
     private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
     private val _editingPlaylistTitle = MutableLiveData<String>()
     private val _usersPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
     //Loading Flag
     val isLoadingSearchTrack = MutableLiveData(false)
-    val isLoadingUpperTrack = MutableLiveData(false)
-    val isLoadingDownerTrack = MutableLiveData(false)
     val isLoadingPlaylistTrack = MutableLiveData(false)
 
     //Navigate Flag
@@ -69,12 +65,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _editingPlaylistTitle
     val searchTracks: LiveData<List<TrackInfo>>
         get() = _searchTracks
-    val upperTracks: LiveData<List<TrackInfo>>
-        get() = _upperTracks
-    val downerTracks: LiveData<List<TrackInfo>>
-        get() = _downerTracks
-    val currentTrack: LiveData<TrackInfo>
-        get() = _currentTrack
+
 
     /**
      * callback
@@ -91,13 +82,13 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
 
         override fun onClick(trackInfo: TrackInfo) {
-            updateCurrentTrack(trackInfo)
+//            updateCurrentTrack(trackInfo)
         }
     }
 
     val dragTrackCallback = object :DragTrackCallback{
         override fun onClick(trackInfo: TrackInfo) {
-            updateCurrentTrack(trackInfo)
+//            updateCurrentTrack(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -174,53 +165,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         isLoadingSearchTrack.postValue(false)
     }
 
-    /**
-     * Recommendの処理
-     * */
 
-    //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
-    fun updateCurrentTrack(track: TrackInfo){
-        navigateRootFragmentPagerPosition(Pager.Recommend)
-        _currentTrack.postValue(track)
-        updateUpperRecommendTrack(track)
-        updateDownerRecommendTrack(track)
-    }
-
-    private fun updateUpperRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
-        isLoadingUpperTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, true)) {
-            is SpotifyApiResource.Success -> {
-                _upperTracks.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
-                    }
-                }
-            }
-        }
-        isLoadingUpperTrack.value = false
-    }
-
-    private fun updateDownerRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
-        isLoadingDownerTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, false)) {
-            is SpotifyApiResource.Success -> {
-                _downerTracks.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
-                    }
-                }
-            }
-        }
-        isLoadingDownerTrack.value = false
-    }
 
 
     /**
@@ -300,7 +245,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun addTrackToEditingPlaylist(track: TrackInfo){
         _editingPlaylist.addItem(track)
 
-        updateCurrentTrack(track)
+//        updateCurrentTrack(track)
         postTracksToPlaylist(track)
 
         //New or Existing playlistに移動してないなら、playlistをnewPlaylistFragmentにreplace
