@@ -6,15 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
-import com.kabos.spotifydj.ui.adapter.PlaylistCallback
+import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 
 @AndroidEntryPoint
 class PlaylistMainFragment: Fragment() {

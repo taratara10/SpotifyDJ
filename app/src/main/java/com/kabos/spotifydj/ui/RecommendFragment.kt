@@ -20,7 +20,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class RecommendFragment: Fragment() {
-
     private lateinit var binding: FragmentRecommendBinding
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()

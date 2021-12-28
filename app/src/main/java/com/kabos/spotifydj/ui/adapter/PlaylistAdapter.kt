@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ListItemPlaylistBinding
 import com.kabos.spotifydj.model.playlist.*
+import com.kabos.spotifydj.util.callback.PlaylistCallback
 
 class PlaylistAdapter(private val callback: PlaylistCallback)
     : ListAdapter<PlaylistItem, PlaylistAdapter.PlaylistViewHolder>(PlaylistDiffCallback){

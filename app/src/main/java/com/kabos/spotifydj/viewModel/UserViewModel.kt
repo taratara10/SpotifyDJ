@@ -7,17 +7,15 @@ import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
-import com.kabos.spotifydj.model.feature.AudioFeature
 import com.kabos.spotifydj.model.playback.Device
 import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.model.requestBody.AddTracksBody
 import com.kabos.spotifydj.model.requestBody.DeleteTrack
 import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
-import com.kabos.spotifydj.model.track.TrackItems
 import com.kabos.spotifydj.repository.*
-import com.kabos.spotifydj.ui.adapter.AdapterCallback
-import com.kabos.spotifydj.ui.adapter.DragTrackCallback
+import com.kabos.spotifydj.util.callback.DragTrackCallback
 import com.kabos.spotifydj.util.*
+import com.kabos.spotifydj.util.callback.TrackCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -72,7 +70,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
     // 共通のcallbackを各FragmentのTrackAdapterに渡して
     // todo これいかんでしょ
-    val callback = object: AdapterCallback {
+    val callback = object: TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             addTrackToEditingPlaylist(trackInfo)
         }
@@ -86,7 +84,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         }
     }
 
-    val dragTrackCallback = object :DragTrackCallback{
+    val dragTrackCallback = object : DragTrackCallback {
         override fun onClick(trackInfo: TrackInfo) {
 //            updateCurrentTrack(trackInfo)
         }

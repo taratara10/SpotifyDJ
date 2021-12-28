@@ -11,6 +11,7 @@ import com.ernestoyaquello.dragdropswiperecyclerview.util.DragDropSwipeDiffCallb
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ListItemDragTrackBinding
 import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.util.callback.DragTrackCallback
 
 class DragTrackAdapter(private val callback: DragTrackCallback, dataset: List<TrackInfo>)
     : DragDropSwipeAdapter<TrackInfo, DragTrackAdapter.DragTrackViewHolder>(dataset)  {
