@@ -32,6 +32,7 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
         mAccessToken = token
     }
 
+    // todo jobで管理したい
     fun searchTracks(keyword: String) = viewModelScope.launch {
         _isLoadingSearchTrack.value = true
         when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {

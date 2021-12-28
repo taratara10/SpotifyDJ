@@ -16,7 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.databinding.FragmentEditExistingPlaylistBinding
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
+import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
+import com.kabos.spotifydj.util.callback.DragTrackCallback
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.viewModel.RecommendViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -25,12 +29,25 @@ import java.util.*
 @AndroidEntryPoint
 class EditExistingPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentEditExistingPlaylistBinding
-    private val viewModel: UserViewModel by activityViewModels()
-    private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
+    private val recommendViewModel: RecommendViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val dragTackAdapter by lazy { DragTrackAdapter(callback ,emptyList()) }
+    private val callback = object : DragTrackCallback {
+        override fun onClick(trackInfo: TrackInfo) {
+            recommendViewModel.updateCurrentTrack(trackInfo)
+        }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentEditExistingPlaylistBinding.inflate(inflater, container, false)
-        return binding.root
+        override fun playback(trackInfo: TrackInfo) {
+//            playbackTrack(trackInfo)
+        }
+
+        override fun onSwiped(position: Int) {
+            playlistViewModel.removeTrackFromLocalPlaylist(position)
+        }
+
+        override fun onDropped(initial: Int, final: Int) {
+            playlistViewModel.reorderPlaylistsTracks(initial,final)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,7 +76,7 @@ class EditExistingPlaylistFragment: Fragment() {
                     //focusが外れたらplaylist titleを更新
                     if (!hasFocus){
                         editText as EditText
-                        viewModel.updatePlaylistTitle(editText.text.toString())
+                        playlistViewModel.updatePlaylistTitle(editText.text.toString())
                     }
                 }
             }
@@ -68,7 +85,7 @@ class EditExistingPlaylistFragment: Fragment() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
+        playlistViewModel.apply {
             editingPlaylist.observe(viewLifecycleOwner) { playlist ->
                 dragTackAdapter.submitList(playlist)
                 binding.tvPlaylistEmpty.isVisible = playlist.isNullOrEmpty()

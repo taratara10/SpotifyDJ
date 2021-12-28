@@ -13,13 +13,15 @@ import androidx.navigation.fragment.findNavController
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
 import com.kabos.spotifydj.util.ReplaceFragment
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DialogConfirmCreatingPlaylist: DialogFragment() {
     private lateinit var binding: DialogConfirmCreatingPlaylistBinding
-    private val viewModel: UserViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private var playlistTitle = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -51,8 +53,9 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
             btnDialogCancel.setOnClickListener { dialog?.cancel() }
             btnDialogSave  .setOnClickListener {
                 if (playlistTitle.isNotEmpty()) {
-                    viewModel.createPlaylist(playlistTitle)
-                    viewModel.isNavigateExistingPlaylistFragment.value = true
+                    playlistViewModel.createPlaylist(playlistTitle)
+                    // todo 抹消する
+                    userViewModel.isNavigateExistingPlaylistFragment.value = true
                     dialog?.cancel()
                     Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
                 }

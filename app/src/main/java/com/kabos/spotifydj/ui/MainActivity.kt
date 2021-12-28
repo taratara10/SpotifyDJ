@@ -17,6 +17,7 @@ import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ActivityMainBinding
 import com.kabos.spotifydj.util.OneShotEvent
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RecommendViewModel
 import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private val userViewModel: UserViewModel by viewModels()
     private val searchViewModel: SearchViewModel by viewModels()
     private val recommendViewModel: RecommendViewModel by viewModels()
+    private val playlistViewModel: PlaylistViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +102,10 @@ class MainActivity : AppCompatActivity() {
                         "com.spotify.music.MainActivity")))
         }
 
+        userViewModel.userAccount.observe(this) { user ->
+            playlistViewModel.initUserAccount(user.id, user.display_name)
+        }
+
         observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
@@ -114,8 +120,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initAccessTokenInViewModels(accessToken: String) {
-        userViewModel.initializeAccessToken(accessToken)
+        userViewModel.initUserAccount(accessToken)
         searchViewModel.initAccessToken(accessToken)
         recommendViewModel.initAccessToken(accessToken)
+        playlistViewModel.initAccessToken(accessToken)
     }
+
 }

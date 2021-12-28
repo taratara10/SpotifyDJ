@@ -13,6 +13,7 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.Pager
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RootViewModel
 import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
@@ -24,6 +25,7 @@ class DialogUsersPlaylists: DialogFragment() {
     private val rootViewModel: RootViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val mainFragmentArgs: MainFragmentArgs by navArgs()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
@@ -33,7 +35,7 @@ class DialogUsersPlaylists: DialogFragment() {
                 rootViewModel.setPagerPosition(Pager.Search)
             }
             if (mainFragmentArgs.fromPlaylist){
-                userViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
+                playlistViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
                 rootViewModel.setPagerPosition(Pager.Playlist)
             }
             findNavController().popBackStack()
@@ -57,7 +59,7 @@ class DialogUsersPlaylists: DialogFragment() {
     }
 
     private fun initViewModels() {
-        userViewModel.apply {
+        playlistViewModel.apply {
             usersPlaylist.observe(this@DialogUsersPlaylists) { playlist ->
                 //Searchで読み込む場合は全件表示
                 if (mainFragmentArgs.fromSearch){

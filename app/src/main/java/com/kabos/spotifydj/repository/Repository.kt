@@ -260,7 +260,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
      * Playlist
      * */
 
-    suspend fun getUsersAllPlaylist(accessToken: String): SpotifyApiResource<List<PlaylistItem>> {
+    suspend fun getUsersPlaylist(accessToken: String): SpotifyApiResource<List<PlaylistItem>> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
             val request = spotifyApi.getUsersAllPlaylists(generateBearer(accessToken))
@@ -348,7 +348,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     suspend fun addTracksToPlaylist(
         accessToken: String,
         playlistId: String,
-        body: AddTracksBody
+        trackUri: String
     ): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
@@ -356,7 +356,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
                 accessToken = generateBearer(accessToken),
                 contentType = APPLICATION_JSON,
                 playlistId = playlistId,
-                body = body
+                body = AddTracksBody(listOf(trackUri))
             )
             if (request.isSuccessful) SpotifyApiResource.Success(true)
             else SpotifyApiResource.Error(errorReasonHandler(request))
@@ -414,7 +414,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     suspend fun deleteTracksFromPlaylist(
         accessToken: String,
         playlistId: String,
-        body: DeleteTracksBody
+        trackUri: String
     ): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
 
@@ -422,7 +422,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             accessToken = generateBearer(accessToken),
             contentType = APPLICATION_JSON,
             playlistId = playlistId,
-            body = body
+            body = DeleteTracksBody(listOf(DeleteTrack(trackUri)))
         )
         return try {
             if (request.isSuccessful) SpotifyApiResource.Success(true)

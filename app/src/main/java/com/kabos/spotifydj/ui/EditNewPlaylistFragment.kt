@@ -16,7 +16,11 @@ import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditNewPlaylistBinding
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
+import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
+import com.kabos.spotifydj.util.callback.DragTrackCallback
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.viewModel.RecommendViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -24,8 +28,26 @@ import java.util.*
 
 class EditNewPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentEditNewPlaylistBinding
-    private val viewModel: UserViewModel by activityViewModels()
-    private val dragTackAdapter by lazy { DragTrackAdapter(viewModel.dragTrackCallback,emptyList()) }
+    private val recommendViewModel: RecommendViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val dragTackAdapter by lazy { DragTrackAdapter(callback ,emptyList()) }
+    private val callback = object : DragTrackCallback {
+        override fun onClick(trackInfo: TrackInfo) {
+            recommendViewModel.updateCurrentTrack(trackInfo)
+        }
+
+        override fun playback(trackInfo: TrackInfo) {
+//            playbackTrack(trackInfo)
+        }
+
+        override fun onSwiped(position: Int) {
+            playlistViewModel.removeTrackFromLocalPlaylist(position)
+        }
+
+        override fun onDropped(initial: Int, final: Int) {
+            playlistViewModel.reorderPlaylistsTracks(initial,final)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentEditNewPlaylistBinding.inflate(inflater, container, false)
@@ -49,7 +71,7 @@ class EditNewPlaylistFragment: Fragment() {
             etNewPlaylistTitle.setText("NewPlaylist_${dataFormat.format(date)}")
 
             btnSavePlaylist.setOnClickListener {
-                viewModel.updatePlaylistTitle(etNewPlaylistTitle.text.toString())
+                playlistViewModel.updatePlaylistTitle(etNewPlaylistTitle.text.toString())
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_playlist)
             }
 
@@ -69,7 +91,7 @@ class EditNewPlaylistFragment: Fragment() {
     }
 
     private fun initViewModels() {
-        viewModel.apply {
+        playlistViewModel.apply {
             editingPlaylist.observe(viewLifecycleOwner) { playlist ->
                 dragTackAdapter.submitList(playlist)
                 binding.tvPlaylistEmpty.isVisible = playlist.isNullOrEmpty()
@@ -79,7 +101,6 @@ class EditNewPlaylistFragment: Fragment() {
             editingPlaylistTitle.observe(viewLifecycleOwner) { title ->
                 binding.etNewPlaylistTitle.setText(title)
             }
-
         }
     }
 }

@@ -19,10 +19,7 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.viewModel.RecommendViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.SearchViewModel
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.viewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,10 +29,11 @@ class SearchFragment: Fragment() {
     private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val trackAdapter by lazy { TrackAdapter(callback) }
     private val callback: TrackCallback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            userViewModel.addTrackToEditingPlaylist(trackInfo)
+            playlistViewModel.addTrackToEditingPlaylist(trackInfo)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -68,7 +66,7 @@ class SearchFragment: Fragment() {
             }
 
             btnLoadPlaylist.setOnClickListener {
-                userViewModel.getAllPlaylists()
+                playlistViewModel.getUsersPlaylists()
                 val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
                 findNavController().navigate(action)
             }
