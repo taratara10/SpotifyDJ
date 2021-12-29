@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.Pager
-import com.kabos.spotifydj.util.ReplaceFragment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

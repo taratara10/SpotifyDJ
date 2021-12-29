@@ -4,11 +4,10 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.kabos.spotifydj.ui.*
 import com.kabos.spotifydj.util.Pager
-import com.kabos.spotifydj.util.ReplaceFragment
 
 class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
-    private var fragmentList = mutableListOf<Fragment>()
-    private var idsList = mutableListOf<Long>()
+    private val fragmentList = mutableListOf<Fragment>()
+    private val idsList = mutableListOf<Long>()
 
     init {
         fragmentList.apply {
@@ -29,14 +28,14 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
     override fun createFragment(position: Int): Fragment = fragmentList[position]
 
-    fun replaceFragment(pattern: ReplaceFragment){
-        when (pattern) {
-            ReplaceFragment.NewPlaylist -> {
+    fun replaceFragment(pager: Pager){
+        when (pager) {
+            Pager.EditPlaylist -> {
                 fragmentList.removeAt(Pager.Playlist.position)
                 fragmentList.add(Pager.Playlist.position, EditPlaylistFragment())
             }
 
-            ReplaceFragment.ResetPlaylist -> {
+            Pager.Playlist -> {
                 fragmentList.removeAt(Pager.Playlist.position)
                 fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
             }
@@ -48,10 +47,10 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
             idsList.add(it.hashCode().toLong())
         }
 
-        notifyDataSet(pattern)
+        notifyDataSet()
     }
 
-    private fun notifyDataSet(pattern: ReplaceFragment) {
+    private fun notifyDataSet() {
         notifyItemRemoved(Pager.Playlist.position)
         notifyItemInserted(Pager.Playlist.position)
     }

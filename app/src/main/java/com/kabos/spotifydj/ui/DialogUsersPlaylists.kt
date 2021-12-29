@@ -25,7 +25,7 @@ class DialogUsersPlaylists: DialogFragment() {
     private val rootViewModel: RootViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
-    private val mainFragmentArgs: MainFragmentArgs by navArgs()
+    private val mainFragmentArgs: RootFragmentArgs by navArgs()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
     private val playlistCallback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {

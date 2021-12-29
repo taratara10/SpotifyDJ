@@ -22,7 +22,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     private var mAccessToken = ""
     private var mUserId = ""
     private var mUserName = ""
-    private var editingPlaylistId = ""
+    private var _editingPlaylistId = ""
 
     private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
     private val _editingPlaylistTitle = MutableLiveData<String>()
@@ -81,7 +81,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     fun createPlaylist(title: String) = viewModelScope.launch {
         when (val result = repository.createPlaylist(mAccessToken, mUserId, title)) {
             is SpotifyApiResource.Success -> {
-                editingPlaylistId = result.data.toString()
+                _editingPlaylistId = result.data.toString()
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
@@ -98,14 +98,14 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         //localPlaylistのTrackを新規作成したplaylistに追加 空なら何もしない
 //        if (localPlaylist.value == null) return@launch
 //        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
-//        repository.addTracksToPlaylist(mAccessToken, editingPlaylistId, requestBody)
+//        repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, requestBody)
     }
 
     //ExistingPlaylistのtitleを変更する
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
         if (title.isEmpty()) return@launch
 
-        when (val result = repository.updatePlaylistTitle(mAccessToken, editingPlaylistId, title)) {
+        when (val result = repository.updatePlaylistTitle(mAccessToken, _editingPlaylistId, title)) {
             is SpotifyApiResource.Success -> {
                 //todo Toast(タイトルを更新しました)
             }
@@ -130,8 +130,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
     private fun postTracksToPlaylist(trackUri: String) = viewModelScope.launch {
-        if (editingPlaylistId.isEmpty()) return@launch
-        when (val result = repository.addTracksToPlaylist(mAccessToken, editingPlaylistId, trackUri)) {
+        if (_editingPlaylistId.isEmpty()) return@launch
+        when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUri)) {
             is SpotifyApiResource.Success -> {
 
             }
@@ -154,8 +154,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     }
 
     private fun deleteTracksFromPlaylist(trackUri: String) = viewModelScope.launch {
-        if (editingPlaylistId.isEmpty()) return@launch
-        when (val result = repository.deleteTracksFromPlaylist(mAccessToken, editingPlaylistId, trackUri)) {
+        if (_editingPlaylistId.isEmpty()) return@launch
+        when (val result = repository.deleteTracksFromPlaylist(mAccessToken, _editingPlaylistId, trackUri)) {
             is SpotifyApiResource.Success -> {
 
             }
@@ -171,12 +171,12 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     }
 
     fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch {
-        if (editingPlaylistId.isEmpty()) return@launch
+        if (_editingPlaylistId.isEmpty()) return@launch
         _editingPlaylist.replacePosition(initialPosition, finalPosition)
 
         when (val result = repository.reorderPlaylistsTracks(
             mAccessToken,
-            editingPlaylistId,
+            _editingPlaylistId,
             initialPosition,
             finalPosition
         )) {
@@ -199,10 +199,16 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
      * */
 
     fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
-        updatePlaylistTitleAndId(playlist)
+        _editingPlaylistId = playlist.id
+        _editingPlaylistTitle.postValue(playlist.name)
         getTracksByPlaylistId(playlist.id)
     }
 
+    fun clearEditingPlaylist() {
+        _editingPlaylistId = ""
+        _editingPlaylistTitle.postValue("")
+        _editingPlaylist.postValue(listOf())
+    }
 
     private fun getTracksByPlaylistId(playlistId: String) = viewModelScope.launch {
         _isLoadingPlaylistTrack.value = true
@@ -221,12 +227,6 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         }
         _isLoadingPlaylistTrack.value = false
     }
-
-    private fun updatePlaylistTitleAndId(playlist: PlaylistItem){
-        editingPlaylistId = playlist.id
-        _editingPlaylistTitle.postValue(playlist.name)
-    }
-
 
     fun updateEditingPlaylistTitle(title: String) {
         _editingPlaylistTitle.postValue(title)

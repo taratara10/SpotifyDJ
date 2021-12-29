@@ -8,9 +8,9 @@
 
     <fragment
         android:id="@+id/nav_main"
-        android:name="com.kabos.spotifydj.ui.MainFragment"
+        android:name="com.kabos.spotifydj.ui.RootFragment"
         android:label="pokedex"
-        tools:layout="@layout/fragment_main" >
+        tools:layout="@layout/fragment_root" >
 
         <action
             android:id="@+id/action_nav_main_to_nav_user_playlist"

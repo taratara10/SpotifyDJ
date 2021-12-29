@@ -2,20 +2,15 @@ package com.kabos.spotifydj.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
-import com.kabos.spotifydj.util.ReplaceFragment
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

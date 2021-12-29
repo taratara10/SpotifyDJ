@@ -67,7 +67,7 @@ class SearchFragment: Fragment() {
 
             btnLoadPlaylist.setOnClickListener {
                 playlistViewModel.getUsersPlaylists()
-                val action = MainFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
+                val action = RootFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
                 findNavController().navigate(action)
             }
         }

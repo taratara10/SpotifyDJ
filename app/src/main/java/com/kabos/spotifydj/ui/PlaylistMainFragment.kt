@@ -10,9 +10,9 @@ import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
+import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,12 +23,12 @@ class PlaylistMainFragment: Fragment() {
     private val playlistAdapter by lazy { PlaylistAdapter(callback) }
     private val callback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
-            if (playlistItem.id == "createNewPlaylist"){
-//                viewModel.isNavigateNewPlaylistFragment.postValue(true)
-            }else{
+            if (playlistItem.id != CREATE_NEW_PLAYLIST_ID) {
                 playlistViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
-                rootViewModel.setEditPlaylistFragment()
+            } else {
+                playlistViewModel.clearEditingPlaylist()
             }
+            rootViewModel.setEditPlaylistFragment()
         }
     }
 
@@ -53,7 +53,7 @@ class PlaylistMainFragment: Fragment() {
             description = "",
             external_urls = ExternalUrls(""),
             href = "",
-            id = "createNewPlaylist",
+            id = CREATE_NEW_PLAYLIST_ID,
             images = listOf(Image(url = "firstItem")),
             name = "新規作成",
             owner = Owner("", ExternalUrlsX(""),"","","",""),
