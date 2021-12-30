@@ -55,18 +55,18 @@ class SearchFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViewModels()
         binding.apply {
-            etSearchTracks.doAfterTextChanged { text ->
-                searchTrack(text.toString())
+            searchEditText.doAfterTextChanged { text ->
+                searchTrackByKeyword(text.toString())
             }
 
-            rvSearchTracksResult.apply {
-                layoutManager = LinearLayoutManager(activity)
+            searchResultList.apply {
                 adapter = trackAdapter
                 addItemDecoration(DividerItemDecoration(activity,LinearLayoutManager(activity).orientation))
             }
 
-            btnLoadPlaylist.setOnClickListener {
+            loadPlaylistButton.setOnClickListener {
                 playlistViewModel.getUsersPlaylists()
+                // todo navArgs 抹殺したい
                 val action = RootFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
                 findNavController().navigate(action)
             }
@@ -76,31 +76,21 @@ class SearchFragment: Fragment() {
     private fun initViewModels() {
         searchViewModel.apply {
             searchTracks.observe(viewLifecycleOwner) { searchResult ->
+                val isSearchWordEmpty = binding.searchEditText.text.isNullOrEmpty()
+                binding.notApplicableResult.isVisible = searchResult.isEmpty() && !isSearchWordEmpty
                 trackAdapter.submitList(searchResult)
-
-                //todo このクソキモイ処理を抹消する
-                //「検索結果該当なし」の表示・非表示する処理
-                // tvLetSearch(キーワードで検索しよう)が非表示の時のみ、「該当なし」を表示する
-                binding.apply {
-                    if (searchResult.isNullOrEmpty() && tvLetSearchTrack.visibility == View.GONE){
-                        tvSearchItemNothing.visibility = View.VISIBLE
-                    }else{
-                        tvSearchItemNothing.visibility = View.GONE
-                        tvLetSearchTrack.visibility = View.GONE
-                    }
-                }
             }
 
             isLoadingSearchTrack.observe(viewLifecycleOwner) { isLoading ->
-                binding.pbSearchProgress.isVisible = isLoading
+                binding.searchProgress.isVisible = isLoading
             }
         }
     }
 
-    private fun searchTrack(keyword: String) {
-        if (keyword.isEmpty()) searchViewModel.clearSearchTracks()
-        else searchViewModel.searchTracks(keyword)
-        binding.tvLetSearchTrack.isVisible = keyword.isEmpty()
+    private fun searchTrackByKeyword(keyword: String) {
+        searchViewModel.searchTracks(keyword)
+        binding.keywordIsEmpty.isVisible = keyword.isEmpty()
+        binding.searchResultList.isVisible = keyword.isNotEmpty()
     }
 
 }

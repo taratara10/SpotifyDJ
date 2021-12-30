@@ -2,4 +2,9 @@
     <string name="app_name">SpotifyDJ</string>
     <string name="track_tempo">BPM: %1$.1f</string>
     <string name="toast_login_failer">ログインに失敗しました</string>
+
+    <!--  search   -->
+    <string name="search_description">キーワードで曲を検索</string>
+    <string name="not_applicable_result">該当結果なし</string>
+    <string name="keyword_is_empty">アーティスト、曲名、キーワードで検索しよう</string>
 </resources>

@@ -4,15 +4,11 @@ import android.content.ComponentName
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ActivityMainBinding

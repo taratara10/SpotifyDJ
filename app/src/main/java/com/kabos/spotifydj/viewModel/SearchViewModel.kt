@@ -10,12 +10,14 @@ import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.util.OneShotEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel@Inject constructor(private val repository: Repository): ViewModel() {
     private var mAccessToken = ""
+    private var searchTrackJob: Job? = null
 
     private val _searchTracks = MutableLiveData<List<TrackInfo>>()
     private val _isLoadingSearchTrack = MutableLiveData(false)
@@ -32,25 +34,36 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
         mAccessToken = token
     }
 
-    // todo jobで管理したい
-    fun searchTracks(keyword: String) = viewModelScope.launch {
-        _isLoadingSearchTrack.value = true
-        when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
-            is SpotifyApiResource.Success -> {
-                _searchTracks.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    is SpotifyApiErrorReason.NotFound,
-                    is SpotifyApiErrorReason.ResponseError,
-                    is SpotifyApiErrorReason.UnKnown -> {
-                        //todo display onFetchFailed textView or Toast
+    fun searchTracks(keyword: String) {
+        searchTrackJob?.cancel()
+        if (keyword.isEmpty()) {
+            clearSearchTracks()
+            _isLoadingSearchTrack.postValue(false)
+            return
+        }
+        searchTrackJob = viewModelScope.launch {
+            _isLoadingSearchTrack.value = true
+            when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
+                is SpotifyApiResource.Success -> {
+                    _searchTracks.postValue(result.data ?: listOf())
+                }
+                is SpotifyApiResource.Error -> {
+                    when (result.reason) {
+                        is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                        is SpotifyApiErrorReason.NotFound,
+                        is SpotifyApiErrorReason.ResponseError,
+                        is SpotifyApiErrorReason.UnKnown -> {
+                            //todo display onFetchFailed textView or Toast
+                        }
                     }
                 }
             }
+            _isLoadingSearchTrack.postValue(false)
         }
-        _isLoadingSearchTrack.postValue(false)
+    }
+
+    private fun clearSearchTracks() {
+        _searchTracks.postValue(listOf())
     }
 
     fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
@@ -69,10 +82,6 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
             }
         }
         _isLoadingSearchTrack.postValue(false)
-    }
-
-    fun clearSearchTracks() {
-        _searchTracks.postValue(listOf())
     }
 
     private fun refreshAccessToken() {
