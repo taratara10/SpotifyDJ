@@ -52,69 +52,66 @@ class RecommendFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViewModels()
-        binding.apply {
-            rvUpperTracksResult.apply {
-                layoutManager = LinearLayoutManager(activity)
-                adapter = upperTrackAdapter
-                addItemDecoration(
-                    DividerItemDecoration(
-                        activity,
-                        LinearLayoutManager(activity).orientation
-                    )
-                )
-            }
+        initRecyclerView()
 
-            rvDownerTracksResult.apply {
-                layoutManager = LinearLayoutManager(activity)
-                adapter = downerTrackAdapter
-                addItemDecoration(
-                    DividerItemDecoration(
-                        activity,
-                        LinearLayoutManager(activity).orientation
-                    )
-                )
-            }
-            rvCurrentTracks.apply {
-                layoutManager = LinearLayoutManager(activity)
-                adapter = currentTrackAdapter
-            }
-        }
     }
 
     private fun initViewModels() {
         recommendViewModel.apply {
             upperTracks.observe(viewLifecycleOwner) { tracks ->
                 upperTrackAdapter.submitList(tracks)
-                updateEmptyTextView(tracks, binding.tvUpperTracksNothing)
+                toggleNotApplicableResult(tracks, binding.notApplicableUpperTrackResult)
             }
 
             downerTracks.observe(viewLifecycleOwner){ tracks ->
                 downerTrackAdapter.submitList(tracks)
-                updateEmptyTextView(tracks, binding.tvDownerTracksNothing)
+                toggleNotApplicableResult(tracks, binding.notApplicableDownerTrackResult)
             }
 
-            currentTrack.observe(viewLifecycleOwner){currentTrack ->
-                //adapterがList<TrackInfo>で受け取るので、Listでラップする
-                val list = listOf(currentTrack)
-                currentTrackAdapter.submitList(list)
-                updateEmptyTextView(list, binding.tvCurrentTracksEmpty)
-                updateEmptyTextView(list,binding.tvUpperTracksEmpty)
-                updateEmptyTextView(list,binding.tvDownerTracksEmpty)
+            currentTrack.observe(viewLifecycleOwner){ track ->
+                currentTrackAdapter.submitList(track)
+                toggleEmptyTextView(track)
             }
+
             isLoadingUpperTrack.observe(viewLifecycleOwner){isLoading ->
-                updateProgressBar(isLoading,binding.pbUpperProgress)
+                toggleProgressBar(isLoading, binding.upperProgress)
             }
             isLoadingDownerTrack.observe(viewLifecycleOwner){isLoading ->
-                updateProgressBar(isLoading,binding.pbDownerProgress)
+                toggleProgressBar(isLoading, binding.downerProgress)
             }
         }
     }
 
-    private fun updateEmptyTextView(item: List<TrackInfo>, textView: TextView){
-        textView.isVisible = item.isEmpty()
+    private fun initRecyclerView() {
+        binding.apply {
+            val dividerItemDecorator = DividerItemDecoration(activity, LinearLayoutManager(activity).orientation)
+            upperTrackList.apply {
+                adapter = upperTrackAdapter
+                addItemDecoration(dividerItemDecorator)
+            }
+
+            downerTrackList.apply {
+                adapter = downerTrackAdapter
+                addItemDecoration(dividerItemDecorator)
+            }
+            currentTrackList.adapter = currentTrackAdapter
+        }
     }
 
-    private fun updateProgressBar(isLoading:Boolean, progressBar: ProgressBar){
+    // toggle View
+    private fun toggleEmptyTextView(currentTrack: List<TrackInfo>) {
+        binding.apply {
+            currentTrackEmpty.isVisible = currentTrack.isEmpty()
+            upperTrackEmpty.isVisible = currentTrack.isEmpty()
+            downerTrackEmpty.isVisible = currentTrack.isEmpty()
+        }
+    }
+    private fun toggleNotApplicableResult(tracks: List<TrackInfo>, textView: TextView) {
+        val isSelectedCurrentTrack: Boolean = !binding.currentTrackEmpty.isVisible
+        textView.isVisible = tracks.isEmpty() && isSelectedCurrentTrack
+    }
+
+    private fun toggleProgressBar(isLoading:Boolean, progressBar: ProgressBar){
         progressBar.isVisible = isLoading
     }
 }

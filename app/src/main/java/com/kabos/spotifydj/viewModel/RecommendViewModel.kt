@@ -18,7 +18,7 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
     private var mAccessToken = ""
     private val _upperTracks = MutableLiveData<List<TrackInfo>>()
     private val _downerTracks = MutableLiveData<List<TrackInfo>>()
-    private val _currentTrack = MutableLiveData<TrackInfo>()
+    private val _currentTrack = MutableLiveData<List<TrackInfo>>()
     private val _isLoadingUpperTrack = MutableLiveData(false)
     private val _isLoadingDownerTrack = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
@@ -27,7 +27,7 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
         get() = _upperTracks
     val downerTracks: LiveData<List<TrackInfo>>
         get() = _downerTracks
-    val currentTrack: LiveData<TrackInfo>
+    val currentTrack: LiveData<List<TrackInfo>>
         get() = _currentTrack
     val isLoadingUpperTrack: LiveData<Boolean>
         get() = _isLoadingUpperTrack
@@ -39,9 +39,9 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
     fun initAccessToken(token: String) {
         mAccessToken = token
     }
-    //すぐにupdateRecommendTrackでcurrentTrack使いたいので、postValue()ではなくsetValue()
+
     fun updateCurrentTrack(track: TrackInfo){
-        _currentTrack.postValue(track)
+        _currentTrack.postValue(listOf(track))
         updateUpperRecommendTrack(track)
         updateDownerRecommendTrack(track)
     }

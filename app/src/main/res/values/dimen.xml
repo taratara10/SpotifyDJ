@@ -75,6 +75,11 @@
     <dimen name="image_size_32">32dp</dimen>
     <dimen name="image_size_40">40dp</dimen>
     <dimen name="image_size_80">80dp</dimen>
+    <dimen name="image_size_90">90dp</dimen>
+    <dimen name="image_size_200">200dp</dimen>
+    <dimen name="image_size_220">220dp</dimen>
+
+
 
     <!--  divider height -->
     <dimen name="divider_height_1">1dp</dimen>

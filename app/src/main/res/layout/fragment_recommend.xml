@@ -4,214 +4,170 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/padding_24"
     android:background="@color/white">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="-28dp"
-        tools:layout_editor_absoluteY="132dp">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <!--  Current Track  -->
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="90dp"
+                android:id="@+id/current_frame"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_size_90"
                 android:background="@drawable/current_recommend_background"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
-                app:layout_constraintTop_toTopOf="@id/rv_current_tracks" />
+                app:layout_constraintTop_toTopOf="@id/current_track_list" />
 
             <TextView
-                android:id="@+id/tv_current_tracks_empty"
+                android:id="@+id/current_track_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="曲をタップして追加"
-                app:layout_constraintBottom_toBottomOf="@+id/rv_current_tracks"
-                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_begin"
-                app:layout_constraintTop_toTopOf="@+id/rv_current_tracks"
-                android:visibility="visible" />
+                android:text="@string/current_track_empty"
+                app:layout_constraintBottom_toBottomOf="@+id/current_track_list"
+                app:layout_constraintTop_toTopOf="@+id/current_track_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_current_tracks"
-                android:layout_width="0dp"
-                android:layout_height="90dp"
-                android:layout_marginTop="4dp"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
+                android:id="@+id/current_track_list"
+                android:layout_width="match_parent"
+                android:paddingHorizontal="@dimen/padding_8"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:layout_height="@dimen/image_size_90"
+                android:layout_marginTop="@dimen/margin_4"
                 app:layout_constraintTop_toTopOf="parent" />
-
 
             <!--    Upper Track        -->
             <TextView
-                android:id="@+id/textView"
-                android:layout_width="0dp"
-                android:layout_height="220dp"
-                android:layout_marginTop="12dp"
+                android:id="@+id/upper_track_flame"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_size_220"
+                android:layout_marginTop="@dimen/margin_12"
                 android:background="@drawable/upper_recommend_background"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
-                app:layout_constraintTop_toTopOf="@+id/tv_upper_tracks" />
+                app:layout_constraintTop_toTopOf="@+id/upper_track_title" />
 
             <TextView
-                android:id="@+id/tv_upper_tracks"
+                android:id="@+id/upper_track_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/margin_12"
                 android:background="@color/white"
-                android:paddingStart="@dimen/margin_8"
-                android:paddingEnd="@dimen/margin_8"
-                android:text="Upper Tracks"
+                android:paddingHorizontal="@dimen/padding_8"
+                android:text="@string/upper_track_title"
                 android:textColor="@color/upper_tracks"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_size_18"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toBottomOf="@id/rv_current_tracks" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/current_track_list" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_upper_tracks_result"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toBottomOf="@+id/tv_upper_tracks" />
+                android:id="@+id/upper_track_list"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_size_200"
+                android:paddingHorizontal="@dimen/padding_8"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@+id/upper_track_title" />
 
             <TextView
-                android:id="@+id/tv_upper_tracks_nothing"
+                android:id="@+id/not_applicable_upper_track_result"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="該当結果なし"
-                app:layout_constraintBottom_toBottomOf="@+id/rv_upper_tracks_result"
-                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_begin"
-                app:layout_constraintTop_toTopOf="@+id/rv_upper_tracks_result"
+                android:text="@string/not_applicable_result"
+                app:layout_constraintBottom_toBottomOf="@+id/upper_track_list"
+                app:layout_constraintTop_toTopOf="@+id/upper_track_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/tv_upper_tracks_empty"
+                android:id="@+id/upper_track_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="関連する盛り上がる曲を探します"
-                app:layout_constraintBottom_toBottomOf="@+id/rv_upper_tracks_result"
-                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_begin"
-                app:layout_constraintTop_toTopOf="@+id/rv_upper_tracks_result"
-                android:visibility="visible" />
+                android:text="@string/upper_track_empty"
+                app:layout_constraintBottom_toBottomOf="@+id/upper_track_list"
+                app:layout_constraintTop_toTopOf="@+id/upper_track_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ProgressBar
-                android:id="@+id/pb_upper_progress"
+                android:id="@+id/upper_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:indeterminateTint="@android:color/holo_green_light"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@id/rv_upper_tracks_result"
-                app:layout_constraintEnd_toEndOf="@id/rv_upper_tracks_result"
-                app:layout_constraintStart_toStartOf="@id/rv_upper_tracks_result"
-                app:layout_constraintTop_toTopOf="@id/rv_upper_tracks_result" />
+                app:layout_constraintBottom_toBottomOf="@+id/upper_track_list"
+                app:layout_constraintTop_toTopOf="@+id/upper_track_list"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
-        <!--    Downer        -->
+        <!--    Downer     -->
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="220dp"
-                android:layout_marginTop="12dp"
+                android:id="@+id/downer_flame"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_size_220"
+                android:layout_marginTop="@dimen/margin_12"
                 android:background="@drawable/downer_recommend_background"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_border_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_border_begin"
-                app:layout_constraintTop_toTopOf="@+id/tv_downer_tracks" />
+                app:layout_constraintTop_toTopOf="@+id/downer_track_title" />
 
             <TextView
-                android:id="@+id/tv_downer_tracks"
+                android:id="@+id/downer_track_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/margin_12"
+                android:paddingHorizontal="@dimen/padding_8"
                 android:background="@color/white"
-                android:paddingStart="@dimen/margin_8"
-                android:paddingEnd="@dimen/margin_8"
-                android:text="Downer Tracks"
+                android:text="@string/downer_track_title"
                 android:textColor="@color/downer_tracks"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_size_18"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toBottomOf="@+id/rv_upper_tracks_result" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/upper_track_list" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_downer_tracks_result"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
-                app:layout_constraintEnd_toStartOf="@+id/guideline_end"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-                app:layout_constraintTop_toBottomOf="@+id/tv_downer_tracks" />
+                android:id="@+id/downer_track_list"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_size_200"
+                android:paddingHorizontal="@dimen/padding_8"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@+id/downer_track_title" />
 
             <TextView
-                android:id="@+id/tv_downer_tracks_nothing"
+                android:id="@+id/not_applicable_downer_track_result"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="該当結果なし"
-                app:layout_constraintBottom_toBottomOf="@+id/rv_downer_tracks_result"
-                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_begin"
-                app:layout_constraintTop_toTopOf="@+id/rv_downer_tracks_result"
+                android:text="@string/not_applicable_result"
+                app:layout_constraintBottom_toBottomOf="@+id/downer_flame"
+                app:layout_constraintEnd_toEndOf="@+id/downer_flame"
+                app:layout_constraintStart_toStartOf="@id/downer_flame"
+                app:layout_constraintTop_toTopOf="@+id/downer_flame"
                 android:visibility="gone" />
+
             <TextView
-                android:id="@+id/tv_downer_tracks_empty"
+                android:id="@+id/downer_track_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="関連する落ち着いた曲を探します"
-                app:layout_constraintBottom_toBottomOf="@+id/rv_downer_tracks_result"
-                app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-                app:layout_constraintStart_toStartOf="@id/guideline_begin"
-                app:layout_constraintTop_toTopOf="@+id/rv_downer_tracks_result"
-                android:visibility="visible" />
+                android:text="@string/downer_track_empty"
+                app:layout_constraintBottom_toBottomOf="@+id/downer_flame"
+                app:layout_constraintEnd_toEndOf="@+id/downer_flame"
+                app:layout_constraintStart_toStartOf="@id/downer_flame"
+                app:layout_constraintTop_toTopOf="@+id/downer_flame" />
 
             <ProgressBar
-                android:id="@+id/pb_downer_progress"
+                android:id="@+id/downer_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:indeterminateTint="@android:color/holo_green_light"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@id/rv_downer_tracks_result"
-                app:layout_constraintEnd_toEndOf="@id/rv_downer_tracks_result"
-                app:layout_constraintStart_toStartOf="@id/rv_downer_tracks_result"
-                app:layout_constraintTop_toTopOf="@id/rv_downer_tracks_result" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline_begin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_begin="@dimen/margin_24" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline_end"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_end="@dimen/margin_24" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline_border_begin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_begin="12dp" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline_border_end"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_end="12dp" />
+                app:layout_constraintBottom_toBottomOf="@id/downer_flame"
+                app:layout_constraintEnd_toEndOf="@id/downer_flame"
+                app:layout_constraintStart_toStartOf="@id/downer_flame"
+                app:layout_constraintTop_toTopOf="@id/downer_flame" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
