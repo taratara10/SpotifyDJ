@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
@@ -18,16 +19,20 @@ import javax.inject.Inject
 class SearchViewModel@Inject constructor(private val repository: Repository): ViewModel() {
     private var mAccessToken = ""
     private var searchTrackJob: Job? = null
-
     private val _searchTracks = MutableLiveData<List<TrackInfo>>()
+
     private val _isLoadingSearchTrack = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
+    private val _toastMessageId = MutableLiveData<Int>()
+
     val searchTracks: LiveData<List<TrackInfo>>
         get() = _searchTracks
     val isLoadingSearchTrack: LiveData<Boolean>
         get() = _isLoadingSearchTrack
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
+    val toastMessageId: LiveData<Int>
+        get() = _toastMessageId
 
 
     fun initAccessToken(token: String) {
@@ -50,10 +55,8 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
                 is SpotifyApiResource.Error -> {
                     when (result.reason) {
                         is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                        is SpotifyApiErrorReason.NotFound,
-                        is SpotifyApiErrorReason.ResponseError,
-                        is SpotifyApiErrorReason.UnKnown -> {
-                            //todo display onFetchFailed textView or Toast
+                        else -> {
+                            _toastMessageId.postValue(R.string.result_failed)
                         }
                     }
                 }
@@ -75,8 +78,8 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
@@ -28,6 +29,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     private var mDeviceId = ""
     private val _userAccount = MutableLiveData<User>()
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
+    private val _toastMessageId = MutableLiveData<Int>()
 
     val startExternalSpotifyApp = MutableLiveData(false)
 
@@ -36,6 +38,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
         get() = _needRefreshAccessToken
     val userAccount: LiveData<User>
         get() = _userAccount
+    val toastMessageId: LiveData<Int>
+        get() = _toastMessageId
 
     fun initUserAccount(accessToken: String) {
         mAccessToken = accessToken
@@ -84,10 +88,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound -> startExternalSpotifyApp.postValue(true)
-                    is SpotifyApiErrorReason.ResponseError,
-                    is SpotifyApiErrorReason.UnKnown -> {
-                        //todo Toast出したい
-//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -107,10 +109,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     is SpotifyApiErrorReason.NotFound -> getUsersDevices()
-                    is SpotifyApiErrorReason.ResponseError,
-                    is SpotifyApiErrorReason.UnKnown -> {
-                        //todo Toast出したい
-//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }

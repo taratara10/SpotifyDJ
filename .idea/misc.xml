@@ -47,6 +47,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_save_24.xml" value="0.3765625" />
         <entry key="app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.3765625" />
         <entry key="app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/adapter_track.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/adapter_users_playlist.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/dialog_confirm_creating_playlist.xml" value="0.2907608695652174" />

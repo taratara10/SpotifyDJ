@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     // todo startIntentも全部ここでobserveして、fragmentは通知送るだけにしたいかも
     private fun initViewModels() {
-        userViewModel.startExternalSpotifyApp.observe(this@MainActivity){ startActivity->
+        userViewModel.startExternalSpotifyApp.observe(this){ startActivity->
             if (startActivity) startActivity(
                 Intent().setComponent(
                     ComponentName(
@@ -105,13 +105,24 @@ class MainActivity : AppCompatActivity() {
         observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(playlistViewModel.needRefreshAccessToken)
+        observeToastMessage(userViewModel.toastMessageId)
+        observeToastMessage(searchViewModel.toastMessageId)
+        observeToastMessage(recommendViewModel.toastMessageId)
+        observeToastMessage(playlistViewModel.toastMessageId)
     }
 
     private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Boolean>>) {
-        liveData.observe(this@MainActivity){ event ->
+        liveData.observe(this){ event ->
             event.getContentIfNotHandled()?.let { needRefresh ->
                 if (needRefresh) authorizationSpotify()
             }
+        }
+    }
+
+    private fun observeToastMessage(liveData: LiveData<Int>) {
+        liveData.observe(this) { message ->
+            Toast.makeText(this, getString(message), Toast.LENGTH_SHORT).show()
         }
     }
 

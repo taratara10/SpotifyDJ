@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
@@ -30,6 +31,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _isLoadingPlaylistTrack = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
+    private val _toastMessageId = MutableLiveData<Int>()
 
     val allPlaylist: LiveData<List<PlaylistItem>>
         get() = _allPlaylist
@@ -43,6 +45,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         get() = _isLoadingPlaylistTrack
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
+    val toastMessageId: LiveData<Int>
+        get() = _toastMessageId
 
     fun initAccessToken(token: String) {
         mAccessToken = token
@@ -63,10 +67,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    is SpotifyApiErrorReason.NotFound,
-                    is SpotifyApiErrorReason.ResponseError,
-                    is SpotifyApiErrorReason.UnKnown -> {
-                        //error handle
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -86,10 +88,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    is SpotifyApiErrorReason.NotFound,
-                    is SpotifyApiErrorReason.ResponseError,
-                    is SpotifyApiErrorReason.UnKnown -> {
-//                            Toast.makeText(this@UserViewModel,"fail",Toast.LENGTH_SHORT).
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -101,19 +101,18 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 //        repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, requestBody)
     }
 
-    //ExistingPlaylistのtitleを変更する
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
         if (title.isEmpty()) return@launch
 
         when (val result = repository.updatePlaylistTitle(mAccessToken, _editingPlaylistId, title)) {
             is SpotifyApiResource.Success -> {
-                //todo Toast(タイトルを更新しました)
+                _toastMessageId.postValue(R.string.result_update_title_success)
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     else -> {
-                        //todo Toast出したい
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -124,12 +123,11 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     // todo playlist replaceの処理必要？
     fun addTrackToEditingPlaylist(track: TrackInfo){
         _editingPlaylist.addItem(track)
-        postTracksToPlaylist(track.contextUri)
+        addTrackToPlaylist(track.contextUri)
     }
 
 
-    //addItemToCurrentPlaylistと名前が似てるので、add -> postに変更した
-    private fun postTracksToPlaylist(trackUri: String) = viewModelScope.launch {
+    private fun addTrackToPlaylist(trackUri: String) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty()) return@launch
         when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUri)) {
             is SpotifyApiResource.Success -> {
@@ -139,7 +137,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
                 when (result.reason) {
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     else -> {
-                        //todo Toast出したい
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -163,7 +161,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
                 when (result.reason) {
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     else -> {
-                        //todo Toast出したい
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -187,7 +185,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
                 when (result.reason) {
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                     else -> {
-                        //todo Toast出したい
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -219,8 +217,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }

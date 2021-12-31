@@ -12,4 +12,7 @@
     <string name="upper_track_empty">関連する盛り上がる曲を探します</string>
     <string name="downer_track_title">Downer Tracks</string>
     <string name="downer_track_empty">関連する落ち着いた曲を探します</string>
+    
+    <string name="result_failed">曲の取得に失敗しました。¥n時間をおいて再度試してください</string>
+    <string name="result_update_title_success">タイトルを更新しました</string>
 </resources>

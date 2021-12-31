@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
@@ -22,6 +23,7 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
     private val _isLoadingUpperTrack = MutableLiveData(false)
     private val _isLoadingDownerTrack = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
+    private val _toastMessageId = MutableLiveData<Int>()
 
     val upperTracks: LiveData<List<TrackInfo>>
         get() = _upperTracks
@@ -35,6 +37,8 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
         get() = _isLoadingDownerTrack
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
+    val toastMessageId: LiveData<Int>
+        get() = _toastMessageId
 
     fun initAccessToken(token: String) {
         mAccessToken = token
@@ -55,8 +59,8 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
@@ -73,8 +77,8 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
             is SpotifyApiResource.Error -> {
                 when (result.reason){
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else  -> {
-                        //error handle
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
