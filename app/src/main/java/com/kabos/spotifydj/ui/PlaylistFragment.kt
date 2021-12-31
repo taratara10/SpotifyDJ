@@ -16,7 +16,7 @@ import com.kabos.spotifydj.viewModel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class PlaylistMainFragment: Fragment() {
+class PlaylistFragment: Fragment() {
     private lateinit var binding: FragmentPlaylistBinding
     private val rootViewModel: RootViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
@@ -41,35 +41,21 @@ class PlaylistMainFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initViewModels()
         binding.apply {
-            rvPlaylist.adapter = playlistAdapter
+            playlistList.adapter = playlistAdapter
         }
     }
 
-    private fun fixFirstItemByCreateNewPlaylist(list: List<PlaylistItem>): List<PlaylistItem>{
-        val mList = list.toMutableList()
-        //1つ目に表示する"新規作成"のアイテム
-        val firstPlaylistItem = PlaylistItem(
-            collaborative = false,
-            description = "",
-            external_urls = ExternalUrls(""),
-            href = "",
-            id = CREATE_NEW_PLAYLIST_ID,
-            images = listOf(Image(url = "firstItem")),
-            name = "新規作成",
-            owner = Owner("", ExternalUrlsX(""),"","","",""),
-            public = false,
-            snapshot_id = "",
-            type = "",
-            uri = "")
-
-        mList.add(0, firstPlaylistItem)
-        return mList.toList()
+    private fun addCreateNewPlaylistItemToFirst(playlist: List<PlaylistItem>): List<PlaylistItem>{
+        val mutablePlaylist = playlist.toMutableList()
+        val firstItem = PlaylistItem.createNewPlaylistItem()
+        mutablePlaylist.add(0, firstItem)
+        return mutablePlaylist.toList()
     }
 
     private fun initViewModels() {
         playlistViewModel.apply {
             userCreatedPlaylist.observe(viewLifecycleOwner) { playlist ->
-                playlistAdapter.submitList(fixFirstItemByCreateNewPlaylist(playlist))
+                playlistAdapter.submitList(addCreateNewPlaylistItemToFirst(playlist))
             }
             getUsersPlaylists()
         }

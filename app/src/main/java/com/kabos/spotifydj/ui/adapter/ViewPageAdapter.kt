@@ -13,7 +13,7 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
         fragmentList.apply {
             add(SearchFragment())
             add(RecommendFragment())
-            add(PlaylistMainFragment())
+            add(PlaylistFragment())
             forEach {
                 idsList.add(it.hashCode().toLong())
             }
@@ -37,7 +37,7 @@ class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {
 
             Pager.Playlist -> {
                 fragmentList.removeAt(Pager.Playlist.position)
-                fragmentList.add(Pager.Playlist.position, PlaylistMainFragment())
+                fragmentList.add(Pager.Playlist.position, PlaylistFragment())
             }
         }
 
