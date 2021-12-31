@@ -24,7 +24,7 @@ class PlaylistFragment: Fragment() {
     private val callback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
             if (playlistItem.id != CREATE_NEW_PLAYLIST_ID) {
-                playlistViewModel.loadPlaylistIntoPlaylistFragment(playlistItem)
+                playlistViewModel.loadPlaylistIntoEditPlaylistFragment(playlistItem)
             } else {
                 playlistViewModel.clearEditingPlaylist()
             }
@@ -56,6 +56,9 @@ class PlaylistFragment: Fragment() {
         playlistViewModel.apply {
             userCreatedPlaylist.observe(viewLifecycleOwner) { playlist ->
                 playlistAdapter.submitList(addCreateNewPlaylistItemToFirst(playlist))
+            }
+            isLoadingPlaylistTrack.observe(viewLifecycleOwner) { isLoading ->
+                // todo progrebar
             }
             getUsersPlaylists()
         }

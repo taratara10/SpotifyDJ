@@ -16,6 +16,7 @@ import com.kabos.spotifydj.util.removeAt
 import com.kabos.spotifydj.util.replacePosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -126,6 +127,10 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         addTrackToPlaylist(track.contextUri)
     }
 
+    fun shouldReplaceEditPlaylistFragment(): Boolean {
+        return _editingPlaylistId.isEmpty()
+    }
+
 
     private fun addTrackToPlaylist(trackUri: String) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty()) return@launch
@@ -196,7 +201,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
      * Dialog Playlist
      * */
 
-    fun loadPlaylistIntoPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
+    fun loadPlaylistIntoEditPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
         _editingPlaylistId = playlist.id
         _editingPlaylistTitle.postValue(playlist.name)
         getTracksByPlaylistId(playlist.id)

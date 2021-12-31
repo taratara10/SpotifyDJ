@@ -10,7 +10,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RootViewModel @Inject constructor(): ViewModel() {
-
     private val _pagerPosition = MutableLiveData<OneShotEvent<Pager>>()
     private val _isEditPlaylistFragment = MutableLiveData<OneShotEvent<Boolean>>()
 
