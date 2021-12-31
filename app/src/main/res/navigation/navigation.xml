@@ -13,40 +13,26 @@
         tools:layout="@layout/fragment_root" >
 
         <action
-            android:id="@+id/action_nav_main_to_nav_user_playlist"
-            app:destination="@id/nav_user_playlist" />
-        <argument
-            android:name="fromSearch"
-            app:argType="boolean"
-            android:defaultValue="false"/>
-        <argument
-            android:name="fromPlaylist"
-            app:argType="boolean"
-            android:defaultValue="false"/>
+            android:id="@+id/action_nav_main_to_nav_select_playlist"
+            app:destination="@id/nav_select_playlist" />
         <action
-            android:id="@+id/action_nav_main_to_nav_confirm_playlist"
-            app:destination="@id/nav_confirm_playlist" />
+            android:id="@+id/action_nav_main_to_nav_confirm_create_playlist"
+            app:destination="@id/nav_confirm_create_playlist" />
 
     </fragment>
 
     <dialog
-        android:id="@+id/nav_user_playlist"
-        android:name="com.kabos.spotifydj.ui.DialogUsersPlaylists"
-        tools:layout="@layout/dialog_users_playlists">
-        <argument
-            android:name="fromSearch"
-            app:argType="boolean"
-            android:defaultValue="false"/>
-        <argument
-            android:name="fromPlaylist"
-            app:argType="boolean"
-            android:defaultValue="false"/>
+        android:id="@+id/nav_select_playlist"
+        android:name="com.kabos.spotifydj.ui.SelectPlaylistDialogFragment"
+        tools:layout="@layout/dialog_fragment_select_playlist">
+
     </dialog>
 
     <dialog
-        android:id="@+id/nav_confirm_playlist"
-        android:name="com.kabos.spotifydj.ui.DialogConfirmCreatingPlaylist"
-        tools:layout="@layout/dialog_confirm_creating_playlist">
+        android:id="@+id/nav_confirm_create_playlist"
+        android:name="com.kabos.spotifydj.ui.ConfirmCreatePlaylistDialogFragment"
+        tools:layout="@layout/dialog_fragment_confirm_create_playlist">
+
     </dialog>
 
 </navigation>

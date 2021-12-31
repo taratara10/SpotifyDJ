@@ -49,11 +49,16 @@
         <entry key="app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.3765625" />
         <entry key="app/src/main/res/layout/adapter_track.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/adapter_users_playlist.xml" value="0.26721014492753625" />
+        <entry key="app/src/main/res/layout/dialog_confirm_creating_playlist.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/dialog_users_playlists.xml" value="0.2015625" />
+        <entry key="app/src/main/res/layout/fragment_edit_playlist.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/fragment_playlist.xml" value="0.2015625" />
         <entry key="app/src/main/res/layout/fragment_recommend.xml" value="0.25815217391304346" />
         <entry key="app/src/main/res/layout/fragment_root.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.21693840579710144" />
+        <entry key="app/src/main/res/layout/list_item_drag_track.xml" value="0.2907608695652174" />
+        <entry key="app/src/main/res/layout/list_item_playlist.xml" value="0.2907608695652174" />
+        <entry key="app/src/main/res/layout/list_item_track.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/menu/menu.xml" value="0.2015625" />
       </map>
     </option>

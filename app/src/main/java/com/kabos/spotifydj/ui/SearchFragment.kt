@@ -66,9 +66,7 @@ class SearchFragment: Fragment() {
 
             loadPlaylistButton.setOnClickListener {
                 playlistViewModel.getUsersPlaylists()
-                // todo navArgs 抹殺したい
-                val action = RootFragmentDirections.actionNavMainToNavUserPlaylist(fromSearch = true)
-                findNavController().navigate(action)
+                findNavController().navigate(R.id.action_nav_main_to_nav_select_playlist)
             }
         }
     }

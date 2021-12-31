@@ -26,13 +26,13 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
     private val _editingPlaylistTitle = MutableLiveData<String>()
-    private val _usersPlaylist = MutableLiveData<List<PlaylistItem>>()
+    private val _allPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _isLoadingPlaylistTrack = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
 
-    val usersPlaylist: LiveData<List<PlaylistItem>>
-        get() = _usersPlaylist
+    val allPlaylist: LiveData<List<PlaylistItem>>
+        get() = _allPlaylist
     val userCreatedPlaylist: LiveData<List<PlaylistItem>>
         get() = _userCreatedPlaylist
     val editingPlaylist: LiveData<List<TrackInfo>>
@@ -57,7 +57,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         when (val result = repository.getUsersPlaylist(mAccessToken)) {
             is SpotifyApiResource.Success -> {
                 val playlist = result.data ?: listOf()
-                _usersPlaylist.postValue(playlist)
+                _allPlaylist.postValue(playlist)
                 filterUserCreatedPlaylist(playlist)
             }
             is SpotifyApiResource.Error -> {

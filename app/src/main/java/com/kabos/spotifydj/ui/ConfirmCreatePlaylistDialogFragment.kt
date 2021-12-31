@@ -8,20 +8,20 @@ import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
+import com.kabos.spotifydj.databinding.DialogFragmentConfirmCreatePlaylistBinding
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DialogConfirmCreatingPlaylist: DialogFragment() {
-    private lateinit var binding: DialogConfirmCreatingPlaylistBinding
+class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
+    private lateinit var binding: DialogFragmentConfirmCreatePlaylistBinding
     private val rootViewModel: RootViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private var playlistTitle = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        binding = DialogConfirmCreatingPlaylistBinding.inflate(LayoutInflater.from(context))
+        binding = DialogFragmentConfirmCreatePlaylistBinding.inflate(LayoutInflater.from(context))
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
             .setTitle("プレイリスト名")
