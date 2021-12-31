@@ -6,7 +6,7 @@
     <!--  search   -->
     <string name="search_description">キーワードで曲を検索</string>
     <string name="not_applicable_result">該当結果なし</string>
-    <string name="keyword_is_empty">アーティスト、曲名、キーワードで検索しよう</string>
+    <string name="search_hint">曲名、アーティスト、キーワード</string>
     <string name="current_track_empty">曲をタップして追加</string>
     <string name="upper_track_title">Upper Tracks</string>
     <string name="upper_track_empty">関連する盛り上がる曲を探します</string>

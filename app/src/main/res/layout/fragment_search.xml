@@ -20,7 +20,7 @@
             android:id="@+id/search_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/keyword_is_empty"
+            android:hint="@string/search_hint"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -36,16 +36,6 @@
         app:layout_constraintTop_toTopOf="@+id/search_layout" />
 
     <TextView
-        android:id="@+id/keyword_is_empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/keyword_is_empty"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-        app:layout_constraintStart_toStartOf="@id/guideline_begin" />
-
-    <TextView
         android:id="@+id/not_applicable_result"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,8 +43,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/guideline_end"
-        app:layout_constraintStart_toStartOf="@id/guideline_begin"
-        android:visibility="gone" />
+        app:layout_constraintStart_toStartOf="@id/guideline_begin" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_result_list"

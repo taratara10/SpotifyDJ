@@ -45,7 +45,7 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
             _isLoadingSearchTrack.value = true
             when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
                 is SpotifyApiResource.Success -> {
-                    _searchTracks.postValue(result.data ?: listOf())
+                    _searchTracks.value = (result.data ?: listOf())
                 }
                 is SpotifyApiResource.Error -> {
                     when (result.reason) {

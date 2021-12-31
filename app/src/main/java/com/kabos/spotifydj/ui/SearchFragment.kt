@@ -22,7 +22,6 @@ import com.kabos.spotifydj.util.callback.TrackCallback
 import com.kabos.spotifydj.viewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding
     private val rootViewModel: RootViewModel by activityViewModels()
@@ -56,7 +55,7 @@ class SearchFragment: Fragment() {
         initViewModels()
         binding.apply {
             searchEditText.doAfterTextChanged { text ->
-                searchTrackByKeyword(text.toString())
+                searchViewModel.searchTracks(text.toString())
             }
 
             searchResultList.apply {
@@ -73,22 +72,15 @@ class SearchFragment: Fragment() {
 
     private fun initViewModels() {
         searchViewModel.apply {
-            searchTracks.observe(viewLifecycleOwner) { searchResult ->
-                val isSearchWordEmpty = binding.searchEditText.text.isNullOrEmpty()
-                binding.notApplicableResult.isVisible = searchResult.isEmpty() && !isSearchWordEmpty
-                trackAdapter.submitList(searchResult)
+            searchTracks.observe(viewLifecycleOwner) { result ->
+                binding.notApplicableResult.isVisible = result.isEmpty()
+                trackAdapter.submitList(result)
             }
 
             isLoadingSearchTrack.observe(viewLifecycleOwner) { isLoading ->
                 binding.searchProgress.isVisible = isLoading
             }
         }
-    }
-
-    private fun searchTrackByKeyword(keyword: String) {
-        searchViewModel.searchTracks(keyword)
-        binding.keywordIsEmpty.isVisible = keyword.isEmpty()
-        binding.searchResultList.isVisible = keyword.isNotEmpty()
     }
 
 }
