@@ -12,6 +12,8 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.addItem
+import com.kabos.spotifydj.util.constant.PlaylistConstant
+import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
 import com.kabos.spotifydj.util.removeAt
 import com.kabos.spotifydj.util.replacePosition
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +33,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     private val _allPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _isLoadingPlaylistTrack = MutableLiveData(false)
+    private val _isPlaylistUnSaved = MutableLiveData(false)
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
     private val _toastMessageId = MutableLiveData<Int>()
 
@@ -44,6 +47,8 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         get() = _editingPlaylistTitle
     val isLoadingPlaylistTrack: LiveData<Boolean>
         get() = _isLoadingPlaylistTrack
+    val isPlaylistUnSaved: LiveData<Boolean>
+        get() = _isPlaylistUnSaved
     val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
         get() = _needRefreshAccessToken
     val toastMessageId: LiveData<Int>
@@ -84,7 +89,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     fun createPlaylist(title: String) = viewModelScope.launch {
         when (val result = repository.createPlaylist(mAccessToken, mUserId, title)) {
             is SpotifyApiResource.Success -> {
-                _editingPlaylistId = result.data.toString()
+                updatePlaylistId(result.data.toString())
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
@@ -120,11 +125,10 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         }
     }
 
-    //onAdd callback
-    // todo playlist replaceの処理必要？
     fun addTrackToEditingPlaylist(track: TrackInfo){
         _editingPlaylist.addItem(track)
         addTrackToPlaylist(track.contextUri)
+        verifyPlaylistIsSaved()
     }
 
     fun shouldReplaceEditPlaylistFragment(): Boolean {
@@ -136,7 +140,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         if (_editingPlaylistId.isEmpty()) return@launch
         when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUri)) {
             is SpotifyApiResource.Success -> {
-
+                verifyPlaylistIsSaved()
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason) {
@@ -202,13 +206,23 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
      * */
 
     fun loadPlaylistIntoEditPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
-        _editingPlaylistId = playlist.id
         _editingPlaylistTitle.postValue(playlist.name)
+        updatePlaylistId(playlist.id)
         getTracksByPlaylistId(playlist.id)
     }
 
+    private fun updatePlaylistId(playlistId: String) {
+        _editingPlaylistId = playlistId
+        verifyPlaylistIsSaved()
+    }
+
+    private fun verifyPlaylistIsSaved() {
+        val isNotSaved = _editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID
+        _isPlaylistUnSaved.postValue(isNotSaved)
+    }
+
     fun clearEditingPlaylist() {
-        _editingPlaylistId = ""
+        updatePlaylistId("")
         _editingPlaylistTitle.postValue("")
         _editingPlaylist.postValue(listOf())
     }

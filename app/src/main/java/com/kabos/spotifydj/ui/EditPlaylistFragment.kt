@@ -17,6 +17,7 @@ import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.util.callback.DragTrackCallback
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RecommendViewModel
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -64,6 +65,7 @@ class EditPlaylistFragment: Fragment() {
             titleEdit.setText("NewPlaylist_${dataFormat.format(date)}")
 
             saveButton.setOnClickListener {
+                // todo save playlist
                 hideNewPlaylistLayout()
             }
 
@@ -82,6 +84,10 @@ class EditPlaylistFragment: Fragment() {
 
             editingPlaylistTitle.observe(viewLifecycleOwner) { title ->
                 binding.titleEdit.setText(title)
+            }
+
+            isPlaylistUnSaved.observe(viewLifecycleOwner) { unSaved ->
+                binding.unsavedDescription.isVisible = unSaved
             }
         }
     }

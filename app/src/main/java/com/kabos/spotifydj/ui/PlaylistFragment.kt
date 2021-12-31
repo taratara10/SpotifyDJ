@@ -23,10 +23,10 @@ class PlaylistFragment: Fragment() {
     private val playlistAdapter by lazy { PlaylistAdapter(callback) }
     private val callback = object : PlaylistCallback {
         override fun onClick(playlistItem: PlaylistItem) {
-            if (playlistItem.id != CREATE_NEW_PLAYLIST_ID) {
-                playlistViewModel.loadPlaylistIntoEditPlaylistFragment(playlistItem)
-            } else {
+            if (playlistItem.id == CREATE_NEW_PLAYLIST_ID) {
                 playlistViewModel.clearEditingPlaylist()
+            } else {
+                playlistViewModel.loadPlaylistIntoEditPlaylistFragment(playlistItem)
             }
             rootViewModel.setEditPlaylistFragment()
         }
