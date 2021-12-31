@@ -4,55 +4,56 @@ import android.content.ComponentName
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
+import com.kabos.spotifydj.databinding.ActivityMainBinding
+import com.kabos.spotifydj.util.OneShotEvent
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.viewModel.RecommendViewModel
+import com.kabos.spotifydj.viewModel.SearchViewModel
 import com.kabos.spotifydj.viewModel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
-    private val REDIRECT_URI = "com.kabos.spotifydj://callback"
-    private val SCOPE = arrayOf("user-read-recently-played",
-        "playlist-read-private",
-        "playlist-read-collaborative",
-        "user-modify-playback-state",
-        "user-read-playback-state",
-        "playlist-modify-public",
-        "playlist-modify-private")
-    private val REQUEST_CODE: Int = 1337
-    // Request code that will be used to verify if the result comes from correct activity
-    // Can be any integer
+    companion object {
+        // Request code that will be used to verify if the result comes from correct activity
+        // Can be any integer
+        private const val REQUEST_CODE: Int = 1337
+        private const val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
+        private const val REDIRECT_URI = "com.kabos.spotifydj://callback"
+        private val SCOPE = arrayOf(
+            "user-read-recently-played",
+            "playlist-read-private",
+            "playlist-read-collaborative",
+            "user-modify-playback-state",
+            "user-read-playback-state",
+            "playlist-modify-public",
+            "playlist-modify-private"
+        )
+    }
 
-    private val viewModel: UserViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
+    private val searchViewModel: SearchViewModel by viewModels()
+    private val recommendViewModel: RecommendViewModel by viewModels()
+    private val playlistViewModel: PlaylistViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
-
-        viewModel.needRefreshAccessToken.observe(this,{ isRefresh->
-            if (isRefresh) authorizationSpotify()
-        })
-
-        viewModel.startExternalSpotifyApp.observe(this,{ startActivity->
-            if (startActivity) startActivity(
-                Intent().setComponent(
-                    ComponentName(
-                        "com.spotify.music",
-                         "com.spotify.music.MainActivity")))
-        })
+        initViewModels()
     }
 
     private fun authorizationSpotify() {
@@ -64,38 +65,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             val response: AuthorizationResponse = AuthorizationClient.getResponse(resultCode, data)
-
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    viewModel.apply {
-                        needRefreshAccessToken.postValue(false)
-                        //以降accessTokenはviewModelのmAccessTokenを介して扱う
-                        initializeAccessToken(response.accessToken)
-                        //初期処理として、playlistを取得して表示
-                        getAllPlaylists()
-                    }
-
-                    //accessTokenの有効期限が3600secなので、少し余裕をもってrefreshする
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        authorizationSpotify()
-                    }, 3500000)
-                    Log.d("STARTING", "GOT AUTH TOKEN")
+                    initAccessTokenInViewModels(response.accessToken)
+                    Timber.d("GOT AUTH TOKEN")
                 }
-
-                AuthorizationResponse.Type.ERROR -> {
-                    //再帰呼び出しでログインできるまでループする
-                    authorizationSpotify()
-                    Toast.makeText(this,"ログインに失敗しました",Toast.LENGTH_SHORT).show()
-                }
-                // Most likely auth flow was cancelled
                 else -> {
                     //再帰呼び出しでログインできるまでループする
                     authorizationSpotify()
-                    Log.d("SPLASH", "Cannot login")
+                    Toast.makeText(this, getString(R.string.toast_login_failer), Toast.LENGTH_SHORT)
+                        .show()
+                    Timber.tag("SPLASH").d("Cannot login")
                 }
             }
         }
@@ -105,9 +87,50 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu, menu)
         return true
     }
-    override fun onSupportNavigateUp(): Boolean {
-        //Fragmentのコールバックがあればそれを実行する
-        if (onBackPressedDispatcher.hasEnabledCallbacks()) onBackPressedDispatcher.onBackPressed()
-        return true
+
+    // todo startIntentも全部ここでobserveして、fragmentは通知送るだけにしたいかも
+    private fun initViewModels() {
+        userViewModel.startExternalSpotifyApp.observe(this){ startActivity->
+            if (startActivity) startActivity(
+                Intent().setComponent(
+                    ComponentName(
+                        "com.spotify.music",
+                        "com.spotify.music.MainActivity")))
+        }
+
+        userViewModel.userAccount.observe(this) { user ->
+            playlistViewModel.initUserAccount(user.id, user.display_name)
+        }
+
+        observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(playlistViewModel.needRefreshAccessToken)
+        observeToastMessage(userViewModel.toastMessageId)
+        observeToastMessage(searchViewModel.toastMessageId)
+        observeToastMessage(recommendViewModel.toastMessageId)
+        observeToastMessage(playlistViewModel.toastMessageId)
     }
+
+    private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Boolean>>) {
+        liveData.observe(this){ event ->
+            event.getContentIfNotHandled()?.let { needRefresh ->
+                if (needRefresh) authorizationSpotify()
+            }
+        }
+    }
+
+    private fun observeToastMessage(liveData: LiveData<Int>) {
+        liveData.observe(this) { message ->
+            Toast.makeText(this, getString(message), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun initAccessTokenInViewModels(accessToken: String) {
+        userViewModel.initUserAccount(accessToken)
+        searchViewModel.initAccessToken(accessToken)
+        recommendViewModel.initAccessToken(accessToken)
+        playlistViewModel.initAccessToken(accessToken)
+    }
+
 }

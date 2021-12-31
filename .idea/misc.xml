@@ -4,23 +4,17 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/center_icon_load_playlist_background.xml" value="0.3828125" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/current_recommend_background.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/dense_outlined.xml" value="0.3828125" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/downer_recommend_background.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/ic_baseline_add_circle_outline_24.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/ic_baseline_class_24.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/ic_baseline_drag_indicator_24.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/ic_baseline_play_circle_outline_24.xml" value="0.3828125" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/rounded_background.xml" value="0.3828125" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/drawable/shape_rounded_corners.xml" value="0.3828125" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/activity_main.xml" value="0.2504528985507246" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/adapter_drag_drop_track.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/adapter_drag_track.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/adapter_track.xml" value="0.33" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/adapter_users_playlist.xml" value="0.2776268115942029" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/dialog_confirm_creating_playlist.xml" value="0.25" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/dialog_creta_playlist.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/dialog_users_playlists.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_edit_existing_playlist.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_edit_new_playlist.xml" value="0.36666666666666664" />
@@ -28,16 +22,44 @@
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_new_playlist.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_playlist.xml" value="0.2776268115942029" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_recommend.xml" value="0.2776268115942029" />
-        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_search.xml" value="0.33" />
+        <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/layout/fragment_search.xml" value="0.1" />
         <entry key="..\:/Users/shuhe/AndroidStudioProjects/SpotifyDJ/app/src/main/res/menu/menu.xml" value="0.36666666666666664" />
+        <entry key="app/src/main/res/drawable/ic_baseline_add_circle_outline_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_arrow_back_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_class_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_cloud_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_cloud_off_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_content_copy_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_create_new_folder_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_folder_120.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_folder_500.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_group_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_group_add_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_help_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_more_vert_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_note_add_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_notifications_24.xml" value="0.3765625" />
         <entry key="app/src/main/res/drawable/ic_baseline_pause_circle_outline_24.xml" value="0.3921875" />
+        <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.3765625" />
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_outline_24.xml" value="0.3921875" />
+        <entry key="app/src/main/res/drawable/ic_baseline_save_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.3765625" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/adapter_track.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/adapter_users_playlist.xml" value="0.26721014492753625" />
+        <entry key="app/src/main/res/layout/dialog_confirm_creating_playlist.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/dialog_users_playlists.xml" value="0.2015625" />
+        <entry key="app/src/main/res/layout/fragment_edit_playlist.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/fragment_playlist.xml" value="0.2015625" />
         <entry key="app/src/main/res/layout/fragment_recommend.xml" value="0.25815217391304346" />
+        <entry key="app/src/main/res/layout/fragment_root.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.21693840579710144" />
+        <entry key="app/src/main/res/layout/list_item_drag_track.xml" value="0.2907608695652174" />
+        <entry key="app/src/main/res/layout/list_item_playlist.xml" value="0.2907608695652174" />
+        <entry key="app/src/main/res/layout/list_item_track.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/menu/menu.xml" value="0.2015625" />
       </map>
     </option>

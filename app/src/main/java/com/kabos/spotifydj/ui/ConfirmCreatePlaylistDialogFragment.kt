@@ -2,27 +2,26 @@ package com.kabos.spotifydj.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.kabos.spotifydj.R
-import com.kabos.spotifydj.databinding.DialogConfirmCreatingPlaylistBinding
-import com.kabos.spotifydj.util.ReplaceFragment
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.databinding.DialogFragmentConfirmCreatePlaylistBinding
+import com.kabos.spotifydj.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.viewModel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DialogConfirmCreatingPlaylist: DialogFragment() {
-    private lateinit var binding: DialogConfirmCreatingPlaylistBinding
-    private val viewModel: UserViewModel by activityViewModels()
+class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
+    private lateinit var binding: DialogFragmentConfirmCreatePlaylistBinding
+    private val rootViewModel: RootViewModel by activityViewModels()
+    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private var playlistTitle = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        binding = DialogConfirmCreatingPlaylistBinding.inflate(LayoutInflater.from(context))
+        binding = DialogFragmentConfirmCreatePlaylistBinding.inflate(LayoutInflater.from(context))
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
             .setTitle("プレイリスト名")
@@ -33,7 +32,8 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
         super.onStart()
         binding.apply {
 
-            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
+            // todo playlistTitleに置換したけど問題ない？
+//            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
             etDialogCreatePlaylistTitle.doAfterTextChanged { text ->
                 //emptyならErrorを表示する & save buttonをenableにする
                 if (text.isNullOrEmpty()) {
@@ -42,15 +42,15 @@ class DialogConfirmCreatingPlaylist: DialogFragment() {
                 } else {
                     tilDialogCreatePlaylistTitle.error = null
                     btnDialogSave.isEnabled = true
-                    viewModel.localPlaylistTitle = text.toString()
+                    playlistTitle = text.toString()
                 }
             }
 
             btnDialogCancel.setOnClickListener { dialog?.cancel() }
-            btnDialogSave  .setOnClickListener {
-                if (viewModel.localPlaylistTitle.isNotEmpty()) {
-                    viewModel.createPlaylist()
-                    viewModel.isNavigateExistingPlaylistFragment.value = true
+            btnDialogSave.setOnClickListener {
+                if (playlistTitle.isNotEmpty()) {
+                    playlistViewModel.createPlaylist(playlistTitle)
+                    rootViewModel.setEditPlaylistFragment()
                     dialog?.cancel()
                     Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
                 }

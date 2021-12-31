@@ -1,4 +1,18 @@
 <resources>
     <string name="app_name">SpotifyDJ</string>
-    <string name="track_tempo">BPM: %f</string>
+    <string name="track_tempo">BPM: %1$.1f</string>
+    <string name="toast_login_failer">ログインに失敗しました</string>
+
+    <!--  search   -->
+    <string name="search_description">キーワードで曲を検索</string>
+    <string name="not_applicable_result">該当結果なし</string>
+    <string name="search_hint">曲名、アーティスト、キーワード</string>
+    <string name="current_track_empty">曲をタップして追加</string>
+    <string name="upper_track_title">Upper Tracks</string>
+    <string name="upper_track_empty">関連する盛り上がる曲を探します</string>
+    <string name="downer_track_title">Downer Tracks</string>
+    <string name="downer_track_empty">関連する落ち着いた曲を探します</string>
+    
+    <string name="result_failed">曲の取得に失敗しました。¥n時間をおいて再度試してください</string>
+    <string name="result_update_title_success">タイトルを更新しました</string>
 </resources>
