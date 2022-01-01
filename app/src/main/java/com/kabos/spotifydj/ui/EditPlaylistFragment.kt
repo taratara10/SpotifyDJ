@@ -60,13 +60,13 @@ class EditPlaylistFragment: Fragment() {
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
+            // todo classに切り分ける
             val date = Calendar.getInstance().time
             val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
             titleEdit.setText("NewPlaylist_${dataFormat.format(date)}")
 
             saveButton.setOnClickListener {
-                // todo save playlist
-                hideNewPlaylistLayout()
+                findNavController().navigate(R.id.action_nav_main_to_nav_confirm_create_playlist)
             }
 
             // todo editTextの編集ではなく、dialogで表示する
@@ -92,6 +92,7 @@ class EditPlaylistFragment: Fragment() {
         }
     }
 
+    // todo 監視
     private fun hideNewPlaylistLayout() {
         binding.apply {
             unsavedDescription.isVisible = false

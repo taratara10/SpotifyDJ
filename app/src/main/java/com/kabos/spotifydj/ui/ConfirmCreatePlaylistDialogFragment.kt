@@ -30,8 +30,8 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        initViewModel()
         binding.apply {
-
             // todo playlistTitleに置換したけど問題ない？
 //            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
             etDialogCreatePlaylistTitle.doAfterTextChanged { text ->
@@ -49,12 +49,18 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
             btnDialogCancel.setOnClickListener { dialog?.cancel() }
             btnDialogSave.setOnClickListener {
                 if (playlistTitle.isNotEmpty()) {
-                    playlistViewModel.createPlaylist(playlistTitle)
+//                    playlistViewModel.createPlaylist(playlistTitle)
                     rootViewModel.setEditPlaylistFragment()
                     dialog?.cancel()
                     Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
                 }
             }
+
+        }
+    }
+
+    private fun initViewModel() {
+        playlistViewModel.apply {
 
         }
     }

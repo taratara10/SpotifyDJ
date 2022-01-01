@@ -330,7 +330,6 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         title: String
     ): SpotifyApiResource<String> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
-
         return try {
             val request = spotifyApi.createPlaylist(
                 accessToken = generateBearer(accessToken),
@@ -344,11 +343,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
     }
 
-    //todo bodyは内部で処理したい
     suspend fun addTracksToPlaylist(
         accessToken: String,
         playlistId: String,
-        trackUri: String
+        trackUris: List<String>
     ): SpotifyApiResource<Boolean> {
         if (accessToken.isEmpty()) return SpotifyApiResource.Error(SpotifyApiErrorReason.EmptyAccessToken)
         return try {
@@ -356,7 +354,7 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
                 accessToken = generateBearer(accessToken),
                 contentType = APPLICATION_JSON,
                 playlistId = playlistId,
-                body = AddTracksBody(listOf(trackUri))
+                body = AddTracksBody(trackUris)
             )
             if (request.isSuccessful) SpotifyApiResource.Success(true)
             else SpotifyApiResource.Error(errorReasonHandler(request))

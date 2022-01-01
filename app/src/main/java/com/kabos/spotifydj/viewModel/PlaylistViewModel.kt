@@ -86,10 +86,11 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     }
 
 
-    fun createPlaylist(title: String) = viewModelScope.launch {
+    fun createPlaylist(title: String, trackUris: List<String>) = viewModelScope.launch {
         when (val result = repository.createPlaylist(mAccessToken, mUserId, title)) {
             is SpotifyApiResource.Success -> {
                 updatePlaylistId(result.data.toString())
+                addTracksToPlaylist(trackUris)
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
@@ -100,11 +101,33 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
                 }
             }
         }
-        //todo createPlaylist時に、editingPalylistの内容をpostする処理
-        //localPlaylistのTrackを新規作成したplaylistに追加 空なら何もしない
-//        if (localPlaylist.value == null) return@launch
-//        val requestBody = AddTracksBody(localPlaylist.value?.map { it.contextUri }!!)
-//        repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, requestBody)
+    }
+
+    fun addTrackToEditingPlaylist(track: TrackInfo){
+        _editingPlaylist.addItem(track)
+        addTracksToPlaylist(listOf(track.contextUri))
+        verifyPlaylistIsSaved()
+    }
+
+    private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
+        if (_editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID) return@launch
+        when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUris)) {
+            is SpotifyApiResource.Success -> {
+                verifyPlaylistIsSaved()
+            }
+            is SpotifyApiResource.Error -> {
+                when (result.reason) {
+                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
+                    else -> {
+                        _toastMessageId.postValue(R.string.result_failed)
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateEditingPlaylistTitle(title: String) {
+        _editingPlaylistTitle.postValue(title)
     }
 
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
@@ -125,36 +148,6 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         }
     }
 
-    fun addTrackToEditingPlaylist(track: TrackInfo){
-        _editingPlaylist.addItem(track)
-        addTrackToPlaylist(track.contextUri)
-        verifyPlaylistIsSaved()
-    }
-
-    fun shouldReplaceEditPlaylistFragment(): Boolean {
-        return _editingPlaylistId.isEmpty()
-    }
-
-
-    private fun addTrackToPlaylist(trackUri: String) = viewModelScope.launch {
-        if (_editingPlaylistId.isEmpty()) return@launch
-        when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUri)) {
-            is SpotifyApiResource.Success -> {
-                verifyPlaylistIsSaved()
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
-    }
-
-
-    //onSwipe callback
     fun removeTrackFromLocalPlaylist(position:Int){
         val removeTrack = _editingPlaylist.removeAt(position)
         if (removeTrack != null) deleteTracksFromPlaylist(removeTrack.contextUri)
@@ -243,10 +236,6 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
             }
         }
         _isLoadingPlaylistTrack.value = false
-    }
-
-    fun updateEditingPlaylistTitle(title: String) {
-        _editingPlaylistTitle.postValue(title)
     }
 
     private fun refreshAccessToken() {
