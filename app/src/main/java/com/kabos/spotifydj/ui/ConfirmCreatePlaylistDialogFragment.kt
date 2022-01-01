@@ -62,8 +62,8 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
 
     private fun verifyPlaylistTitle(title: String) {
         binding.apply {
-            titleLayout.setErrorMessageByBoolean(title.isEmpty(), getString(R.string.playlist_title_error_message))
-            saveButton.setInvalidAppearance(title.isNotEmpty())
+            titleLayout.setErrorMessageByBoolean(title.isNotEmpty(), getString(R.string.playlist_title_error_message))
+            saveButton.setInvalidAppearance(title.isEmpty())
         }
     }
 }

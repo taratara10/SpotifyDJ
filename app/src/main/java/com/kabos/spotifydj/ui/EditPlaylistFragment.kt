@@ -64,12 +64,10 @@ class EditPlaylistFragment: Fragment() {
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
-            // todo classに切り分ける
-            val date = Calendar.getInstance().time
-            val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
-            titleEdit.setText("NewPlaylist_${dataFormat.format(date)}")
+            titleEdit.setText(generateNewPlaylistTitle())
 
             saveButton.setOnClickListener {
+                playlistViewModel.updateEditingPlaylistTitle(titleEdit.text.toString())
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_create_playlist)
             }
 
@@ -91,16 +89,21 @@ class EditPlaylistFragment: Fragment() {
             }
 
             isPlaylistUnSaved.observe(viewLifecycleOwner) { unSaved ->
-                binding.unsavedDescription.isVisible = unSaved
+                toggleNewPlaylistDescription(unSaved)
             }
         }
     }
 
-    // todo 監視
-    private fun hideNewPlaylistLayout() {
+    private fun toggleNewPlaylistDescription(isPlaylistUnSaved: Boolean) {
         binding.apply {
-            unsavedDescription.isVisible = false
-            saveButton.isVisible = false
+            unsavedDescription.isVisible = isPlaylistUnSaved
+            saveButton.isVisible = isPlaylistUnSaved
         }
+    }
+
+    private fun generateNewPlaylistTitle(): String {
+        val date = Calendar.getInstance().time
+        val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
+        return getString(R.string.new_playlist_title, dataFormat.format(date))
     }
 }

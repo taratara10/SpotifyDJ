@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">SpotifyDJ</string>
     <string name="track_tempo">BPM: %1$.1f</string>
+    <string name="new_playlist_title">NewPlaylist_%1$s</string>
     <string name="toast_login_failer">ログインに失敗しました</string>
 
     <!--  search   -->
