@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
 import com.kabos.spotifydj.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
@@ -28,7 +29,7 @@ class PlaylistFragment: Fragment() {
             } else {
                 playlistViewModel.loadPlaylistIntoEditPlaylistFragment(playlistItem)
             }
-            rootViewModel.setEditPlaylistFragment()
+            rootViewModel.setPagerPosition(Pager.EditPlaylist)
         }
     }
 

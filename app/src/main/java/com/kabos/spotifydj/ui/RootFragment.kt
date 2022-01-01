@@ -82,25 +82,21 @@ class RootFragment: Fragment() {
 
     private fun initViewModels() {
         val viewPager = binding.pager
-        rootViewModel.apply {
-            isEditPlaylistFragment.observe(viewLifecycleOwner) { event ->
-                event.getContentIfNotHandled()?.let { needReplace ->
-                    if (needReplace){
-                        viewPagerAdapter.replaceFragment(Pager.EditPlaylist)
-                        //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
-                        viewPager.setCurrentItem(Pager.Search.position, true)
-                        viewPager.setCurrentItem(Pager.Playlist.position,true)
-                    }
-                }
-            }
-
-            pagerPosition.observe(viewLifecycleOwner) { event ->
-                event.getContentIfNotHandled()?.let { pager ->
-                    viewPager.setCurrentItem(pager.position, true)
+        rootViewModel.pagerPosition.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { pager ->
+                when (pager) {
+                    Pager.EditPlaylist -> replaceEditPlaylistFragment(viewPager)
+                    else -> viewPager.setCurrentItem(pager.position, true)
                 }
             }
         }
+    }
 
+    private fun replaceEditPlaylistFragment(viewPager: ViewPager2) {
+        viewPagerAdapter.replaceFragment(Pager.EditPlaylist)
+        //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
+        viewPager.setCurrentItem(Pager.Recommend.position, true)
+        viewPager.setCurrentItem(Pager.EditPlaylist.position, true)
     }
 }
 

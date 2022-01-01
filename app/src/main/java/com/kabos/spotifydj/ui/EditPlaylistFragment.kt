@@ -14,21 +14,25 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditPlaylistBinding
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.DragTrackCallback
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RecommendViewModel
+import com.kabos.spotifydj.viewModel.RootViewModel
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
 class EditPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentEditPlaylistBinding
+    private val rootViewModel: RootViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val dragTackAdapter by lazy { DragTrackAdapter(callback ,emptyList()) }
     private val callback = object : DragTrackCallback {
         override fun onClick(trackInfo: TrackInfo) {
             recommendViewModel.updateCurrentTrack(trackInfo)
+            rootViewModel.setPagerPosition(Pager.Recommend)
         }
 
         override fun playback(trackInfo: TrackInfo) {

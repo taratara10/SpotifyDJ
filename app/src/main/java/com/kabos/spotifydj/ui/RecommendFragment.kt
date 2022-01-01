@@ -36,7 +36,7 @@ class RecommendFragment: Fragment() {
     private val callback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             playlistViewModel.addTrackToEditingPlaylist(trackInfo)
-            rootViewModel.setPagerPosition(Pager.Playlist)
+            rootViewModel.setPagerPosition(Pager.EditPlaylist)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -48,7 +48,6 @@ class RecommendFragment: Fragment() {
         }
 
     }
-    private var alreadySetEditPlaylistFragment = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentRecommendBinding.inflate(inflater, container, false)
