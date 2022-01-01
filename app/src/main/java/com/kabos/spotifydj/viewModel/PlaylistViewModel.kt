@@ -91,6 +91,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
             is SpotifyApiResource.Success -> {
                 updatePlaylistId(result.data.toString())
                 addTracksToPlaylist(trackUris)
+                _toastMessageId.postValue(R.string.result_crete_playlist_success)
             }
             is SpotifyApiResource.Error -> {
                 when (result.reason){
@@ -112,9 +113,7 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID) return@launch
         when (val result = repository.addTracksToPlaylist(mAccessToken, _editingPlaylistId, trackUris)) {
-            is SpotifyApiResource.Success -> {
-                verifyPlaylistIsSaved()
-            }
+            is SpotifyApiResource.Success -> { }
             is SpotifyApiResource.Error -> {
                 when (result.reason) {
                     is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()

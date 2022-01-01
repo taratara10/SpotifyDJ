@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentRecommendBinding
 import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
+import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
 import com.kabos.spotifydj.viewModel.RecommendViewModel
@@ -35,9 +36,7 @@ class RecommendFragment: Fragment() {
     private val callback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             playlistViewModel.addTrackToEditingPlaylist(trackInfo)
-            if (playlistViewModel.shouldReplaceEditPlaylistFragment()) {
-                rootViewModel.setEditPlaylistFragment()
-            }
+            rootViewModel.setPagerPosition(Pager.Playlist)
         }
 
         override fun playback(trackInfo: TrackInfo) {
@@ -49,6 +48,7 @@ class RecommendFragment: Fragment() {
         }
 
     }
+    private var alreadySetEditPlaylistFragment = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentRecommendBinding.inflate(inflater, container, false)

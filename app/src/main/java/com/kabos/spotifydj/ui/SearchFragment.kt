@@ -33,9 +33,7 @@ class SearchFragment: Fragment() {
     private val callback: TrackCallback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
             playlistViewModel.addTrackToEditingPlaylist(trackInfo)
-            if (playlistViewModel.shouldReplaceEditPlaylistFragment()) {
-                rootViewModel.setEditPlaylistFragment()
-            }
+            rootViewModel.setPagerPosition(Pager.Playlist)
         }
 
         override fun playback(trackInfo: TrackInfo) {

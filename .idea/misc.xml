@@ -51,6 +51,8 @@
         <entry key="app/src/main/res/layout/adapter_track.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/adapter_users_playlist.xml" value="0.26721014492753625" />
         <entry key="app/src/main/res/layout/dialog_confirm_creating_playlist.xml" value="0.2907608695652174" />
+        <entry key="app/src/main/res/layout/dialog_fragment_confirm_create_playlist.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/dialog_fragment_select_playlist.xml" value="0.28306159420289856" />
         <entry key="app/src/main/res/layout/dialog_users_playlists.xml" value="0.2015625" />
         <entry key="app/src/main/res/layout/fragment_edit_playlist.xml" value="0.2907608695652174" />
         <entry key="app/src/main/res/layout/fragment_playlist.xml" value="0.2015625" />

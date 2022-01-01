@@ -4,27 +4,27 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogFragmentConfirmCreatePlaylistBinding
+import com.kabos.spotifydj.util.setErrorMessageByBoolean
+import com.kabos.spotifydj.util.setInvalidAppearance
 import com.kabos.spotifydj.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
     private lateinit var binding: DialogFragmentConfirmCreatePlaylistBinding
-    private val rootViewModel: RootViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
-    private var playlistTitle = ""
+    private var playlistTrackUris: List<String> = listOf()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = DialogFragmentConfirmCreatePlaylistBinding.inflate(LayoutInflater.from(context))
         return AlertDialog.Builder(requireActivity())
             .setView(binding.root)
-            .setTitle("プレイリスト名")
             .create()
     }
 
@@ -32,36 +32,38 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
         super.onStart()
         initViewModel()
         binding.apply {
-            // todo playlistTitleに置換したけど問題ない？
-//            etDialogCreatePlaylistTitle.setText(viewModel.localPlaylistTitle)
-            etDialogCreatePlaylistTitle.doAfterTextChanged { text ->
-                //emptyならErrorを表示する & save buttonをenableにする
-                if (text.isNullOrEmpty()) {
-                    tilDialogCreatePlaylistTitle.error = "タイトルを入力してください"
-                    btnDialogSave.isEnabled = false
-                } else {
-                    tilDialogCreatePlaylistTitle.error = null
-                    btnDialogSave.isEnabled = true
-                    playlistTitle = text.toString()
-                }
+            titleEdit.doAfterTextChanged { text ->
+                verifyPlaylistTitle(text.toString())
             }
 
-            btnDialogCancel.setOnClickListener { dialog?.cancel() }
-            btnDialogSave.setOnClickListener {
-                if (playlistTitle.isNotEmpty()) {
-//                    playlistViewModel.createPlaylist(playlistTitle)
-                    rootViewModel.setEditPlaylistFragment()
-                    dialog?.cancel()
-                    Toast.makeText(context,"プレイリストを作成しました", Toast.LENGTH_LONG).show()
-                }
+            cancelButton.setOnClickListener {
+                findNavController().popBackStack()
             }
 
+            saveButton.setOnClickListener {
+                playlistViewModel.createPlaylist(titleEdit.text.toString(), playlistTrackUris)
+                findNavController()
+            }
         }
     }
 
     private fun initViewModel() {
         playlistViewModel.apply {
+            editingPlaylistTitle.observe(this@ConfirmCreatePlaylistDialogFragment) { title ->
+                binding.titleEdit.setText(title)
+                verifyPlaylistTitle(title)
+            }
 
+            editingPlaylist.observe(this@ConfirmCreatePlaylistDialogFragment) { tracks ->
+                playlistTrackUris = tracks.map { it.contextUri }
+            }
+        }
+    }
+
+    private fun verifyPlaylistTitle(title: String) {
+        binding.apply {
+            titleLayout.setErrorMessageByBoolean(title.isEmpty(), getString(R.string.playlist_title_error_message))
+            saveButton.setInvalidAppearance(title.isNotEmpty())
         }
     }
 }
