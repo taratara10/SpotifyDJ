@@ -4,6 +4,7 @@ class ApiConstants {
     companion object {
         const val ENDPOINT = "https://api.spotify.com/v1/"
         const val APPLICATION_JSON = "application/json"
+        const val AUTH_TOKEN = "authorization_token"
         // SpotifyApi interface
         const val AUTHORIZATION = "Authorization"
         const val CONTENT_TYPE = "Content-Type"

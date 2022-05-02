@@ -1,6 +1,7 @@
 package com.kabos.spotifydj.ui.activity
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
+import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import com.kabos.spotifydj.databinding.ActivityMainBinding
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             "playlist-modify-public",
             "playlist-modify-private"
         )
+
+        lateinit var activity: MainActivity
     }
 
     private val userViewModel: UserViewModel by viewModels()
@@ -52,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        activity = this
+
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
         initViewModels()
     }
@@ -63,13 +69,21 @@ class MainActivity : AppCompatActivity() {
         AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request)
     }
 
+    private fun saveAccessTokenInSharedPref(token: String) {
+        val preference = getPreferences(Context.MODE_PRIVATE)
+        with(preference.edit()) {
+            putString(ApiConstants.AUTH_TOKEN, token)
+            apply()
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE) {
             val response: AuthorizationResponse = AuthorizationClient.getResponse(resultCode, data)
             when(response.type) {
                 AuthorizationResponse.Type.TOKEN -> {
-                    initAccessTokenInViewModels(response.accessToken)
+                    saveAccessTokenInSharedPref(response.accessToken)
                     Timber.d("GOT AUTH TOKEN")
                 }
                 else -> {
@@ -128,7 +142,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initAccessTokenInViewModels(accessToken: String) {
         userViewModel.initUserAccount(accessToken)
-        searchViewModel.initAccessToken(accessToken)
         recommendViewModel.initAccessToken(accessToken)
         playlistViewModel.initAccessToken(accessToken)
     }
