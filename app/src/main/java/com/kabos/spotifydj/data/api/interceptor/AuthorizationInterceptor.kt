@@ -22,8 +22,7 @@ class AuthorizationInterceptor: Interceptor {
         val preference = activity.getPreferences(Context.MODE_PRIVATE)
         val token = preference.getString(ApiConstants.AUTH_TOKEN, "")
 
-        Timber.d("-- token ${preference.getString(ApiConstants.AUTH_TOKEN, "nulll")}")
         return if (!token.isNullOrEmpty()) token
-        else throw SpotifyApiException.EmptyAccessToken
+        else throw SpotifyApiException.UnAuthorized
     }
 }

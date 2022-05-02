@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         // Request code that will be used to verify if the result comes from correct activity
         // Can be any integer
-        private const val REQUEST_CODE: Int = 1337
+        private const val REQUEST_CODE: Int = 2022
         private const val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
         private const val REDIRECT_URI = "com.kabos.spotifydj://callback"
         private val SCOPE = arrayOf(
@@ -56,14 +56,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         activity = this
 
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
         initViewModels()
+        launchAuthenticationActivity()
     }
 
-    private fun authorizationSpotify() {
+    private fun launchAuthenticationActivity() {
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(SCOPE)
             .build()
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> {
                     //再帰呼び出しでログインできるまでループする
-                    authorizationSpotify()
+                    launchAuthenticationActivity()
                     Toast.makeText(this, getString(R.string.toast_login_failer), Toast.LENGTH_SHORT)
                         .show()
                     Timber.tag("SPLASH").d("Cannot login")
@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
     private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Unit>>) {
         liveData.observe(this){ event ->
             event.getContentIfNotHandled()?.let {
-                authorizationSpotify()
+                launchAuthenticationActivity()
             }
         }
     }
