@@ -34,11 +34,9 @@ class TrackRepository @Inject constructor(
     }
 
     suspend fun getTrackInfosByPlaylistId(playlistId: String): List<TrackInfo> {
-
         val playlists = playlistApi.getTracksByPlaylistId(playlistId)
             .errorHandling().items.map { it.track }
         return generateTrackInfo(playlists)
-
     }
 
     private suspend fun generateTrackInfo(trackItems: List<TrackItems>): List<TrackInfo> {
@@ -88,7 +86,6 @@ class TrackRepository @Inject constructor(
             minEnergy = trackInfo.energy * minEnergyRate,
             maxEnergy = trackInfo.energy * maxEnergyRate,
         ).errorHandling().tracks
-
     }
 
 }

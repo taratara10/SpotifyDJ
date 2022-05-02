@@ -16,7 +16,6 @@ import javax.inject.Inject
 
 class PlaylistRepository @Inject constructor(private val playlistApi: PlaylistApi) {
 
-
     suspend fun getUsersPlaylist(): List<PlaylistItem> {
         return playlistApi.getUsersAllPlaylists().errorHandling().items
     }
@@ -29,32 +28,28 @@ class PlaylistRepository @Inject constructor(private val playlistApi: PlaylistAp
         userId: String,
         title: String
     ): String {
-
         return playlistApi.createPlaylist(
             userId = userId,
             body = CreatePlaylistBody(name = title)
         ).errorHandling().id
-
     }
 
     suspend fun addTracksToPlaylist(
         playlistId: String,
         trackUris: List<String>
-    ): Boolean {
-
+    ) {
         playlistApi.addTracksToPlaylist(
             contentType = ApiConstants.APPLICATION_JSON,
             playlistId = playlistId,
             body = AddTracksBody(trackUris)
         ).errorHandling()
-        return true
     }
 
     suspend fun reorderPlaylistsTracks(
         playlistId: String,
         initialPosition: Int,
         finalPosition: Int
-    ): Boolean {
+    ) {
         playlistApi.reorderPlaylistsTracks(
             contentType = ApiConstants.APPLICATION_JSON,
             playlistId = playlistId,
@@ -63,22 +58,17 @@ class PlaylistRepository @Inject constructor(private val playlistApi: PlaylistAp
                 insert_before = finalPosition
             )
         )
-        return true
-
     }
 
     suspend fun updatePlaylistTitle(
         playlistId: String,
         playlistTitle: String
-    ): Boolean {
-
+    ) {
         playlistApi.updatePlaylistTitle(
             contentType = ApiConstants.APPLICATION_JSON,
             playlistId = playlistId,
             body = UpdatePlaylistTitleBody(name = playlistTitle)
         )
-
-        return true
     }
 
     suspend fun deleteTracksFromPlaylist(

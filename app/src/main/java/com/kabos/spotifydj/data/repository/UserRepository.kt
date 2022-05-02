@@ -24,12 +24,8 @@ class UserRepository @Inject constructor(private val userApi: UserApi) {
         return true
     }
 
-    suspend fun pausePlayback(deviceId: String): Boolean {
-
+    suspend fun pausePlayback(deviceId: String) {
         userApi.pausePlayback(deviceId).errorHandling()
-
-        // TODO これ、、、Unit返せばいいな
-        return true
     }
 
     suspend fun getUsersDevices(): List<Device> {
