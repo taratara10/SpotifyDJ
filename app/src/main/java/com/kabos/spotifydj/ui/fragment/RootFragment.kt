@@ -21,7 +21,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class RootFragment: Fragment() {
     private lateinit var binding: FragmentRootBinding
     private val viewPagerAdapter: ViewPagerAdapter by lazy { ViewPagerAdapter(this) }
-    private val userViewModel: UserViewModel by activityViewModels()
     private val rootViewModel: RootViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

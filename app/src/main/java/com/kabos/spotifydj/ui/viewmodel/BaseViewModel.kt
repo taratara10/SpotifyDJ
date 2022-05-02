@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.model.exception.TokenExpiredException
 import com.kabos.spotifydj.util.OneShotEvent
 import timber.log.Timber
 
@@ -21,15 +22,20 @@ open class BaseViewModel : ViewModel(){
         get() = _needRefreshAccessToken
 
 
-
     fun errorHandle(exception: Throwable) {
-        if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
-            _needRefreshAccessToken.postValue(OneShotEvent(Unit))
-        } else {
-            _toastMessageId.postValue(R.string.result_failed)
+        when (exception) {
+            is SpotifyApiException -> {
+                when (exception) {
+                    is SpotifyApiException.UnAuthorized -> _needRefreshAccessToken.postValue(OneShotEvent(Unit))
+                    else -> _toastMessageId.postValue(R.string.result_failed)
+                }
+            }
+            is TokenExpiredException -> {
+                _needRefreshAccessToken.postValue(OneShotEvent(Unit))
+            }
         }
+
         Timber.d("--api error $exception")
     }
-
 
 }

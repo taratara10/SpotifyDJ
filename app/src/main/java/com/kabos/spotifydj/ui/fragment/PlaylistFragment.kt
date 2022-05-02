@@ -58,9 +58,6 @@ class PlaylistFragment: Fragment() {
             userCreatedPlaylist.observe(viewLifecycleOwner) { playlist ->
                 playlistAdapter.submitList(addCreateNewPlaylistItemToFirst(playlist))
             }
-            isLoadingPlaylistTrack.observe(viewLifecycleOwner) { isLoading ->
-                // todo progrebar
-            }
             getUsersPlaylists()
         }
     }

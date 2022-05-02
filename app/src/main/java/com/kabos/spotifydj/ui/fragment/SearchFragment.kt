@@ -68,8 +68,9 @@ class SearchFragment: Fragment() {
         }
     }
 
+
     private fun initViewModels() {
-        searchViewModel.apply {
+        with(searchViewModel) {
             searchTracks.observe(viewLifecycleOwner) { result ->
                 binding.notApplicableResult.isVisible = result.isEmpty()
                 trackAdapter.submitList(result)
