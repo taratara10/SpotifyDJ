@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">SpotifyDJ</string>
     <string name="track_tempo">BPM: %1$.1f</string>
+    <string name="new_playlist_title">NewPlaylist_%1$s</string>
     <string name="toast_login_failer">ログインに失敗しました</string>
 
     <!--  search   -->
@@ -15,4 +16,10 @@
     
     <string name="result_failed">曲の取得に失敗しました。¥n時間をおいて再度試してください</string>
     <string name="result_update_title_success">タイトルを更新しました</string>
+    <string name="title_create_playlist">プレイリストを作成</string>
+    <string name="title_playlist">プレイリスト名</string>
+    <string name="btn_save">保存する</string>
+    <string name="btn_cancel">キャンセル</string>
+    <string name="playlist_title_error_message">タイトルを入力してください</string>
+    <string name="result_crete_playlist_success">プレイリストを作成しました</string>
 </resources>

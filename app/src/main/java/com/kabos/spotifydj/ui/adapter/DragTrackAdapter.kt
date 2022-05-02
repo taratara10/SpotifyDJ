@@ -10,7 +10,7 @@ import com.ernestoyaquello.dragdropswiperecyclerview.listener.OnItemSwipeListene
 import com.ernestoyaquello.dragdropswiperecyclerview.util.DragDropSwipeDiffCallback
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ListItemDragTrackBinding
-import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.util.callback.DragTrackCallback
 
 class DragTrackAdapter(private val callback: DragTrackCallback, dataset: List<TrackInfo>)

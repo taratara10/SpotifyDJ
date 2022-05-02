@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/nav_main"
-        android:name="com.kabos.spotifydj.ui.RootFragment"
+        android:name="com.kabos.spotifydj.ui.fragment.RootFragment"
         android:label="pokedex"
         tools:layout="@layout/fragment_root" >
 
@@ -23,14 +23,14 @@
 
     <dialog
         android:id="@+id/nav_select_playlist"
-        android:name="com.kabos.spotifydj.ui.SelectPlaylistDialogFragment"
+        android:name="com.kabos.spotifydj.ui.dialog.SelectPlaylistDialogFragment"
         tools:layout="@layout/dialog_fragment_select_playlist">
 
     </dialog>
 
     <dialog
         android:id="@+id/nav_confirm_create_playlist"
-        android:name="com.kabos.spotifydj.ui.ConfirmCreatePlaylistDialogFragment"
+        android:name="com.kabos.spotifydj.ui.dialog.ConfirmCreatePlaylistDialogFragment"
         tools:layout="@layout/dialog_fragment_confirm_create_playlist">
 
     </dialog>

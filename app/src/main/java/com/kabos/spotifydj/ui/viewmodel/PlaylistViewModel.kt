@@ -1,0 +1,160 @@
+package com.kabos.spotifydj.ui.viewmodel
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.kabos.spotifydj.R
+import com.kabos.spotifydj.data.model.TrackInfo
+import com.kabos.spotifydj.data.model.playlist.PlaylistItem
+import com.kabos.spotifydj.data.repository.PlaylistRepository
+import com.kabos.spotifydj.data.repository.TrackRepository
+import com.kabos.spotifydj.util.OneShotEvent
+import com.kabos.spotifydj.util.addItem
+import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
+import com.kabos.spotifydj.util.removeAt
+import com.kabos.spotifydj.util.replacePosition
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class PlaylistViewModel @Inject constructor(
+    private val playlistRepository: PlaylistRepository,
+    private val trackRepository: TrackRepository
+    ): BaseViewModel() {
+    private var mUserId = ""
+    private var mUserName = ""
+    private var _editingPlaylistId = ""
+
+    private val _editingPlaylist = MutableLiveData<List<TrackInfo>>()
+    private val _editingPlaylistTitle = MutableLiveData<String>()
+    private val _allPlaylist = MutableLiveData<List<PlaylistItem>>()
+    private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
+    private val _isLoadingPlaylistTrack = MutableLiveData(false)
+    private val _isPlaylistUnSaved = MutableLiveData(false)
+
+    val allPlaylist: LiveData<List<PlaylistItem>>
+        get() = _allPlaylist
+    val userCreatedPlaylist: LiveData<List<PlaylistItem>>
+        get() = _userCreatedPlaylist
+    val editingPlaylist: LiveData<List<TrackInfo>>
+        get() = _editingPlaylist
+    val editingPlaylistTitle: LiveData<String>
+        get() = _editingPlaylistTitle
+    val isLoadingPlaylistTrack: LiveData<Boolean>
+        get() = _isLoadingPlaylistTrack
+    val isPlaylistUnSaved: LiveData<Boolean>
+        get() = _isPlaylistUnSaved
+
+    fun initUserAccount(id:String, name: String) {
+        mUserId = id
+        mUserName = name
+    }
+
+    fun getUsersPlaylists() = viewModelScope.launch {
+        runCatching {
+            val playlist = playlistRepository.getUsersPlaylist()
+            _allPlaylist.postValue(playlist)
+            filterUserCreatedPlaylist(playlist)
+        }.onFailure { errorHandle(it) }
+    }
+    private fun filterUserCreatedPlaylist(playlist:List<PlaylistItem>) {
+        // todo idでなくていいの？
+        _userCreatedPlaylist.postValue(playlist.filter { it.owner.display_name == mUserName })
+    }
+
+
+    fun createPlaylist(title: String, trackUris: List<String>) = viewModelScope.launch {
+        runCatching {
+            val playlistId = playlistRepository.createPlaylist(mUserId, title)
+            updatePlaylistId(playlistId)
+            addTracksToPlaylist(trackUris)
+            _toastMessageId.postValue(R.string.result_crete_playlist_success)
+        }.onFailure { errorHandle(it) }
+    }
+
+    fun addTrackToEditingPlaylist(track: TrackInfo){
+        _editingPlaylist.addItem(track)
+        addTracksToPlaylist(listOf(track.contextUri))
+        verifyPlaylistIsSaved()
+    }
+
+    private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
+        if (_editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID) return@launch
+        runCatching {
+            playlistRepository.addTracksToPlaylist(_editingPlaylistId, trackUris)
+        }.onFailure { errorHandle(it) }
+    }
+
+    fun updateEditingPlaylistTitle(title: String) {
+        _editingPlaylistTitle.postValue(title)
+    }
+
+    fun updatePlaylistTitle(title: String) = viewModelScope.launch {
+        if (title.isEmpty()) return@launch
+        runCatching {
+            playlistRepository.updatePlaylistTitle(_editingPlaylistId, title)
+            _toastMessageId.postValue(R.string.result_update_title_success)
+        }.onFailure { errorHandle(it) }
+    }
+
+    fun removeTrackFromLocalPlaylist(position:Int){
+        val removeTrack = _editingPlaylist.removeAt(position)
+        if (removeTrack != null) deleteTracksFromPlaylist(removeTrack.contextUri)
+    }
+
+    private fun deleteTracksFromPlaylist(trackUri: String) = viewModelScope.launch {
+        if (_editingPlaylistId.isEmpty()) return@launch
+        runCatching {
+            playlistRepository.deleteTracksFromPlaylist(_editingPlaylistId, trackUri)
+        }.onFailure { errorHandle(it) }
+    }
+
+    fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch {
+        if (_editingPlaylistId.isEmpty()) return@launch
+        _editingPlaylist.replacePosition(initialPosition, finalPosition)
+        runCatching {
+            playlistRepository.reorderPlaylistsTracks(
+                _editingPlaylistId,
+                initialPosition,
+                finalPosition
+            )
+        }.onFailure { errorHandle(it) }
+    }
+
+    /**
+     * Dialog Playlist
+     * */
+
+    fun loadPlaylistIntoEditPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
+        _editingPlaylistTitle.postValue(playlist.name)
+        updatePlaylistId(playlist.id)
+        getTracksByPlaylistId(playlist.id)
+    }
+
+    private fun updatePlaylistId(playlistId: String) {
+        _editingPlaylistId = playlistId
+        verifyPlaylistIsSaved()
+    }
+
+    private fun verifyPlaylistIsSaved() {
+        val isNotSaved = _editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID
+        _isPlaylistUnSaved.postValue(isNotSaved)
+    }
+
+    fun clearEditingPlaylist() {
+        updatePlaylistId("")
+        _editingPlaylistTitle.postValue("")
+        _editingPlaylist.postValue(listOf())
+    }
+
+    private fun getTracksByPlaylistId(playlistId: String) = viewModelScope.launch {
+        _isLoadingPlaylistTrack.value = true
+        runCatching {
+            _editingPlaylist.postValue(trackRepository.getTrackInfosByPlaylistId(playlistId))
+        }.onFailure { errorHandle(it) }
+        _isLoadingPlaylistTrack.value = false
+    }
+
+}
