@@ -12,14 +12,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentRecommendBinding
-import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewModel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewModel.RootViewModel
-import com.kabos.spotifydj.ui.viewModel.UserViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
+import com.kabos.spotifydj.ui.viewmodel.RootViewModel
+import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

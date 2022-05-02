@@ -1,6 +1,6 @@
 package com.kabos.spotifydj.di
 
-import com.kabos.spotifydj.model.apiConstants.ApiConstants
+import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

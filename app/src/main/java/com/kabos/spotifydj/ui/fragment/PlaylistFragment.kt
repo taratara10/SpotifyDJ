@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.kabos.spotifydj.databinding.FragmentPlaylistBinding
-import com.kabos.spotifydj.model.playlist.*
+import com.kabos.spotifydj.data.model.playlist.*
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

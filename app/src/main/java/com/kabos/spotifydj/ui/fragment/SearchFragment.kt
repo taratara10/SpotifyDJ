@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentSearchBinding
-import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.ui.viewModel.*
+import com.kabos.spotifydj.ui.viewmodel.*
 
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding

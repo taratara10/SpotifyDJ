@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ListItemTrackBinding
-import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.util.callback.TrackCallback
 
 class TrackAdapter(private val callback: TrackCallback)

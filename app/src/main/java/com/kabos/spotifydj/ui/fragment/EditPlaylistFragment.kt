@@ -11,13 +11,13 @@ import androidx.navigation.fragment.findNavController
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditPlaylistBinding
-import com.kabos.spotifydj.model.TrackInfo
+import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.DragTrackCallback
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewModel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
+import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 

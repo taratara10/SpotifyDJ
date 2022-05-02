@@ -1,6 +1,6 @@
 package com.kabos.spotifydj.di
 
-import com.kabos.spotifydj.model.apiConstants.ApiConstants.Companion.ENDPOINT
+import com.kabos.spotifydj.data.model.apiConstants.ApiConstants.Companion.ENDPOINT
 import com.kabos.spotifydj.repository.SpotifyApi
 import dagger.Module
 import dagger.Provides

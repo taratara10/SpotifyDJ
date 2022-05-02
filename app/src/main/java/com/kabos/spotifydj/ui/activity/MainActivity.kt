@@ -13,10 +13,10 @@ import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.ActivityMainBinding
 import com.kabos.spotifydj.util.OneShotEvent
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewModel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewModel.SearchViewModel
-import com.kabos.spotifydj.ui.viewModel.UserViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
+import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
+import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse

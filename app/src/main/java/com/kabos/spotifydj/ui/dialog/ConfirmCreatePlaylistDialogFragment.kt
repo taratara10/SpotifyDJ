@@ -10,7 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogFragmentConfirmCreatePlaylistBinding
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
 import com.kabos.spotifydj.util.setErrorMessageByBoolean
 import com.kabos.spotifydj.util.setInvalidAppearance
 import dagger.hilt.android.AndroidEntryPoint

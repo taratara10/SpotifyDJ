@@ -8,13 +8,13 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.kabos.spotifydj.databinding.DialogFragmentSelectPlaylistBinding
-import com.kabos.spotifydj.model.playlist.PlaylistItem
+import com.kabos.spotifydj.data.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.Pager
-import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewModel.RootViewModel
-import com.kabos.spotifydj.ui.viewModel.SearchViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.RootViewModel
+import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
