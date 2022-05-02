@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
+import com.kabos.spotifydj.data.model.exception.SpotifyApiException
 import com.kabos.spotifydj.databinding.ActivityMainBinding
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
@@ -127,10 +128,10 @@ class MainActivity : AppCompatActivity() {
         userViewModel.getUserAccount()
     }
 
-    private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Boolean>>) {
+    private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Unit>>) {
         liveData.observe(this){ event ->
-            event.getContentIfNotHandled()?.let { needRefresh ->
-                if (needRefresh) authorizationSpotify()
+            event.getContentIfNotHandled()?.let {
+                authorizationSpotify()
             }
         }
     }

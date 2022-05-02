@@ -20,58 +20,8 @@ import okhttp3.internal.http.StatusLine
 import retrofit2.Response
 import retrofit2.http.*
 
-interface SpotifyApi {
-    @GET("me")
-    suspend fun getUsersProfile(): Response<User>
+interface PlaylistApi {
 
-
-    /**
-     * Player
-     * */
-    @GET("me/player/devices")
-    suspend fun getUsersDevices(): Response<Devices>
-
-    @PUT("me/player/play")
-    suspend fun playback(
-        @Query(DEVICE_ID) deviceId: String,
-        @Body body: PlaybackBody
-    ): Response<Unit>
-
-    @PUT("me/player/pause")
-    suspend fun pausePlayback(
-        @Query(DEVICE_ID) deviceId: String,
-    ): Response<Unit>
-
-
-    /**
-     *  Search
-     * */
-    @GET("search")
-    suspend fun getTracksByKeyword(
-        @Query("q") keyword: String,
-        @Query(TYPE) type: String
-    ): Response<SearchTracks>
-
-    @GET("audio-features/{$ID}")
-    suspend fun getAudioFeaturesById(
-        @Path(ID) id: String
-    ): Response<AudioFeature>
-
-    @GET("recommendations")
-    suspend fun getRecommendations(
-        @Query("seed_tracks") seedTrackId: String,
-        @Query("min_tempo") minTempo: Double,
-        @Query("max_tempo") maxTempo: Double,
-        @Query("min_danceability") minDancebility: Double,
-        @Query("max_danceability") maxDancebility: Double,
-        @Query("min_energy") minEnergy: Double,
-        @Query("max_energy") maxEnergy: Double,
-    ): Response<RecommendTracks>
-
-
-    /**
-     *  playlist
-     * */
     @GET("me/playlists")
     suspend fun getUsersAllPlaylists(): Response<Playlist>
 

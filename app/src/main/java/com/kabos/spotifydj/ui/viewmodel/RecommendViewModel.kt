@@ -6,23 +6,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
-import com.kabos.spotifydj.data.repository.Repository
+import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.repository.TrackRepository
 import com.kabos.spotifydj.util.OneShotEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RecommendViewModel @Inject constructor(private val repository: Repository): ViewModel() {
+class RecommendViewModel @Inject constructor(
+    private val trackRepository: TrackRepository
+) : BaseViewModel() {
     private val _upperTracks = MutableLiveData<List<TrackInfo>>()
     private val _downerTracks = MutableLiveData<List<TrackInfo>>()
     private val _currentTrack = MutableLiveData<List<TrackInfo>>()
     private val _isLoadingUpperTrack = MutableLiveData(false)
     private val _isLoadingDownerTrack = MutableLiveData(false)
-    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
-    private val _toastMessageId = MutableLiveData<Int>()
 
     val upperTracks: LiveData<List<TrackInfo>>
         get() = _upperTracks
@@ -34,12 +33,8 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
         get() = _isLoadingUpperTrack
     val isLoadingDownerTrack: LiveData<Boolean>
         get() = _isLoadingDownerTrack
-    val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
-        get() = _needRefreshAccessToken
-    val toastMessageId: LiveData<Int>
-        get() = _toastMessageId
 
-    fun updateCurrentTrack(track: TrackInfo){
+    fun updateCurrentTrack(track: TrackInfo) {
         _currentTrack.postValue(listOf(track))
         updateUpperRecommendTrack(track)
         updateDownerRecommendTrack(track)
@@ -47,41 +42,18 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
 
     private fun updateUpperRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         _isLoadingUpperTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(trackInfo, true)) {
-            is SpotifyApiResource.Success -> {
-                _upperTracks.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            _upperTracks.postValue(trackRepository.getRecommendTrackInfos(trackInfo, true))
+        }.onFailure { errorHandle(it) }
         _isLoadingUpperTrack.value = false
     }
 
     private fun updateDownerRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         _isLoadingDownerTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(trackInfo, false)) {
-            is SpotifyApiResource.Success -> {
-                _downerTracks.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            _downerTracks.postValue(trackRepository.getRecommendTrackInfos(trackInfo, false))
+        }.onFailure { errorHandle(it) }
         _isLoadingDownerTrack.value = false
     }
 
-    private fun refreshAccessToken() {
-        _needRefreshAccessToken.postValue(OneShotEvent(true))
-    }
 }

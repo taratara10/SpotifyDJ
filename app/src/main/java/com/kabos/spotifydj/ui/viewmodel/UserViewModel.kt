@@ -7,10 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.data.model.User
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
+import com.kabos.spotifydj.data.model.exception.SpotifyApiException
 import com.kabos.spotifydj.data.model.playback.Device
-import com.kabos.spotifydj.data.repository.Repository
+import com.kabos.spotifydj.data.repository.UserRepository
 import com.kabos.spotifydj.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -18,36 +17,27 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
+class UserViewModel @Inject constructor(private val userRepository: UserRepository) :
+    BaseViewModel() {
     private var mDeviceId = ""
     private val _userAccount = MutableLiveData<User>()
-    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
-    private val _toastMessageId = MutableLiveData<Int>()
 
     val startExternalSpotifyApp = MutableLiveData(false)
 
-
-    val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
-        get() = _needRefreshAccessToken
     val userAccount: LiveData<User>
         get() = _userAccount
-    val toastMessageId: LiveData<Int>
-        get() = _toastMessageId
+
 
     fun getUserAccount() = viewModelScope.launch {
-        when (val result = repository.getUsersProfile()) {
-            is SpotifyApiResource.Success -> {
-                val user = result.data ?: return@launch
-                _userAccount.postValue(user)
+
+        runCatching {
+            val user = userRepository.getUsersProfile()
+            _userAccount.postValue(user)
+        }.onFailure { exception ->
+            if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
+                _needRefreshAccessToken.postValue(OneShotEvent(Unit))
             }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        Timber.d("${result.reason}")
-                    }
-                }
-            }
+            Timber.d("errorHandle $exception")
         }
     }
 
@@ -56,53 +46,46 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
      * */
 
     //todo deviceIdをSharePrefから取り出して初期化する
-    fun initializeDeviceId(deviceId: String){
+    fun initializeDeviceId(deviceId: String) {
         mDeviceId = deviceId
     }
 
     private fun getUsersDevices() = viewModelScope.launch {
-        when (val result = repository.getUsersDevices()) {
-            is SpotifyApiResource.Success -> {
-                //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404
-                //なので、毎回Spotifyアプリを開いて、deviceIdを取得
-                val userDevice: Device? =result.data?.find { it.type == "Smartphone" }
-                if (userDevice != null) {
-                    mDeviceId = userDevice.id
-                }else {
-                    startExternalSpotifyApp.postValue(true)
-                }
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    is SpotifyApiErrorReason.NotFound -> startExternalSpotifyApp.postValue(true)
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            val devices = userRepository.getUsersDevices()
+            // TODO ここでデバイス選択ダイアログだしたらよさげ
 
+            //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404
+            //なので、毎回Spotifyアプリを開いて、deviceIdを取得
+            val userDevice: Device? = devices.find { it.type == "Smartphone" }
+            if (userDevice != null) {
+                mDeviceId = userDevice.id
+            } else {
+                startExternalSpotifyApp.postValue(true)
+            }
+        }.onFailure { errorHandle(it) }
 
     }
 
     fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         if (mDeviceId.isEmpty()) getUsersDevices()
 
-        when (val result = repository.playbackTrack(mDeviceId, trackInfo.contextUri)) {
-            is SpotifyApiResource.Success -> {
-               //icon変えたりする？
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    is SpotifyApiErrorReason.NotFound -> getUsersDevices()
+        runCatching {
+            userRepository.playbackTrack(mDeviceId, trackInfo.contextUri)
+        }.onFailure {
+            if (it is SpotifyApiException) {
+                when (it) {
+                    is SpotifyApiException.UnAuthorized -> _needRefreshAccessToken.postValue(
+                        OneShotEvent(Unit)
+                    )
+                    is SpotifyApiException.NotFound -> getUsersDevices()
                     else -> {
                         _toastMessageId.postValue(R.string.result_failed)
                     }
                 }
             }
         }
+
     }
 //        //isPlaybackによって、再生、停止を行う
 //        if (trackInfo.isPlayback){
@@ -142,8 +125,4 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //        trackList.value = list
 //    }
 
-
-    fun refreshAccessToken() {
-        _needRefreshAccessToken.postValue(OneShotEvent(true))
-    }
 }

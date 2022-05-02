@@ -6,10 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
-import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.data.model.playlist.PlaylistItem
-import com.kabos.spotifydj.data.repository.Repository
+import com.kabos.spotifydj.data.repository.PlaylistRepository
+import com.kabos.spotifydj.data.repository.TrackRepository
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.addItem
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
@@ -20,7 +19,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlaylistViewModel @Inject constructor(private val repository: Repository): ViewModel() {
+class PlaylistViewModel @Inject constructor(
+    private val playlistRepository: PlaylistRepository,
+    private val trackRepository: TrackRepository
+    ): BaseViewModel() {
     private var mUserId = ""
     private var mUserName = ""
     private var _editingPlaylistId = ""
@@ -31,8 +33,6 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     private val _userCreatedPlaylist = MutableLiveData<List<PlaylistItem>>()
     private val _isLoadingPlaylistTrack = MutableLiveData(false)
     private val _isPlaylistUnSaved = MutableLiveData(false)
-    private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
-    private val _toastMessageId = MutableLiveData<Int>()
 
     val allPlaylist: LiveData<List<PlaylistItem>>
         get() = _allPlaylist
@@ -46,10 +46,6 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
         get() = _isLoadingPlaylistTrack
     val isPlaylistUnSaved: LiveData<Boolean>
         get() = _isPlaylistUnSaved
-    val needRefreshAccessToken: LiveData<OneShotEvent<Boolean>>
-        get() = _needRefreshAccessToken
-    val toastMessageId: LiveData<Int>
-        get() = _toastMessageId
 
     fun initUserAccount(id:String, name: String) {
         mUserId = id
@@ -57,21 +53,11 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
     }
 
     fun getUsersPlaylists() = viewModelScope.launch {
-        when (val result = repository.getUsersPlaylist()) {
-            is SpotifyApiResource.Success -> {
-                val playlist = result.data ?: listOf()
-                _allPlaylist.postValue(playlist)
-                filterUserCreatedPlaylist(playlist)
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            val playlist = playlistRepository.getUsersPlaylist()
+            _allPlaylist.postValue(playlist)
+            filterUserCreatedPlaylist(playlist)
+        }.onFailure { errorHandle(it) }
     }
     private fun filterUserCreatedPlaylist(playlist:List<PlaylistItem>) {
         // todo idでなくていいの？
@@ -80,21 +66,12 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
 
     fun createPlaylist(title: String, trackUris: List<String>) = viewModelScope.launch {
-        when (val result = repository.createPlaylist(mUserId, title)) {
-            is SpotifyApiResource.Success -> {
-                updatePlaylistId(result.data.toString())
-                addTracksToPlaylist(trackUris)
-                _toastMessageId.postValue(R.string.result_crete_playlist_success)
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            val playlistId = playlistRepository.createPlaylist(mUserId, title)
+            updatePlaylistId(playlistId)
+            addTracksToPlaylist(trackUris)
+            _toastMessageId.postValue(R.string.result_crete_playlist_success)
+        }.onFailure { errorHandle(it) }
     }
 
     fun addTrackToEditingPlaylist(track: TrackInfo){
@@ -105,17 +82,9 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID) return@launch
-        when (val result = repository.addTracksToPlaylist(_editingPlaylistId, trackUris)) {
-            is SpotifyApiResource.Success -> { }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            playlistRepository.addTracksToPlaylist(_editingPlaylistId, trackUris)
+        }.onFailure { errorHandle(it) }
     }
 
     fun updateEditingPlaylistTitle(title: String) {
@@ -124,20 +93,10 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     fun updatePlaylistTitle(title: String) = viewModelScope.launch {
         if (title.isEmpty()) return@launch
-
-        when (val result = repository.updatePlaylistTitle(_editingPlaylistId, title)) {
-            is SpotifyApiResource.Success -> {
-                _toastMessageId.postValue(R.string.result_update_title_success)
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            playlistRepository.updatePlaylistTitle(_editingPlaylistId, title)
+            _toastMessageId.postValue(R.string.result_update_title_success)
+        }.onFailure { errorHandle(it) }
     }
 
     fun removeTrackFromLocalPlaylist(position:Int){
@@ -147,42 +106,21 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     private fun deleteTracksFromPlaylist(trackUri: String) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty()) return@launch
-        when (val result = repository.deleteTracksFromPlaylist(_editingPlaylistId, trackUri)) {
-            is SpotifyApiResource.Success -> {
-
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            playlistRepository.deleteTracksFromPlaylist(_editingPlaylistId, trackUri)
+        }.onFailure { errorHandle(it) }
     }
 
     fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty()) return@launch
         _editingPlaylist.replacePosition(initialPosition, finalPosition)
-
-        when (val result = repository.reorderPlaylistsTracks(
-            _editingPlaylistId,
-            initialPosition,
-            finalPosition
-        )) {
-            is SpotifyApiResource.Success -> {
-
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason) {
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            playlistRepository.reorderPlaylistsTracks(
+                _editingPlaylistId,
+                initialPosition,
+                finalPosition
+            )
+        }.onFailure { errorHandle(it) }
     }
 
     /**
@@ -213,24 +151,10 @@ class PlaylistViewModel @Inject constructor(private val repository: Repository):
 
     private fun getTracksByPlaylistId(playlistId: String) = viewModelScope.launch {
         _isLoadingPlaylistTrack.value = true
-        when (val result = repository.getTrackInfosByPlaylistId(playlistId)) {
-            is SpotifyApiResource.Success -> {
-                _editingPlaylist.postValue(result.data ?: listOf())
-            }
-            is SpotifyApiResource.Error -> {
-                when (result.reason){
-                    is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
-                    else -> {
-                        _toastMessageId.postValue(R.string.result_failed)
-                    }
-                }
-            }
-        }
+        runCatching {
+            _editingPlaylist.postValue(trackRepository.getTrackInfosByPlaylistId(playlistId))
+        }.onFailure { errorHandle(it) }
         _isLoadingPlaylistTrack.value = false
-    }
-
-    private fun refreshAccessToken() {
-        _needRefreshAccessToken.postValue(OneShotEvent(true))
     }
 
 }
