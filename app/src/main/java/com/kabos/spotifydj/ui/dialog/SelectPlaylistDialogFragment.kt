@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -12,9 +12,9 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.Pager
-import com.kabos.spotifydj.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.SearchViewModel
+import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewModel.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

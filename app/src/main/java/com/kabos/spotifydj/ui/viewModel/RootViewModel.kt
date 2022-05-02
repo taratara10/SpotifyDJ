@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.viewModel
+package com.kabos.spotifydj.ui.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.viewModel
+package com.kabos.spotifydj.ui.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,14 +10,8 @@ import com.kabos.spotifydj.model.User
 import com.kabos.spotifydj.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.model.playback.Device
-import com.kabos.spotifydj.model.playlist.PlaylistItem
-import com.kabos.spotifydj.model.requestBody.AddTracksBody
-import com.kabos.spotifydj.model.requestBody.DeleteTrack
-import com.kabos.spotifydj.model.requestBody.DeleteTracksBody
 import com.kabos.spotifydj.repository.*
-import com.kabos.spotifydj.util.callback.DragTrackCallback
 import com.kabos.spotifydj.util.*
-import com.kabos.spotifydj.util.callback.TrackCallback
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import timber.log.Timber

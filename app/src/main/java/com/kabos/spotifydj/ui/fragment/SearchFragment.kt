@@ -1,8 +1,6 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.fragment
 
 import android.os.Bundle
-import android.text.TextUtils.isEmpty
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +17,7 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.viewModel.*
-import dagger.hilt.android.AndroidEntryPoint
+import com.kabos.spotifydj.ui.viewModel.*
 
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding

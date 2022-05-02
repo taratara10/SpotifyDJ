@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,8 +12,8 @@ import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.PlaylistCallback
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
-import com.kabos.spotifydj.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewModel.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.fragment
 
 import android.content.ComponentName
 import android.content.Intent
@@ -13,8 +13,8 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentRootBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.util.Pager
-import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.ui.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,12 +16,11 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.viewModel.RecommendViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
-import com.kabos.spotifydj.viewModel.UserViewModel
+import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewModel.RecommendViewModel
+import com.kabos.spotifydj.ui.viewModel.RootViewModel
+import com.kabos.spotifydj.ui.viewModel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 
 @AndroidEntryPoint
 class RecommendFragment: Fragment() {

@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.ui
+package com.kabos.spotifydj.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.ernestoyaquello.dragdropswiperecyclerview.DragDropSwipeRecyclerView
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditPlaylistBinding
@@ -16,10 +15,9 @@ import com.kabos.spotifydj.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.DragTrackCallback
-import com.kabos.spotifydj.viewModel.PlaylistViewModel
-import com.kabos.spotifydj.viewModel.RecommendViewModel
-import com.kabos.spotifydj.viewModel.RootViewModel
-import timber.log.Timber
+import com.kabos.spotifydj.ui.viewModel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewModel.RecommendViewModel
+import com.kabos.spotifydj.ui.viewModel.RootViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 

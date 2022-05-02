@@ -2,7 +2,10 @@ package com.kabos.spotifydj.ui.adapter
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.kabos.spotifydj.ui.*
+import com.kabos.spotifydj.ui.fragment.EditPlaylistFragment
+import com.kabos.spotifydj.ui.fragment.PlaylistFragment
+import com.kabos.spotifydj.ui.fragment.RecommendFragment
+import com.kabos.spotifydj.ui.fragment.SearchFragment
 import com.kabos.spotifydj.util.Pager
 
 class ViewPagerAdapter(fragment: Fragment): FragmentStateAdapter(fragment) {

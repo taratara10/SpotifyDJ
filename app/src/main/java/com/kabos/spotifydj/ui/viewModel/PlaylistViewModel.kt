@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.viewModel
+package com.kabos.spotifydj.ui.viewModel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,13 +12,11 @@ import com.kabos.spotifydj.model.playlist.PlaylistItem
 import com.kabos.spotifydj.repository.Repository
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.addItem
-import com.kabos.spotifydj.util.constant.PlaylistConstant
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
 import com.kabos.spotifydj.util.removeAt
 import com.kabos.spotifydj.util.replacePosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel

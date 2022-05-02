@@ -12,13 +12,9 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-object SpotifyApiModule {
+object ApiModule {
     @Singleton
     @Provides
-    fun provideSpotifyApi(moshiConverterFactory: MoshiConverterFactory): SpotifyApi =
-        Retrofit.Builder()
-            .baseUrl(ENDPOINT)
-            .addConverterFactory(moshiConverterFactory)
-            .build()
-            .create(SpotifyApi::class.java)
+    fun provideSpotifyApi(retrofit: Retrofit): SpotifyApi =
+        retrofit.create(SpotifyApi::class.java)
 }
