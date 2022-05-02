@@ -3,6 +3,7 @@ package com.kabos.spotifydj.data.api.interceptor
 import android.content.Context
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.model.exception.TokenExpiredException
 import com.kabos.spotifydj.ui.activity.MainActivity
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -23,6 +24,6 @@ class AuthorizationInterceptor: Interceptor {
         val token = preference.getString(ApiConstants.AUTH_TOKEN, "")
 
         return if (!token.isNullOrEmpty()) token
-        else throw SpotifyApiException.UnAuthorized
+        else throw TokenExpiredException()
     }
 }
