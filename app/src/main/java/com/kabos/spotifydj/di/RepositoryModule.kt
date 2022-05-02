@@ -1,6 +1,6 @@
 package com.kabos.spotifydj.di
 
-import com.kabos.spotifydj.repository.Repository
+import com.kabos.spotifydj.data.repository.Repository
 import com.kabos.spotifydj.data.api.SpotifyApi
 import dagger.Module
 import dagger.Provides

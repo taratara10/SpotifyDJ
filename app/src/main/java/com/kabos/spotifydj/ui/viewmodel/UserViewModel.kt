@@ -10,7 +10,7 @@ import com.kabos.spotifydj.data.model.User
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
 import com.kabos.spotifydj.data.model.playback.Device
-import com.kabos.spotifydj.repository.*
+import com.kabos.spotifydj.data.repository.Repository
 import com.kabos.spotifydj.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -19,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(private val repository: Repository): ViewModel() {
-    private var mAccessToken = ""
     private var mDeviceId = ""
     private val _userAccount = MutableLiveData<User>()
     private val _needRefreshAccessToken = MutableLiveData<OneShotEvent<Boolean>>()
@@ -35,13 +34,8 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     val toastMessageId: LiveData<Int>
         get() = _toastMessageId
 
-    fun initUserAccount(accessToken: String) {
-        mAccessToken = accessToken
-        getUserAccount()
-    }
-
-    private fun getUserAccount() = viewModelScope.launch {
-        when (val result = repository.getUsersProfile(mAccessToken)) {
+    fun getUserAccount() = viewModelScope.launch {
+        when (val result = repository.getUsersProfile()) {
             is SpotifyApiResource.Success -> {
                 val user = result.data ?: return@launch
                 _userAccount.postValue(user)
@@ -67,7 +61,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     }
 
     private fun getUsersDevices() = viewModelScope.launch {
-        when (val result = repository.getUsersDevices(mAccessToken)) {
+        when (val result = repository.getUsersDevices()) {
             is SpotifyApiResource.Success -> {
                 //sharedPrefに詰めて運用したかったけど、activeじゃないとdeviceId指定しても404
                 //なので、毎回Spotifyアプリを開いて、deviceIdを取得
@@ -95,7 +89,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
     fun playbackTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         if (mDeviceId.isEmpty()) getUsersDevices()
 
-        when (val result = repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)) {
+        when (val result = repository.playbackTrack(mDeviceId, trackInfo.contextUri)) {
             is SpotifyApiResource.Success -> {
                //icon変えたりする？
             }
@@ -114,7 +108,7 @@ class UserViewModel @Inject constructor(private val repository: Repository): Vie
 //        if (trackInfo.isPlayback){
 //            repository.pausePlayback(mAccessToken,mDeviceId)
 //        }else {
-//            repository.playbackTrack(mAccessToken, mDeviceId, trackInfo.contextUri)
+//            repository.playbackTrack(mDeviceId, trackInfo.contextUri)
 //        }
 //        togglePlaybackIcon(trackInfo)
 

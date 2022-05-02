@@ -8,16 +8,16 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
-import com.kabos.spotifydj.repository.Repository
+import com.kabos.spotifydj.data.repository.Repository
 import com.kabos.spotifydj.util.OneShotEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel@Inject constructor(private val repository: Repository): ViewModel() {
-    private var mAccessToken = ""
     private var searchTrackJob: Job? = null
     private val _searchTracks = MutableLiveData<List<TrackInfo>>()
 
@@ -35,10 +35,6 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
         get() = _toastMessageId
 
 
-    fun initAccessToken(token: String) {
-        mAccessToken = token
-    }
-
     fun searchTracks(keyword: String) {
         searchTrackJob?.cancel()
         if (keyword.isEmpty()) {
@@ -48,7 +44,7 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
         }
         searchTrackJob = viewModelScope.launch {
             _isLoadingSearchTrack.value = true
-            when (val result = repository.searchTrackInfo(mAccessToken, keyword)) {
+            when (val result = repository.searchTrackInfo(keyword)) {
                 is SpotifyApiResource.Success -> {
                     _searchTracks.value = (result.data ?: listOf())
                 }
@@ -57,6 +53,7 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
                         is SpotifyApiErrorReason.UnAuthorized -> refreshAccessToken()
                         else -> {
                             _toastMessageId.postValue(R.string.result_failed)
+                            Timber.d("-- failure ${result.reason}")
                         }
                     }
                 }
@@ -71,7 +68,7 @@ class SearchViewModel@Inject constructor(private val repository: Repository): Vi
 
     fun loadPlaylistIntoSearchFragment(playlistId: String) = viewModelScope.launch{
         _isLoadingSearchTrack.value = true
-        when (val result = repository.getTrackInfosByPlaylistId(mAccessToken, playlistId)) {
+        when (val result = repository.getTrackInfosByPlaylistId( playlistId)) {
             is SpotifyApiResource.Success -> {
                  _searchTracks.postValue(result.data ?: listOf())
             }

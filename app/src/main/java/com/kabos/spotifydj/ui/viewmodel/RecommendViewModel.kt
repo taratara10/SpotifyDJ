@@ -8,7 +8,7 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiErrorReason
 import com.kabos.spotifydj.data.model.apiResult.SpotifyApiResource
-import com.kabos.spotifydj.repository.Repository
+import com.kabos.spotifydj.data.repository.Repository
 import com.kabos.spotifydj.util.OneShotEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -16,7 +16,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecommendViewModel @Inject constructor(private val repository: Repository): ViewModel() {
-    private var mAccessToken = ""
     private val _upperTracks = MutableLiveData<List<TrackInfo>>()
     private val _downerTracks = MutableLiveData<List<TrackInfo>>()
     private val _currentTrack = MutableLiveData<List<TrackInfo>>()
@@ -40,10 +39,6 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
     val toastMessageId: LiveData<Int>
         get() = _toastMessageId
 
-    fun initAccessToken(token: String) {
-        mAccessToken = token
-    }
-
     fun updateCurrentTrack(track: TrackInfo){
         _currentTrack.postValue(listOf(track))
         updateUpperRecommendTrack(track)
@@ -52,7 +47,7 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
 
     private fun updateUpperRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         _isLoadingUpperTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, true)) {
+        when (val result = repository.getRecommendTrackInfos(trackInfo, true)) {
             is SpotifyApiResource.Success -> {
                 _upperTracks.postValue(result.data ?: listOf())
             }
@@ -70,7 +65,7 @@ class RecommendViewModel @Inject constructor(private val repository: Repository)
 
     private fun updateDownerRecommendTrack(trackInfo: TrackInfo) = viewModelScope.launch {
         _isLoadingDownerTrack.value = true
-        when (val result = repository.getRecommendTrackInfos(mAccessToken, trackInfo, false)) {
+        when (val result = repository.getRecommendTrackInfos(trackInfo, false)) {
             is SpotifyApiResource.Success -> {
                 _downerTracks.postValue(result.data ?: listOf())
             }

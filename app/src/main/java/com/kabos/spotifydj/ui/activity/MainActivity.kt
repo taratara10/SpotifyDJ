@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         observeToastMessage(searchViewModel.toastMessageId)
         observeToastMessage(recommendViewModel.toastMessageId)
         observeToastMessage(playlistViewModel.toastMessageId)
+        userViewModel.getUserAccount()
     }
 
     private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Boolean>>) {
@@ -138,12 +139,6 @@ class MainActivity : AppCompatActivity() {
         liveData.observe(this) { message ->
             Toast.makeText(this, getString(message), Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun initAccessTokenInViewModels(accessToken: String) {
-        userViewModel.initUserAccount(accessToken)
-        recommendViewModel.initAccessToken(accessToken)
-        playlistViewModel.initAccessToken(accessToken)
     }
 
 }

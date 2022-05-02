@@ -1,4 +1,4 @@
-package com.kabos.spotifydj.repository
+package com.kabos.spotifydj.data.repository
 
 import com.kabos.spotifydj.data.api.SpotifyApi
 import com.kabos.spotifydj.data.model.*
@@ -35,8 +35,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
 
     }
 
-    suspend fun getUsersProfile(accessToken: String): SpotifyApiResource<User> {
-        
+    suspend fun getUsersProfile(): SpotifyApiResource<User> {
+
         return try {
             val request = spotifyApi.getUsersProfile()
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!)
@@ -50,11 +50,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
      * Player
      * */
     suspend fun playbackTrack(
-        accessToken: String,
         deviceId: String,
         contextUri: String
     ): SpotifyApiResource<Boolean> {
-        
+
 
         return try {
             val request = spotifyApi.playback(
@@ -68,8 +67,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
     }
 
-    suspend fun pausePlayback(accessToken: String, deviceId: String): SpotifyApiResource<Boolean> {
-        
+    suspend fun pausePlayback(deviceId: String): SpotifyApiResource<Boolean> {
+
         return try {
             val request = spotifyApi.pausePlayback(
                 deviceId = deviceId
@@ -81,8 +80,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         }
     }
 
-    suspend fun getUsersDevices(accessToken: String): SpotifyApiResource<List<Device>> {
-        
+    suspend fun getUsersDevices(): SpotifyApiResource<List<Device>> {
+
 
         return try {
             val request = spotifyApi.getUsersDevices()
@@ -97,12 +96,12 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
      * Search
      * */
 
-    suspend fun searchTrackInfo(accessToken: String, keyword: String): SpotifyApiResource<List<TrackInfo>> {
+    suspend fun searchTrackInfo(keyword: String): SpotifyApiResource<List<TrackInfo>> {
         val trackInfos = mutableListOf<TrackInfo>()
         var errorReason: SpotifyApiErrorReason? = null
         coroutineScope {
             val trackItems = async {
-                return@async when(val result = getTrackItemsByKeyword(accessToken, keyword)) {
+                return@async when (val result = getTrackItemsByKeyword(keyword)) {
                     is SpotifyApiResource.Success -> result.data ?: listOf()
                     is SpotifyApiResource.Error -> {
                         errorReason = result.reason
@@ -114,8 +113,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             if (errorReason != null) return@coroutineScope
 
             async {
-                trackItems.forEach{ trackItem ->
-                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                trackItems.forEach { trackItem ->
+                    when (val result = getAudioFeaturesById(trackItem.id)) {
                         is SpotifyApiResource.Success -> {
                             val audioFeature: AudioFeature = result.data ?: return@forEach
                             val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
@@ -137,22 +136,21 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         val albumImages: List<Image> = trackItems.album.images
         val imageUrl: String = if (albumImages.isNotEmpty()) albumImages.first().url else ""
         return TrackInfo(
-                id = trackItems.id,
-                contextUri = audioFeature.uri,
-                name = trackItems.name,
-                artist = artistName,
-                imageUrl = imageUrl,
-                tempo = audioFeature.tempo,
-                danceability = audioFeature.danceability,
-                energy = audioFeature.energy
-            )
+            id = trackItems.id,
+            contextUri = audioFeature.uri,
+            name = trackItems.name,
+            artist = artistName,
+            imageUrl = imageUrl,
+            tempo = audioFeature.tempo,
+            danceability = audioFeature.danceability,
+            energy = audioFeature.energy
+        )
     }
 
     private suspend fun getTrackItemsByKeyword(
-        accessToken: String,
         keyword: String
     ): SpotifyApiResource<List<TrackItems>> {
-        
+
 
         return try {
             val request = spotifyApi.getTracksByKeyword(
@@ -167,10 +165,9 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     private suspend fun getAudioFeaturesById(
-        accessToken: String,
         id: String
     ): SpotifyApiResource<AudioFeature> {
-        
+
         return try {
             val request = spotifyApi.getAudioFeaturesById(id)
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()!!)
@@ -181,7 +178,6 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun getRecommendTrackInfos(
-        accessToken: String,
         trackInfo: TrackInfo,
         fetchUpperTrack: Boolean
     ): SpotifyApiResource<List<TrackInfo>> {
@@ -189,7 +185,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
         var errorReason: SpotifyApiErrorReason? = null
         coroutineScope {
             val trackItems = async {
-                return@async when (val result = getRecommendTrackItems(accessToken, trackInfo, fetchUpperTrack)) {
+                return@async when (val result =
+                    getRecommendTrackItems(trackInfo, fetchUpperTrack)) {
                     is SpotifyApiResource.Success -> result.data ?: listOf()
                     is SpotifyApiResource.Error -> {
                         errorReason = result.reason
@@ -201,8 +198,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             if (errorReason != null) return@coroutineScope
 
             async {
-                trackItems.forEach{ trackItem ->
-                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                trackItems.forEach { trackItem ->
+                    when (val result = getAudioFeaturesById(trackItem.id)) {
                         is SpotifyApiResource.Success -> {
                             val audioFeature: AudioFeature = result.data ?: return@forEach
                             val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
@@ -218,11 +215,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     private suspend fun getRecommendTrackItems(
-        accessToken: String,
         trackInfo: TrackInfo,
         fetchUpperTrack: Boolean
     ): SpotifyApiResource<List<TrackItems>> {
-        
+
 
         //UpperTrackListを返したいならEnergyを1.0~1.2、Downerは0.8~1.0に調整
         var minEnergyRate = RecommendParameter.MinEnergyRate.value //1.0
@@ -252,8 +248,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
      * Playlist
      * */
 
-    suspend fun getUsersPlaylist(accessToken: String): SpotifyApiResource<List<PlaylistItem>> {
-        
+    suspend fun getUsersPlaylist(): SpotifyApiResource<List<PlaylistItem>> {
+
         return try {
             val request = spotifyApi.getUsersAllPlaylists()
             if (request.isSuccessful) SpotifyApiResource.Success(request.body()?.items ?: listOf())
@@ -262,16 +258,16 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             SpotifyApiResource.Error(SpotifyApiErrorReason.UnKnown(e))
         }
     }
+
     // todo trackItemsの関数だけ変更すれば使いまわせる
     suspend fun getTrackInfosByPlaylistId(
-        accessToken: String,
         playlistId: String
     ): SpotifyApiResource<List<TrackInfo>> {
         val trackInfos = mutableListOf<TrackInfo>()
         var errorReason: SpotifyApiErrorReason? = null
         coroutineScope {
             val trackItems = async {
-                return@async when (val result = getTrackItemsByPlaylistId(accessToken, playlistId)) {
+                return@async when (val result = getTrackItemsByPlaylistId(playlistId)) {
                     is SpotifyApiResource.Success -> result.data ?: listOf()
                     is SpotifyApiResource.Error -> {
                         errorReason = result.reason
@@ -283,8 +279,8 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
             if (errorReason != null) return@coroutineScope
 
             async {
-                trackItems.forEach{ trackItem ->
-                    when (val result = getAudioFeaturesById(accessToken, trackItem.id)) {
+                trackItems.forEach { trackItem ->
+                    when (val result = getAudioFeaturesById(trackItem.id)) {
                         is SpotifyApiResource.Success -> {
                             val audioFeature: AudioFeature = result.data ?: return@forEach
                             val trackInfo: TrackInfo = generateTrackInfo(trackItem, audioFeature)
@@ -300,10 +296,9 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     private suspend fun getTrackItemsByPlaylistId(
-        accessToken: String,
         playlistId: String
     ): SpotifyApiResource<List<TrackItems>> {
-        
+
         val request = spotifyApi.getTracksByPlaylistId(
             playlistId = playlistId
         )
@@ -316,11 +311,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun createPlaylist(
-        accessToken: String,
         userId: String,
         title: String
     ): SpotifyApiResource<String> {
-        
+
         return try {
             val request = spotifyApi.createPlaylist(
                 userId = userId,
@@ -334,11 +328,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun addTracksToPlaylist(
-        accessToken: String,
         playlistId: String,
         trackUris: List<String>
     ): SpotifyApiResource<Boolean> {
-        
+
         return try {
             val request = spotifyApi.addTracksToPlaylist(
                 contentType = APPLICATION_JSON,
@@ -353,12 +346,11 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun reorderPlaylistsTracks(
-        accessToken: String,
         playlistId: String,
         initialPosition: Int,
         finalPosition: Int
     ): SpotifyApiResource<Boolean> {
-        
+
 
         val request = spotifyApi.reorderPlaylistsTracks(
             contentType = APPLICATION_JSON,
@@ -377,11 +369,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun updatePlaylistTitle(
-        accessToken: String,
         playlistId: String,
         playlistTitle: String
     ): SpotifyApiResource<Boolean> {
-        
+
 
         return try {
             val request = spotifyApi.updatePlaylistTitle(
@@ -397,11 +388,10 @@ class Repository @Inject constructor(private val spotifyApi: SpotifyApi) {
     }
 
     suspend fun deleteTracksFromPlaylist(
-        accessToken: String,
         playlistId: String,
         trackUri: String
     ): SpotifyApiResource<Boolean> {
-        
+
 
         val request = spotifyApi.deleteTracksFromPlaylist(
             contentType = APPLICATION_JSON,
