@@ -6,6 +6,7 @@ import com.kabos.spotifydj.data.model.User
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import com.kabos.spotifydj.data.model.feature.AudioFeature
 import com.kabos.spotifydj.data.model.playlist.CreatePlaylistBody
+import com.kabos.spotifydj.data.model.playlist.Playlist
 import com.kabos.spotifydj.data.model.playlist.PlaylistItem
 import com.kabos.spotifydj.data.model.requestBody.*
 import com.kabos.spotifydj.data.model.track.TrackItems
@@ -16,8 +17,8 @@ import javax.inject.Inject
 
 class PlaylistRepository @Inject constructor(private val playlistApi: PlaylistApi) {
 
-    suspend fun getUsersPlaylist(): List<PlaylistItem> {
-        return playlistApi.getUsersAllPlaylists().errorHandling().items
+    suspend fun getUsersPlaylist(offset: Int = 0): Playlist {
+        return playlistApi.getUsersAllPlaylists(offset = offset).errorHandling()
     }
 
     private suspend fun getTrackItemsByPlaylistId(playlistId: String): List<TrackItems> {

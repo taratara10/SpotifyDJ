@@ -8,6 +8,7 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.data.model.User
 import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.model.exception.TokenExpiredException
 import com.kabos.spotifydj.data.model.playback.Device
 import com.kabos.spotifydj.data.repository.UserRepository
 import com.kabos.spotifydj.util.*
@@ -37,6 +38,7 @@ class UserViewModel @Inject constructor(private val userRepository: UserReposito
             if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
                 _needRefreshAccessToken.postValue(OneShotEvent(Unit))
             }
+            if (exception is TokenExpiredException) _needRefreshAccessToken.postValue(OneShotEvent(Unit))
             Timber.d("errorHandle $exception")
         }
     }

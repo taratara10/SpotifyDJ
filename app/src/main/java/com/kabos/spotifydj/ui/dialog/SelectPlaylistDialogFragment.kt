@@ -4,9 +4,12 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kabos.spotifydj.databinding.DialogFragmentSelectPlaylistBinding
 import com.kabos.spotifydj.data.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
@@ -44,13 +47,38 @@ class SelectPlaylistDialogFragment: DialogFragment() {
         initViewModels()
         binding.apply {
             usersPlaylistList.adapter = playlistAdapter
+            usersPlaylistList.addOnScrollListener(InfiniteScrollListener())
         }
 
     }
 
     private fun initViewModels() {
-        playlistViewModel.allPlaylist.observe(this) { playlist ->
-            playlistAdapter.submitList(playlist)
+        with(playlistViewModel) {
+            allPlaylist.observe(this@SelectPlaylistDialogFragment) { playlist ->
+                playlistAdapter.submitList(playlist)
+            }
+
+            isLoadingPlaylist.observe(this@SelectPlaylistDialogFragment) {isLoading ->
+                binding.progress.isVisible = isLoading
+            }
+        }
+    }
+
+    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            // アダプターが保持しているアイテムの合計
+            val itemCount = playlistAdapter.itemCount
+            // 画面に表示されているアイテム数
+            val childCount = recyclerView.childCount
+            val manager = recyclerView.layoutManager as LinearLayoutManager
+            // 画面に表示されている一番上のアイテムの位置
+            val firstPosition = manager.findFirstVisibleItemPosition()
+            // 以下の条件に当てはまれば一番下までスクロールされたと判断できる。
+            if (itemCount == childCount + firstPosition) {
+                playlistViewModel.getNextPlaylist()
+            }
         }
     }
 }
