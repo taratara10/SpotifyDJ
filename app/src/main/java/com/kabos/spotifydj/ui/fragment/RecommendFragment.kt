@@ -19,7 +19,7 @@ import com.kabos.spotifydj.util.callback.TrackCallback
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
 import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
-import com.kabos.spotifydj.ui.viewmodel.UserViewModel
+import com.kabos.spotifydj.ui.viewmodel.PlayerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,7 +27,7 @@ class RecommendFragment: Fragment() {
     private lateinit var binding: FragmentRecommendBinding
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val rootViewModel: RootViewModel by activityViewModels()
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val playerViewModel: PlayerViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val currentTrackAdapter by lazy { TrackAdapter(callback) }
     private val upperTrackAdapter by lazy { TrackAdapter(callback) }
@@ -39,7 +39,7 @@ class RecommendFragment: Fragment() {
         }
 
         override fun playback(trackInfo: TrackInfo) {
-            userViewModel.playbackTrack(trackInfo)
+            playerViewModel.playbackTrack(trackInfo)
         }
 
         override fun onClick(trackInfo: TrackInfo) {

@@ -18,34 +18,10 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor(private val userRepository: UserRepository) :
+class PlayerViewModel @Inject constructor(private val userRepository: UserRepository) :
     BaseViewModel() {
     private var mDeviceId = ""
-    private val _userAccount = MutableLiveData<User>()
-
     val startExternalSpotifyApp = MutableLiveData(false)
-
-    val userAccount: LiveData<User>
-        get() = _userAccount
-
-
-    fun getUserAccount() = viewModelScope.launch {
-
-        runCatching {
-            val user = userRepository.getUsersProfile()
-            _userAccount.postValue(user)
-        }.onFailure { exception ->
-            if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
-                _needRefreshAccessToken.postValue(OneShotEvent(Unit))
-            }
-            if (exception is TokenExpiredException) _needRefreshAccessToken.postValue(OneShotEvent(Unit))
-            Timber.d("errorHandle $exception")
-        }
-    }
-
-    /**
-     * Playback
-     * */
 
     //todo deviceIdをSharePrefから取り出して初期化する
     fun initializeDeviceId(deviceId: String) {

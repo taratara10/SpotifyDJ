@@ -3,10 +3,14 @@ package com.kabos.spotifydj.ui.viewmodel
 import androidx.lifecycle.*
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
+import com.kabos.spotifydj.data.model.User
+import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.model.exception.TokenExpiredException
 import com.kabos.spotifydj.data.model.playlist.Playlist
 import com.kabos.spotifydj.data.model.playlist.PlaylistItem
 import com.kabos.spotifydj.data.repository.PlaylistRepository
 import com.kabos.spotifydj.data.repository.TrackRepository
+import com.kabos.spotifydj.data.repository.UserRepository
 import com.kabos.spotifydj.util.OneShotEvent
 import com.kabos.spotifydj.util.addItem
 import com.kabos.spotifydj.util.constant.PlaylistConstant.Companion.CREATE_NEW_PLAYLIST_ID
@@ -19,6 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
+    private val userRepository: UserRepository,
     private val playlistRepository: PlaylistRepository,
     private val trackRepository: TrackRepository
 ) : BaseViewModel() {
@@ -49,10 +54,23 @@ class PlaylistViewModel @Inject constructor(
         get() = _isPlaylistUnSaved
 
     fun initUserAccount(id: String, name: String) {
-        mUserId = id
-        mUserName = name
+
     }
 
+    fun getUserAccount() = viewModelScope.launch {
+
+        runCatching {
+            val user = userRepository.getUsersProfile()
+            mUserId = user.id
+            mUserName = user.display_name
+        }.onFailure { exception ->
+            if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
+                _needRefreshAccessToken.postValue(OneShotEvent(Unit))
+            }
+            if (exception is TokenExpiredException) _needRefreshAccessToken.postValue(OneShotEvent(Unit))
+            Timber.d("errorHandle $exception")
+        }
+    }
     fun getUsersPlaylists() = viewModelScope.launch {
         _isLoadingPlaylist.postValue(true)
         runCatching {

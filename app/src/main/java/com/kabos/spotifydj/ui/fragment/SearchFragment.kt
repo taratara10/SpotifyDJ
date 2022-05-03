@@ -22,7 +22,7 @@ import com.kabos.spotifydj.ui.viewmodel.*
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding
     private val rootViewModel: RootViewModel by activityViewModels()
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val playerViewModel: PlayerViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
@@ -34,7 +34,7 @@ class SearchFragment: Fragment() {
         }
 
         override fun playback(trackInfo: TrackInfo) {
-            userViewModel.playbackTrack(trackInfo)
+            playerViewModel.playbackTrack(trackInfo)
         }
 
         override fun onClick(trackInfo: TrackInfo) {

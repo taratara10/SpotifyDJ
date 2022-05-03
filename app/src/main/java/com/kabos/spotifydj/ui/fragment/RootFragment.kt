@@ -14,7 +14,6 @@ import com.kabos.spotifydj.databinding.FragmentRootBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
-import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,7 +45,6 @@ class RootFragment: Fragment() {
                     Intent().setComponent(
                         ComponentName("com.spotify.music",
                             "com.spotify.music.MainActivity")))
-
                 true
             }
             R.id.menu_fetch_playlist -> {
