@@ -70,6 +70,7 @@ class EditPlaylistFragment: Fragment() {
             }
 
             back.setOnClickListener {
+                playlistViewModel.clearEditingPlaylist()
                 rootViewModel.setPagerPosition(Pager.Playlist)
             }
 

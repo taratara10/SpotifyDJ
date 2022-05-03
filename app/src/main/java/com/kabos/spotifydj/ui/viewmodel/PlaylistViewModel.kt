@@ -53,10 +53,6 @@ class PlaylistViewModel @Inject constructor(
     val isPlaylistUnSaved: LiveData<Boolean>
         get() = _isPlaylistUnSaved
 
-    fun initUserAccount(id: String, name: String) {
-
-    }
-
     fun getUserAccount() = viewModelScope.launch {
 
         runCatching {
@@ -107,10 +103,10 @@ class PlaylistViewModel @Inject constructor(
             val nextOffsetPlaylist = playlistRepository.getUsersPlaylist(nextOffset)
             currentPlaylist = nextOffsetPlaylist
 
-            Timber.d("--ss playlist ${nextOffsetPlaylist.offset}/${nextOffsetPlaylist.total}")
             nextOffsetPlaylist.items.forEach {
                 _allPlaylist.addItem(it)
             }
+
             _allPlaylist.value?.let {
                 filterUserCreatedPlaylist(it)
             }
@@ -138,6 +134,7 @@ class PlaylistViewModel @Inject constructor(
         verifyPlaylistIsSaved()
     }
 
+    // todo 不正なID代入してそう
     private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
         if (_editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID) return@launch
         runCatching {
@@ -158,8 +155,10 @@ class PlaylistViewModel @Inject constructor(
     }
 
     fun removeTrackFromLocalPlaylist(position: Int) {
-        val removeTrack = _editingPlaylist.removeAt(position)
-        if (removeTrack != null) deleteTracksFromPlaylist(removeTrack.contextUri)
+        runCatching {
+            val removeTrack = _editingPlaylist.removeAt(position)
+            if (removeTrack != null) deleteTracksFromPlaylist(removeTrack.contextUri)
+        }
     }
 
     private fun deleteTracksFromPlaylist(trackUri: String) = viewModelScope.launch {
@@ -181,25 +180,10 @@ class PlaylistViewModel @Inject constructor(
         }.onFailure { errorHandle(it) }
     }
 
-    /**
-     * Dialog Playlist
-     * */
-
     fun loadPlaylistIntoEditPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
         _editingPlaylistTitle.postValue(playlist.name)
         updatePlaylistId(playlist.id)
         getTracksByPlaylistId(playlist.id)
-    }
-
-    private fun updatePlaylistId(playlistId: String) {
-        _editingPlaylistId = playlistId
-        verifyPlaylistIsSaved()
-    }
-
-    private fun verifyPlaylistIsSaved() {
-        val isNotSaved =
-            _editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID
-        _isPlaylistUnSaved.postValue(isNotSaved)
     }
 
     fun clearEditingPlaylist() {
@@ -214,4 +198,14 @@ class PlaylistViewModel @Inject constructor(
         }.onFailure { errorHandle(it) }
     }
 
+    private fun updatePlaylistId(playlistId: String) {
+        _editingPlaylistId = playlistId
+        verifyPlaylistIsSaved()
+    }
+
+    private fun verifyPlaylistIsSaved() {
+        val isNotSaved =
+            _editingPlaylistId.isEmpty() || _editingPlaylistId == CREATE_NEW_PLAYLIST_ID
+        _isPlaylistUnSaved.postValue(isNotSaved)
+    }
 }
