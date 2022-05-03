@@ -18,7 +18,9 @@ import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
+import com.kabos.spotifydj.util.InfiniteScrollListener
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SelectPlaylistDialogFragment: DialogFragment() {
@@ -47,9 +49,10 @@ class SelectPlaylistDialogFragment: DialogFragment() {
         initViewModels()
         binding.apply {
             usersPlaylistList.adapter = playlistAdapter
-            usersPlaylistList.addOnScrollListener(InfiniteScrollListener())
+            usersPlaylistList.addOnScrollListener(InfiniteScrollListener(playlistAdapter){
+                playlistViewModel.getNextPlaylist()
+            })
         }
-
     }
 
     private fun initViewModels() {
@@ -64,21 +67,4 @@ class SelectPlaylistDialogFragment: DialogFragment() {
         }
     }
 
-    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-
-            // アダプターが保持しているアイテムの合計
-            val itemCount = playlistAdapter.itemCount
-            // 画面に表示されているアイテム数
-            val childCount = recyclerView.childCount
-            val manager = recyclerView.layoutManager as LinearLayoutManager
-            // 画面に表示されている一番上のアイテムの位置
-            val firstPosition = manager.findFirstVisibleItemPosition()
-            // 以下の条件に当てはまれば一番下までスクロールされたと判断できる。
-            if (itemCount == childCount + firstPosition) {
-                playlistViewModel.getNextPlaylist()
-            }
-        }
-    }
 }

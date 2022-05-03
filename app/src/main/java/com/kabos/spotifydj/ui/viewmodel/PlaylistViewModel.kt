@@ -93,6 +93,9 @@ class PlaylistViewModel @Inject constructor(
             nextOffsetPlaylist.items.forEach {
                 _allPlaylist.addItem(it)
             }
+            _allPlaylist.value?.let {
+                filterUserCreatedPlaylist(it)
+            }
         }.onFailure { errorHandle(it) }
 
         _isLoadingPlaylist.postValue(false)
