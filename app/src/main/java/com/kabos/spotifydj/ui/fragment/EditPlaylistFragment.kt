@@ -13,11 +13,9 @@ import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.FragmentEditPlaylistBinding
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
+import com.kabos.spotifydj.ui.viewmodel.*
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.DragTrackCallback
-import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,7 +23,7 @@ class EditPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentEditPlaylistBinding
     private val rootViewModel: RootViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
-    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by activityViewModels()
     private val dragTackAdapter by lazy { DragTrackAdapter(callback ,emptyList()) }
     private val callback = object : DragTrackCallback {
         override fun onClick(trackInfo: TrackInfo) {
@@ -38,11 +36,11 @@ class EditPlaylistFragment: Fragment() {
         }
 
         override fun onSwiped(position: Int) {
-            playlistViewModel.removeTrackFromLocalPlaylist(position)
+            editingPlaylistViewModel.removeTrackFromLocalPlaylist(position)
         }
 
         override fun onDropped(initial: Int, final: Int) {
-            playlistViewModel.reorderPlaylistsTracks(initial,final)
+            editingPlaylistViewModel.reorderPlaylistsTracks(initial,final)
         }
     }
 
@@ -65,12 +63,12 @@ class EditPlaylistFragment: Fragment() {
             titleEdit.setText(generateNewPlaylistTitle())
 
             saveButton.setOnClickListener {
-                playlistViewModel.updateEditingPlaylistTitle(titleEdit.text.toString())
+                editingPlaylistViewModel.updateEditingPlaylistTitle(titleEdit.text.toString())
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_create_playlist)
             }
 
             back.setOnClickListener {
-                playlistViewModel.clearEditingPlaylist()
+                editingPlaylistViewModel.clearEditingPlaylist()
                 rootViewModel.setPagerPosition(Pager.Playlist)
             }
 
@@ -80,7 +78,7 @@ class EditPlaylistFragment: Fragment() {
     }
 
     private fun initViewModels() {
-        playlistViewModel.apply {
+        editingPlaylistViewModel.apply {
             editingPlaylist.observe(viewLifecycleOwner) { playlist ->
                 dragTackAdapter.submitList(playlist)
                 binding.emptyText.isVisible = playlist.isNullOrEmpty()

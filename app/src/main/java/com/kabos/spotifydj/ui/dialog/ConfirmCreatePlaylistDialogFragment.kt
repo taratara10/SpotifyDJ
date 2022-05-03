@@ -10,15 +10,18 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.databinding.DialogFragmentConfirmCreatePlaylistBinding
+import com.kabos.spotifydj.ui.viewmodel.EditingPlaylistViewModel
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
+import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import com.kabos.spotifydj.util.setErrorMessageByBoolean
 import com.kabos.spotifydj.util.setInvalidAppearance
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
+class ConfirmCreatePlaylistDialogFragment : DialogFragment() {
     private lateinit var binding: DialogFragmentConfirmCreatePlaylistBinding
-    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by activityViewModels()
     private var playlistTrackUris: List<String> = listOf()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -41,14 +44,18 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
             }
 
             saveButton.setOnClickListener {
-                playlistViewModel.createPlaylist(titleEdit.text.toString(), playlistTrackUris)
+                editingPlaylistViewModel.createPlaylist(
+                    userViewModel.userId,
+                    titleEdit.text.toString(),
+                    playlistTrackUris
+                )
                 findNavController().popBackStack()
             }
         }
     }
 
     private fun initViewModel() {
-        playlistViewModel.apply {
+        editingPlaylistViewModel.apply {
             editingPlaylistTitle.observe(this@ConfirmCreatePlaylistDialogFragment) { title ->
                 binding.titleEdit.setText(title)
                 verifyPlaylistTitle(title)
@@ -62,7 +69,10 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
 
     private fun verifyPlaylistTitle(title: String) {
         binding.apply {
-            titleLayout.setErrorMessageByBoolean(title.isNotEmpty(), getString(R.string.playlist_title_error_message))
+            titleLayout.setErrorMessageByBoolean(
+                title.isNotEmpty(),
+                getString(R.string.playlist_title_error_message)
+            )
             saveButton.setInvalidAppearance(title.isEmpty())
         }
     }

@@ -18,6 +18,7 @@ import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
+import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import com.kabos.spotifydj.util.InfiniteScrollListener
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
@@ -26,6 +27,7 @@ import timber.log.Timber
 class SelectPlaylistDialogFragment: DialogFragment() {
     private lateinit var binding: DialogFragmentSelectPlaylistBinding
     private val rootViewModel: RootViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
@@ -50,7 +52,7 @@ class SelectPlaylistDialogFragment: DialogFragment() {
         binding.apply {
             usersPlaylistList.adapter = playlistAdapter
             usersPlaylistList.addOnScrollListener(InfiniteScrollListener(playlistAdapter){
-                playlistViewModel.getNextPlaylist()
+                playlistViewModel.getNextPlaylist(userViewModel.userName)
             })
         }
     }

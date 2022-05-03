@@ -14,11 +14,8 @@ import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import com.kabos.spotifydj.databinding.ActivityMainBinding
+import com.kabos.spotifydj.ui.viewmodel.*
 import com.kabos.spotifydj.util.OneShotEvent
-import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
-import com.kabos.spotifydj.ui.viewmodel.PlayerViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -46,10 +43,11 @@ class MainActivity : AppCompatActivity() {
         lateinit var activity: MainActivity
     }
 
-    private val playerViewModel: PlayerViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
     private val searchViewModel: SearchViewModel by viewModels()
     private val recommendViewModel: RecommendViewModel by viewModels()
     private val playlistViewModel: PlaylistViewModel by viewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
         initViewModels()
         launchAuthenticationActivity()
-        playlistViewModel.getUserAccount()
+        userViewModel.getUserAccount()
     }
 
     private fun launchAuthenticationActivity() {
@@ -105,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     // todo startIntentも全部ここでobserveして、fragmentは通知送るだけにしたいかも
     private fun initViewModels() {
-        playerViewModel.startExternalSpotifyApp.observe(this){ startActivity->
+        userViewModel.startExternalSpotifyApp.observe(this){ startActivity->
             if (startActivity) startActivity(
                 Intent().setComponent(
                     ComponentName(
@@ -113,14 +111,16 @@ class MainActivity : AppCompatActivity() {
                         "com.spotify.music.MainActivity")))
         }
 
-        observeAccessTokenExpiration(playerViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(playlistViewModel.needRefreshAccessToken)
-        observeToastMessage(playerViewModel.toastMessageId)
+        observeAccessTokenExpiration(editingPlaylistViewModel.needRefreshAccessToken)
+        observeToastMessage(userViewModel.toastMessageId)
         observeToastMessage(searchViewModel.toastMessageId)
         observeToastMessage(recommendViewModel.toastMessageId)
         observeToastMessage(playlistViewModel.toastMessageId)
+        observeToastMessage(editingPlaylistViewModel.toastMessageId)
     }
 
     private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Unit>>) {

@@ -22,19 +22,20 @@ import com.kabos.spotifydj.ui.viewmodel.*
 class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding
     private val rootViewModel: RootViewModel by activityViewModels()
-    private val playerViewModel: PlayerViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by activityViewModels()
     private val trackAdapter by lazy { TrackAdapter(callback) }
     private val callback: TrackCallback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            playlistViewModel.addTrackToEditingPlaylist(trackInfo)
+            editingPlaylistViewModel.addTrackToEditingPlaylist(trackInfo)
             rootViewModel.setPagerPosition(Pager.EditPlaylist)
         }
 
         override fun playback(trackInfo: TrackInfo) {
-            playerViewModel.playbackTrack(trackInfo)
+            userViewModel.playbackTrack(trackInfo)
         }
 
         override fun onClick(trackInfo: TrackInfo) {
@@ -62,12 +63,11 @@ class SearchFragment: Fragment() {
             }
 
             loadPlaylistButton.setOnClickListener {
-                playlistViewModel.getUsersPlaylists()
+                playlistViewModel.getUsersPlaylists(userViewModel.userName)
                 findNavController().navigate(R.id.action_nav_main_to_nav_select_playlist)
             }
         }
     }
-
 
     private fun initViewModels() {
         with(searchViewModel) {
