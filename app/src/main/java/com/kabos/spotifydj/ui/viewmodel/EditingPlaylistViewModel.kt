@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EditingPlaylistViewModel  @Inject constructor(
+class EditingPlaylistViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository,
     private val trackRepository: TrackRepository
 ) : BaseViewModel() {
@@ -34,24 +34,28 @@ class EditingPlaylistViewModel  @Inject constructor(
     val isPlaylistUnSaved: LiveData<Boolean>
         get() = _isPlaylistUnSaved
 
-    fun createPlaylist(userId: String, title: String, trackUris: List<String>) = viewModelScope.launch {
-        runCatching {
-            val playlistId = playlistRepository.createPlaylist(userId, title)
-            updatePlaylistId(playlistId)
-            addTracksToPlaylist(trackUris)
-            _toastMessageId.postValue(R.string.result_crete_playlist_success)
-        }.onFailure { errorHandle(it) }
-    }
+    fun createPlaylist(userId: String, title: String, trackUris: List<String>) =
+        viewModelScope.launch {
+            runCatching {
+                val playlistId = playlistRepository.createPlaylist(userId, title)
+                updatePlaylistId(playlistId)
+                addTracksToPlaylist(trackUris)
+                _toastMessageId.postValue(R.string.result_crete_playlist_success)
+            }.onFailure { errorHandle(it) }
+        }
 
     fun addTrackToEditingPlaylist(track: TrackInfo) {
         _editingPlaylist.addItem(track)
-        addTracksToPlaylist(listOf(track.contextUri))
+
+        if (shouldPostLocalEdits()) {
+            addTracksToPlaylist(listOf(track.contextUri))
+        }
+        // 途中で赤ラベルのステータスが変わらないなら、onViewCreatedでやればいい気もする
+        // 考慮もれそうなので、ここでやっちゃうか
         verifyPlaylistIsSaved()
     }
 
-    // todo 不正なID代入してそう
     private fun addTracksToPlaylist(trackUris: List<String>) = viewModelScope.launch {
-        if (_editingPlaylistId.isEmpty() || _editingPlaylistId == PlaylistConstant.CREATE_NEW_PLAYLIST_ID) return@launch
         runCatching {
             playlistRepository.addTracksToPlaylist(_editingPlaylistId, trackUris)
         }.onFailure { errorHandle(it) }
@@ -77,21 +81,23 @@ class EditingPlaylistViewModel  @Inject constructor(
     }
 
     private fun deleteTracksFromPlaylist(trackUri: String) = viewModelScope.launch {
-        if (_editingPlaylistId.isEmpty()) return@launch
         runCatching {
-            playlistRepository.deleteTracksFromPlaylist(_editingPlaylistId, trackUri)
+            if (shouldPostLocalEdits()) {
+                playlistRepository.deleteTracksFromPlaylist(_editingPlaylistId, trackUri)
+            }
         }.onFailure { errorHandle(it) }
     }
 
     fun reorderPlaylistsTracks(initialPosition: Int, finalPosition: Int) = viewModelScope.launch {
-        if (_editingPlaylistId.isEmpty()) return@launch
         _editingPlaylist.replacePosition(initialPosition, finalPosition)
         runCatching {
-            playlistRepository.reorderPlaylistsTracks(
-                _editingPlaylistId,
-                initialPosition,
-                finalPosition
-            )
+            if (shouldPostLocalEdits()) {
+                playlistRepository.reorderPlaylistsTracks(
+                    _editingPlaylistId,
+                    initialPosition,
+                    finalPosition
+                )
+            }
         }.onFailure { errorHandle(it) }
     }
 
@@ -123,4 +129,8 @@ class EditingPlaylistViewModel  @Inject constructor(
             _editingPlaylistId.isEmpty() || _editingPlaylistId == PlaylistConstant.CREATE_NEW_PLAYLIST_ID
         _isPlaylistUnSaved.postValue(isNotSaved)
     }
+
+    private fun shouldPostLocalEdits(): Boolean =
+        (_editingPlaylistId.isNotEmpty()
+                && _editingPlaylistId != PlaylistConstant.CREATE_NEW_PLAYLIST_ID)
 }
