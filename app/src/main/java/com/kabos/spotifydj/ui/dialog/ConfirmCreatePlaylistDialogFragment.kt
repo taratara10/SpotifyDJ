@@ -42,7 +42,7 @@ class ConfirmCreatePlaylistDialogFragment: DialogFragment() {
 
             saveButton.setOnClickListener {
                 playlistViewModel.createPlaylist(titleEdit.text.toString(), playlistTrackUris)
-                findNavController()
+                findNavController().popBackStack()
             }
         }
     }

@@ -69,6 +69,10 @@ class EditPlaylistFragment: Fragment() {
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_create_playlist)
             }
 
+            back.setOnClickListener {
+                rootViewModel.setPagerPosition(Pager.Playlist)
+            }
+
             // todo editTextの編集ではなく、dialogで表示する
 
         }

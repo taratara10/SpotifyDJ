@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background_black"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -25,25 +26,34 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ImageButton
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintBottom_toTopOf="@+id/playlist_list"
+        app:layout_constraintStart_toStartOf="@+id/guideline_begin" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/title_layout"
         style="@style/MyDenseOutlined"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColorHint="@color/white"
-        android:layout_marginTop="@dimen/margin_8"
         android:layout_marginEnd="16dp"
+        android:layout_marginTop="@dimen/margin_16"
+        android:textColorHint="@color/white"
         app:layout_constraintEnd_toStartOf="@+id/save_button"
-        app:layout_constraintStart_toStartOf="@+id/guideline_begin"
-        app:layout_constraintTop_toBottomOf="@id/unsaved_description" >
+        app:layout_constraintStart_toEndOf="@+id/back"
+        app:layout_constraintTop_toBottomOf="@+id/unsaved_description">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/title_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="新規プレイリスト名"
-            android:textColor="@color/white"
-            android:inputType="text" />
+            android:focusable="false"
+            android:inputType="text"
+            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
