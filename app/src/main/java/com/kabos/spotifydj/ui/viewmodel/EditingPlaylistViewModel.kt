@@ -101,10 +101,10 @@ class EditingPlaylistViewModel @Inject constructor(
         }.onFailure { errorHandle(it) }
     }
 
-    fun loadPlaylistIntoEditPlaylistFragment(playlist: PlaylistItem) = viewModelScope.launch {
-        _editingPlaylistTitle.postValue(playlist.name)
-        updatePlaylistId(playlist.id)
-        getTracksByPlaylistId(playlist.id)
+    fun loadPlaylistIntoEditPlaylistFragment(playlistId: String, name: String) = viewModelScope.launch {
+        _editingPlaylistTitle.postValue(name)
+        updatePlaylistId(playlistId)
+        getTracksByPlaylistId(playlistId)
     }
 
     fun clearEditingPlaylist() {
@@ -115,7 +115,9 @@ class EditingPlaylistViewModel @Inject constructor(
 
     private fun getTracksByPlaylistId(playlistId: String) = viewModelScope.launch {
         runCatching {
-            _editingPlaylist.postValue(trackRepository.getTrackInfosByPlaylistId(playlistId))
+            if (shouldPostLocalEdits()) {
+                _editingPlaylist.postValue(trackRepository.getTrackInfosByPlaylistId(playlistId))
+            }
         }.onFailure { errorHandle(it) }
     }
 

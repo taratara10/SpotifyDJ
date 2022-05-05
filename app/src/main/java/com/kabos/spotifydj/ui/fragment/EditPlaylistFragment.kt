@@ -16,8 +16,6 @@ import com.kabos.spotifydj.ui.adapter.DragTrackAdapter
 import com.kabos.spotifydj.ui.viewmodel.*
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.DragTrackCallback
-import java.text.SimpleDateFormat
-import java.util.*
 
 class EditPlaylistFragment: Fragment() {
     private lateinit var binding: FragmentEditPlaylistBinding
@@ -60,8 +58,6 @@ class EditPlaylistFragment: Fragment() {
                 disableSwipeDirection(DragDropSwipeRecyclerView.ListOrientation.DirectionFlag.RIGHT)
             }
 
-            titleEdit.setText(generateNewPlaylistTitle())
-
             saveButton.setOnClickListener {
                 editingPlaylistViewModel.updateEditingPlaylistTitle(titleEdit.text.toString())
                 findNavController().navigate(R.id.action_nav_main_to_nav_confirm_create_playlist)
@@ -100,11 +96,5 @@ class EditPlaylistFragment: Fragment() {
             unsavedDescription.isVisible = isPlaylistUnSaved
             saveButton.isVisible = isPlaylistUnSaved
         }
-    }
-
-    private fun generateNewPlaylistTitle(): String {
-        val date = Calendar.getInstance().time
-        val dataFormat = SimpleDateFormat("yyyy_MM_dd", Locale.getDefault())
-        return getString(R.string.new_playlist_title, dataFormat.format(date))
     }
 }
