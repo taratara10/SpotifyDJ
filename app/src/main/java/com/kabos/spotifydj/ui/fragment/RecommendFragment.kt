@@ -14,12 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.kabos.spotifydj.databinding.FragmentRecommendBinding
 import com.kabos.spotifydj.data.model.TrackInfo
 import com.kabos.spotifydj.ui.adapter.TrackAdapter
+import com.kabos.spotifydj.ui.viewmodel.*
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.util.callback.TrackCallback
-import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewmodel.RootViewModel
-import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,13 +25,13 @@ class RecommendFragment: Fragment() {
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val rootViewModel: RootViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
-    private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by activityViewModels()
     private val currentTrackAdapter by lazy { TrackAdapter(callback) }
     private val upperTrackAdapter by lazy { TrackAdapter(callback) }
     private val downerTrackAdapter  by lazy { TrackAdapter(callback) }
     private val callback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            playlistViewModel.addTrackToEditingPlaylist(trackInfo)
+            editingPlaylistViewModel.addTrackToEditingPlaylist(trackInfo)
             rootViewModel.setPagerPosition(Pager.EditPlaylist)
         }
 

@@ -4,9 +4,12 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kabos.spotifydj.databinding.DialogFragmentSelectPlaylistBinding
 import com.kabos.spotifydj.data.model.playlist.PlaylistItem
 import com.kabos.spotifydj.ui.adapter.PlaylistAdapter
@@ -15,12 +18,16 @@ import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
 import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
+import com.kabos.spotifydj.ui.viewmodel.UserViewModel
+import com.kabos.spotifydj.util.InfiniteScrollListener
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SelectPlaylistDialogFragment: DialogFragment() {
     private lateinit var binding: DialogFragmentSelectPlaylistBinding
     private val rootViewModel: RootViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
     private val playlistAdapter by lazy { PlaylistAdapter(playlistCallback) }
@@ -44,13 +51,22 @@ class SelectPlaylistDialogFragment: DialogFragment() {
         initViewModels()
         binding.apply {
             usersPlaylistList.adapter = playlistAdapter
+            usersPlaylistList.addOnScrollListener(InfiniteScrollListener(playlistAdapter){
+                playlistViewModel.getNextPlaylist(userViewModel.userName)
+            })
         }
-
     }
 
     private fun initViewModels() {
-        playlistViewModel.allPlaylist.observe(this) { playlist ->
-            playlistAdapter.submitList(playlist)
+        with(playlistViewModel) {
+            allPlaylist.observe(this@SelectPlaylistDialogFragment) { playlist ->
+                playlistAdapter.submitList(playlist)
+            }
+
+            isLoadingPlaylist.observe(this@SelectPlaylistDialogFragment) {isLoading ->
+                binding.progress.isVisible = isLoading
+            }
         }
     }
+
 }

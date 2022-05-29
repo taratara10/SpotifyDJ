@@ -26,10 +26,11 @@ class SearchFragment: Fragment() {
     private val searchViewModel: SearchViewModel by activityViewModels()
     private val recommendViewModel: RecommendViewModel by activityViewModels()
     private val playlistViewModel: PlaylistViewModel by activityViewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by activityViewModels()
     private val trackAdapter by lazy { TrackAdapter(callback) }
     private val callback: TrackCallback = object : TrackCallback {
         override fun addTrack(trackInfo: TrackInfo) {
-            playlistViewModel.addTrackToEditingPlaylist(trackInfo)
+            editingPlaylistViewModel.addTrackToEditingPlaylist(trackInfo)
             rootViewModel.setPagerPosition(Pager.EditPlaylist)
         }
 
@@ -62,14 +63,14 @@ class SearchFragment: Fragment() {
             }
 
             loadPlaylistButton.setOnClickListener {
-                playlistViewModel.getUsersPlaylists()
+                playlistViewModel.getUsersPlaylists(userViewModel.userName)
                 findNavController().navigate(R.id.action_nav_main_to_nav_select_playlist)
             }
         }
     }
 
     private fun initViewModels() {
-        searchViewModel.apply {
+        with(searchViewModel) {
             searchTracks.observe(viewLifecycleOwner) { result ->
                 binding.notApplicableResult.isVisible = result.isEmpty()
                 trackAdapter.submitList(result)

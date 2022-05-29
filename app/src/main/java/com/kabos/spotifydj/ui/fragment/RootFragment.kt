@@ -14,14 +14,12 @@ import com.kabos.spotifydj.databinding.FragmentRootBinding
 import com.kabos.spotifydj.ui.adapter.ViewPagerAdapter
 import com.kabos.spotifydj.util.Pager
 import com.kabos.spotifydj.ui.viewmodel.RootViewModel
-import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class RootFragment: Fragment() {
     private lateinit var binding: FragmentRootBinding
     private val viewPagerAdapter: ViewPagerAdapter by lazy { ViewPagerAdapter(this) }
-    private val userViewModel: UserViewModel by activityViewModels()
     private val rootViewModel: RootViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -47,7 +45,6 @@ class RootFragment: Fragment() {
                     Intent().setComponent(
                         ComponentName("com.spotify.music",
                             "com.spotify.music.MainActivity")))
-
                 true
             }
             R.id.menu_fetch_playlist -> {
@@ -80,18 +77,21 @@ class RootFragment: Fragment() {
         rootViewModel.pagerPosition.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { pager ->
                 when (pager) {
-                    Pager.EditPlaylist -> replaceEditPlaylistFragment(viewPager)
+                    Pager.Playlist -> replacePlaylistFragment(Pager.Playlist)
+                    Pager.EditPlaylist -> replacePlaylistFragment(Pager.EditPlaylist)
                     else -> viewPager.setCurrentItem(pager.position, true)
                 }
             }
         }
     }
 
-    private fun replaceEditPlaylistFragment(viewPager: ViewPager2) {
-        viewPagerAdapter.replaceFragment(Pager.EditPlaylist)
+    private fun replacePlaylistFragment(pager: Pager) {
+        viewPagerAdapter.replaceFragment(pager)
         //fragmentをreplaceした後なので、一旦別のfragment行って更新してから戻ってくる
-        viewPager.setCurrentItem(Pager.Recommend.position, true)
-        viewPager.setCurrentItem(Pager.EditPlaylist.position, true)
+        with(binding.pager) {
+            setCurrentItem(Pager.Recommend.position, true)
+            setCurrentItem(Pager.Playlist.position, true)
+        }
     }
 }
 

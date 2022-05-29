@@ -1,13 +1,11 @@
 package com.kabos.spotifydj.ui.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.TrackInfo
-import com.kabos.spotifydj.data.model.User
 import com.kabos.spotifydj.data.model.exception.SpotifyApiException
+import com.kabos.spotifydj.data.model.exception.TokenExpiredException
 import com.kabos.spotifydj.data.model.playback.Device
 import com.kabos.spotifydj.data.repository.UserRepository
 import com.kabos.spotifydj.util.*
@@ -19,31 +17,29 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(private val userRepository: UserRepository) :
     BaseViewModel() {
+    private var mUserId = ""
+    private var mUserName = ""
     private var mDeviceId = ""
-    private val _userAccount = MutableLiveData<User>()
 
     val startExternalSpotifyApp = MutableLiveData(false)
-
-    val userAccount: LiveData<User>
-        get() = _userAccount
-
+    val userId
+        get() = mUserId
+    val userName
+        get() = mUserName
 
     fun getUserAccount() = viewModelScope.launch {
-
         runCatching {
             val user = userRepository.getUsersProfile()
-            _userAccount.postValue(user)
+            mUserId = user.id
+            mUserName = user.display_name
         }.onFailure { exception ->
             if (exception is SpotifyApiException && exception is SpotifyApiException.UnAuthorized) {
                 _needRefreshAccessToken.postValue(OneShotEvent(Unit))
             }
+            if (exception is TokenExpiredException) _needRefreshAccessToken.postValue(OneShotEvent(Unit))
             Timber.d("errorHandle $exception")
         }
     }
-
-    /**
-     * Playback
-     * */
 
     //todo deviceIdをSharePrefから取り出して初期化する
     fun initializeDeviceId(deviceId: String) {

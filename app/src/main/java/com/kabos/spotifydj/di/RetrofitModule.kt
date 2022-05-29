@@ -2,6 +2,7 @@ package com.kabos.spotifydj.di
 
 import com.kabos.spotifydj.BuildConfig
 import com.kabos.spotifydj.data.api.interceptor.AuthorizationInterceptor
+import com.kabos.spotifydj.data.api.interceptor.LoggingInterceptor
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
 import dagger.Module
 import dagger.Provides
@@ -35,9 +36,7 @@ object RetrofitModule {
             .addInterceptor(AuthorizationInterceptor())
 
         if (BuildConfig.DEBUG) {
-            val httpInterceptor = HttpLoggingInterceptor()
-            httpInterceptor.level = HttpLoggingInterceptor.Level.BASIC
-            client.addInterceptor(httpInterceptor)
+            client.addInterceptor(LoggingInterceptor())
         }
 
         return client.build()

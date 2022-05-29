@@ -23,7 +23,10 @@ import retrofit2.http.*
 interface PlaylistApi {
 
     @GET("me/playlists")
-    suspend fun getUsersAllPlaylists(): Response<Playlist>
+    suspend fun getUsersAllPlaylists(
+        @Query("limit") limit: Int = 50,
+        @Query("offset") offset: Int = 0
+    ): Response<Playlist>
 
     @GET("playlists/{$PLAYLIST_ID}/tracks")
     suspend fun getTracksByPlaylistId(

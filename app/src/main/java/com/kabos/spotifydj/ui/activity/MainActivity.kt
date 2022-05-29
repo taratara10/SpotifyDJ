@@ -13,13 +13,9 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.lifecycle.LiveData
 import com.kabos.spotifydj.R
 import com.kabos.spotifydj.data.model.apiConstants.ApiConstants
-import com.kabos.spotifydj.data.model.exception.SpotifyApiException
 import com.kabos.spotifydj.databinding.ActivityMainBinding
+import com.kabos.spotifydj.ui.viewmodel.*
 import com.kabos.spotifydj.util.OneShotEvent
-import com.kabos.spotifydj.ui.viewmodel.PlaylistViewModel
-import com.kabos.spotifydj.ui.viewmodel.RecommendViewModel
-import com.kabos.spotifydj.ui.viewmodel.SearchViewModel
-import com.kabos.spotifydj.ui.viewmodel.UserViewModel
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -31,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         // Request code that will be used to verify if the result comes from correct activity
         // Can be any integer
-        private const val REQUEST_CODE: Int = 1337
+        private const val REQUEST_CODE: Int = 2022
         private const val CLIENT_ID = "d343c712f57f4f02ace00abddfec1bb6"
         private const val REDIRECT_URI = "com.kabos.spotifydj://callback"
         private val SCOPE = arrayOf(
@@ -51,19 +47,21 @@ class MainActivity : AppCompatActivity() {
     private val searchViewModel: SearchViewModel by viewModels()
     private val recommendViewModel: RecommendViewModel by viewModels()
     private val playlistViewModel: PlaylistViewModel by viewModels()
+    private val editingPlaylistViewModel: EditingPlaylistViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         activity = this
 
         AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO) // アプリ全体に適用
         initViewModels()
+        launchAuthenticationActivity()
+        userViewModel.getUserAccount()
     }
 
-    private fun authorizationSpotify() {
+    private fun launchAuthenticationActivity() {
         val request = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
             .setScopes(SCOPE)
             .build()
@@ -89,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> {
                     //再帰呼び出しでログインできるまでループする
-                    authorizationSpotify()
+                    launchAuthenticationActivity()
                     Toast.makeText(this, getString(R.string.toast_login_failer), Toast.LENGTH_SHORT)
                         .show()
                     Timber.tag("SPLASH").d("Cannot login")
@@ -113,25 +111,22 @@ class MainActivity : AppCompatActivity() {
                         "com.spotify.music.MainActivity")))
         }
 
-        userViewModel.userAccount.observe(this) { user ->
-            playlistViewModel.initUserAccount(user.id, user.display_name)
-        }
-
         observeAccessTokenExpiration(userViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(searchViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(recommendViewModel.needRefreshAccessToken)
         observeAccessTokenExpiration(playlistViewModel.needRefreshAccessToken)
+        observeAccessTokenExpiration(editingPlaylistViewModel.needRefreshAccessToken)
         observeToastMessage(userViewModel.toastMessageId)
         observeToastMessage(searchViewModel.toastMessageId)
         observeToastMessage(recommendViewModel.toastMessageId)
         observeToastMessage(playlistViewModel.toastMessageId)
-        userViewModel.getUserAccount()
+        observeToastMessage(editingPlaylistViewModel.toastMessageId)
     }
 
     private fun observeAccessTokenExpiration(liveData: LiveData<OneShotEvent<Unit>>) {
         liveData.observe(this){ event ->
             event.getContentIfNotHandled()?.let {
-                authorizationSpotify()
+                launchAuthenticationActivity()
             }
         }
     }
